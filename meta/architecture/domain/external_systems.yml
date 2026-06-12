@@ -1,0 +1,22 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-12
+# tier: large
+
+external_systems:
+  - id: EXT-001
+    name: OpenAIApi
+    direction: outbound
+    protocol: rest
+    description: AI parsing service used to extract recipe content (ingredients, instructions, quantities) from PDF files, website HTML, and YouTube transcripts during the recipe import flow.
+
+  - id: EXT-002
+    name: ProductDatasetProvider
+    direction: inbound
+    protocol: file
+    description: External food/product dataset (e.g. USDA FoodData Central or OpenFoodFacts) used to pre-seed the global product catalog on initial deployment. Source TBD; data arrives as a bulk file import, not a live integration.
+
+  - id: EXT-003
+    name: IdentityProvider
+    direction: outbound
+    protocol: other
+    description: Email/password authentication handled internally for MVP1. Social login providers (Google, etc.) are explicitly deferred; this slot is reserved for when they are added.

@@ -1,0 +1,268 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-12
+# tier: large
+
+events:
+  # ── Product Analyser ──────────────────────────────────────────────────────
+
+  - id: EVT-001
+    name: ProductCreated
+    triggered_by: CMD-001
+    aggregate: AGG-001
+    source: [US-PA-005]
+    payload_summary: product_id, owner_user_id, name, nutrition_breakdown, created_at
+
+  - id: EVT-002
+    name: ProductUpdated
+    triggered_by: CMD-002
+    aggregate: AGG-001
+    source: [US-PA-006]
+    payload_summary: product_id, owner_user_id, changed_fields, updated_at
+
+  - id: EVT-003
+    name: ProductDeleted
+    triggered_by: CMD-003
+    aggregate: AGG-001
+    source: [US-PA-006]
+    payload_summary: product_id, owner_user_id, deleted_at
+
+  - id: EVT-004
+    name: ProductMarkedForWeek
+    triggered_by: CMD-004
+    aggregate: AGG-001
+    source: [US-PA-007]
+    payload_summary: product_id, user_id, week_start_date
+
+  - id: EVT-005
+    name: ProductUnmarkedFromWeek
+    triggered_by: CMD-005
+    aggregate: AGG-001
+    source: [US-PA-007]
+    payload_summary: product_id, user_id, week_start_date
+
+  - id: EVT-006
+    name: ProductTaggedWithDiet
+    triggered_by: CMD-006
+    aggregate: AGG-001
+    source: [US-DA-003]
+    payload_summary: product_id, diet_id, tagged_by_user_id
+
+  # ── Recipe Analyser ───────────────────────────────────────────────────────
+
+  - id: EVT-007
+    name: RecipeCreated
+    triggered_by: CMD-007
+    aggregate: AGG-002
+    source: [US-RA-009]
+    payload_summary: recipe_id, owner_user_id, title, ingredient_lines, nutrition_summary, created_at
+
+  - id: EVT-008
+    name: RecipeImported
+    triggered_by: CMD-008
+    aggregate: AGG-002
+    source: [US-RA-010]
+    payload_summary: recipe_id, owner_user_id, source_type, source_url, title, ingredient_lines, nutrition_summary
+
+  - id: EVT-009
+    name: RecipeUpdated
+    triggered_by: CMD-009
+    aggregate: AGG-002
+    source: [US-RA-012, US-RA-013]
+    payload_summary: recipe_id, owner_user_id, changed_fields, updated_at
+
+  - id: EVT-010
+    name: RecipeDeleted
+    triggered_by: CMD-010
+    aggregate: AGG-002
+    source: [US-RA-012]
+    payload_summary: recipe_id, owner_user_id, deleted_at
+
+  - id: EVT-011
+    name: RecipeMarkedAsFavorite
+    triggered_by: CMD-011
+    aggregate: AGG-002
+    source: [US-RA-007]
+    payload_summary: recipe_id, user_id
+
+  - id: EVT-012
+    name: RecipeUnmarkedAsFavorite
+    triggered_by: CMD-012
+    aggregate: AGG-002
+    source: [US-RA-007]
+    payload_summary: recipe_id, user_id
+
+  - id: EVT-013
+    name: RecipeMarkedForWeek
+    triggered_by: CMD-013
+    aggregate: AGG-002
+    source: [US-RA-008]
+    payload_summary: recipe_id, user_id, week_start_date
+
+  - id: EVT-014
+    name: RecipeUnmarkedFromWeek
+    triggered_by: CMD-014
+    aggregate: AGG-002
+    source: [US-RA-008]
+    payload_summary: recipe_id, user_id, week_start_date
+
+  - id: EVT-015
+    name: RecipeTaggedWithDiet
+    triggered_by: CMD-015
+    aggregate: AGG-002
+    source: [US-DA-004]
+    payload_summary: recipe_id, diet_id, tagged_by_user_id
+
+  # ── Personal Cabinet ──────────────────────────────────────────────────────
+
+  - id: EVT-016
+    name: UserRegistered
+    triggered_by: CMD-016
+    aggregate: AGG-003
+    source: [US-PC-001]
+    payload_summary: user_id, email, registered_at
+
+  - id: EVT-017
+    name: UserCredentialsUpdated
+    triggered_by: CMD-017
+    aggregate: AGG-003
+    source: [US-PC-001]
+    payload_summary: user_id, changed_fields, updated_at
+
+  - id: EVT-018
+    name: UserProfileUpdated
+    triggered_by: CMD-018
+    aggregate: AGG-003
+    source: [US-PC-002, US-PC-003, US-PC-004, US-PC-005]
+    payload_summary: user_id, changed_fields, updated_at
+
+  # ── Meal Log ─────────────────────────────────────────────────────────────
+
+  - id: EVT-019
+    name: MealLogEntryAdded
+    triggered_by: CMD-019
+    aggregate: AGG-004
+    source: [US-PC-006]
+    payload_summary: log_id, user_id, date, item_type, item_id, amount_g, nutrition_contribution
+
+  - id: EVT-020
+    name: MealLogEntryUpdated
+    triggered_by: CMD-020
+    aggregate: AGG-004
+    source: [US-PC-006]
+    payload_summary: log_id, user_id, date, changed_fields
+
+  - id: EVT-021
+    name: MealLogEntryDeleted
+    triggered_by: CMD-021
+    aggregate: AGG-004
+    source: [US-PC-006]
+    payload_summary: log_id, user_id, date
+
+  # ── Meal Planner ──────────────────────────────────────────────────────────
+
+  - id: EVT-022
+    name: MealPlanCreated
+    triggered_by: CMD-022
+    aggregate: AGG-005
+    source: [US-MP-001]
+    payload_summary: plan_id, user_id, start_date, end_date
+
+  - id: EVT-023
+    name: MealPlanDateRangeUpdated
+    triggered_by: CMD-023
+    aggregate: AGG-005
+    source: [US-MP-001]
+    payload_summary: plan_id, user_id, new_start_date, new_end_date
+
+  - id: EVT-024
+    name: ItemAddedToSummary
+    triggered_by: CMD-024
+    aggregate: AGG-005
+    source: [US-MP-003, US-MP-004]
+    payload_summary: plan_id, item_type, item_id, summary_section_id
+
+  - id: EVT-025
+    name: SummarySectionAdded
+    triggered_by: CMD-025
+    aggregate: AGG-005
+    source: [US-MP-005]
+    payload_summary: plan_id, section_id, section_name
+
+  - id: EVT-026
+    name: SummarySectionDeleted
+    triggered_by: CMD-026
+    aggregate: AGG-005
+    source: [US-MP-005]
+    payload_summary: plan_id, section_id
+
+  - id: EVT-027
+    name: SummarySectionRenamed
+    triggered_by: CMD-027
+    aggregate: AGG-005
+    source: [US-MP-005]
+    payload_summary: plan_id, section_id, new_name
+
+  - id: EVT-028
+    name: ItemAssignedToDaySection
+    triggered_by: CMD-028
+    aggregate: AGG-005
+    source: [US-MP-007, US-MP-009]
+    payload_summary: plan_id, day_date, section_id, item_type, item_id, servings
+
+  - id: EVT-029
+    name: ItemMovedBetweenDays
+    triggered_by: CMD-029
+    aggregate: AGG-005
+    source: [US-MP-008]
+    payload_summary: plan_id, from_day_date, from_section_id, to_day_date, to_section_id, item_type, item_id
+
+  - id: EVT-030
+    name: ItemRemovedFromDaySection
+    triggered_by: CMD-030
+    aggregate: AGG-005
+    source: [US-MP-010]
+    payload_summary: plan_id, day_date, section_id, item_type, item_id, removed_from_summary
+
+  - id: EVT-031
+    name: DishServingsSet
+    triggered_by: CMD-031
+    aggregate: AGG-005
+    source: [US-MP-011]
+    payload_summary: plan_id, day_date, section_id, item_id, servings
+
+  - id: EVT-032
+    name: DayCardSectionAdded
+    triggered_by: CMD-032
+    aggregate: AGG-005
+    source: [US-MP-006]
+    payload_summary: plan_id, day_date, section_id, section_name
+
+  - id: EVT-033
+    name: DayCardSectionDeleted
+    triggered_by: CMD-033
+    aggregate: AGG-005
+    source: [US-MP-006]
+    payload_summary: plan_id, day_date, section_id
+
+  - id: EVT-034
+    name: DayCardSectionRenamed
+    triggered_by: CMD-034
+    aggregate: AGG-005
+    source: [US-MP-006]
+    payload_summary: plan_id, day_date, section_id, new_name
+
+  # ── Shopping List ─────────────────────────────────────────────────────────
+
+  - id: EVT-035
+    name: ShoppingListGenerated
+    triggered_by: CMD-035
+    aggregate: AGG-006
+    source: [US-MP-013]
+    payload_summary: shopping_list_id, plan_id, user_id, items, generated_at
+
+  - id: EVT-036
+    name: ShoppingListRefreshed
+    triggered_by: CMD-036
+    aggregate: AGG-006
+    source: [US-MP-013]
+    payload_summary: shopping_list_id, plan_id, user_id, updated_items, refreshed_at

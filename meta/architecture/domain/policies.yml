@@ -1,0 +1,53 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-12
+# tier: large
+
+policies:
+  - id: POL-001
+    name: SummaryPoolCleanupOnItemRemoval
+    when: EVT-030
+    then: CMD-030
+    rationale: >
+      When an item is removed from a day card section, the system must check whether
+      the same item appears on any other day card in the plan. If it does not, it must
+      automatically remove the item from the meal-prep summary pool. This keeps the
+      summary pool consistent with actual plan usage without requiring an explicit
+      user action to clean up.
+
+  - id: POL-002
+    name: SummaryPoolPopulatedFromWeeklySelections
+    when: "EVT-004 or EVT-013"
+    then: CMD-024
+    rationale: >
+      When a product or recipe is marked for the current week, it should automatically
+      appear in the meal-prep summary for any active meal plan whose date range falls
+      within that week. This bridges the weekly-selection workflow in Product/Recipe
+      Analyser with the Meal Planner summary pool.
+
+  - id: POL-003
+    name: RecipeNutritionRecalculatedOnIngredientChange
+    when: EVT-009
+    then: CMD-009
+    rationale: >
+      When a recipe's ingredient lines are modified (add, remove, or change amount),
+      the recipe's nutrition summary must be recalculated and persisted immediately.
+      Stale nutrition data would violate INV-004 and mislead planning and logging.
+
+  - id: POL-004
+    name: ShoppingListStaleOnPlanChange
+    when: "EVT-028 or EVT-029 or EVT-030 or EVT-031"
+    then: CMD-036
+    rationale: >
+      When items are assigned, moved, removed, or have their servings changed on a
+      meal plan, any existing shopping list derived from that plan becomes potentially
+      stale. The system should mark the shopping list as stale (or auto-refresh if the
+      user has opted in) so that quantities always reflect the current plan state.
+
+  - id: POL-005
+    name: DailyNutritionSummaryRecalculatedOnLogChange
+    when: "EVT-019 or EVT-020 or EVT-021"
+    then: CMD-019
+    rationale: >
+      When any meal log entry is added, updated, or deleted for a given user-date,
+      the daily nutrition summary for that date must be recomputed. This ensures the
+      user always sees an accurate total, satisfying INV-010.

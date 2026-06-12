@@ -1,0 +1,130 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-12
+# tier: large
+
+terms:
+  - id: TERM-001
+    term: Product
+    definition: A food item with a nutritional breakdown (calories, macros, micros) that can be browsed, searched, added to recipes, logged as meals, or placed into a meal plan.
+    context: unknown
+    aliases: [food item, ingredient]
+    source: [US-PA-001, US-PA-002, US-PA-003, US-PA-005]
+
+  - id: TERM-002
+    term: Recipe
+    definition: A named, structured collection of product-linked ingredient lines, cooking instructions, and a derived nutritional summary, created manually or via import.
+    context: unknown
+    aliases: [dish]
+    source: [US-RA-001, US-RA-009, US-RA-010]
+
+  - id: TERM-003
+    term: Diet
+    definition: A named nutrition system or eating pattern (e.g. Mediterranean, keto) that carries a description and optional macro-split guidance; used to tag products and recipes as compatible.
+    context: unknown
+    aliases: [nutrition system, diet pattern, dietary plan]
+    source: [US-DA-001, US-DA-002, US-DA-003, US-DA-004]
+
+  - id: TERM-004
+    term: Meal Plan
+    definition: A date-ranged collection of day cards, each containing per-section assignments of products and recipes with servings, assembled to cover a specific period.
+    context: unknown
+    aliases: [weekly plan, plan]
+    source: [US-MP-001, US-MP-002, US-MP-003]
+
+  - id: TERM-005
+    term: Day Card
+    definition: A single day's view within a meal plan, containing named sections (breakfast, lunch, dinner, snacks) each holding zero or more items with serving counts.
+    context: unknown
+    aliases: [daily card, day]
+    source: [US-MP-002, US-MP-006, US-MP-011]
+
+  - id: TERM-006
+    term: Meal-Prep Summary
+    definition: An aggregate pool of all products and recipes shortlisted or assigned within the selected planning period; the staging area from which items are placed onto day cards.
+    context: unknown
+    aliases: [summary, weekly summary, summary pool]
+    source: [US-MP-002, US-MP-003, US-MP-004, US-MP-007]
+
+  - id: TERM-007
+    term: Weekly Selection
+    definition: A flag on a product or recipe indicating it has been chosen for use in the current week; items with this flag surface automatically in the meal-prep summary.
+    context: unknown
+    aliases: [selected for current week, week tag]
+    source: [US-PA-007, US-RA-008, US-MP-003]
+
+  - id: TERM-008
+    term: Shopping List
+    definition: A generated list of products derived from a meal plan, consolidating quantities needed to prepare all scheduled meals in the plan period.
+    context: unknown
+    aliases: [grocery list]
+    source: [US-MP-013]
+
+  - id: TERM-009
+    term: Meal Log
+    definition: A daily record of products and recipes the user consumed, used to compute a daily nutrition summary and compare against dietary goals.
+    context: unknown
+    aliases: [food log, food diary, intake log]
+    source: [US-PC-006]
+
+  - id: TERM-010
+    term: Calorie Corridor
+    definition: A personalized recommended daily calorie range derived from the user's body metrics, diet choice, and macro proportions.
+    context: unknown
+    aliases: [calorie range, recommended calorie range]
+    source: [US-PC-005]
+
+  - id: TERM-011
+    term: Nutrition Breakdown
+    definition: The per-100 g or per-serving values for energy (kcal), protein, fat, carbohydrates, and optionally micronutrients, attached to a product or recipe.
+    context: unknown
+    aliases: [nutritional components, macros, nutrition summary]
+    source: [US-PA-001, US-RA-001, US-RA-011]
+
+  - id: TERM-012
+    term: Ingredient Line
+    definition: A single entry in a recipe that references a product by ID and specifies an amount; the ingredient line is what enables consistent nutrition aggregation.
+    context: unknown
+    aliases: [ingredient, recipe ingredient]
+    source: [US-RA-001, US-RA-013]
+
+  - id: TERM-013
+    term: User
+    definition: An authenticated individual who uses MealPlanner to plan meals, track intake, and manage personal products and recipes.
+    context: unknown
+    aliases: [individual user, planner, cook]
+    source: [US-PA-005, US-PC-001, US-PC-006]
+
+  - id: TERM-014
+    term: Nutritionist
+    definition: A professional user role who curates products and recipes and annotates dietary compatibility, treated in MVP1 with the same permissions as a regular user.
+    context: unknown
+    aliases: [planner, diet advisor]
+    source: [US-PA-001, US-DA-003, US-DA-004]
+
+  - id: TERM-015
+    term: Serving
+    definition: The portion unit for a recipe or product on a day card; nutrition totals and shopping quantities scale by servings multiplied per dish per day.
+    context: unknown
+    aliases: [servings, portion]
+    source: [US-MP-011, US-RA-011]
+
+  - id: TERM-016
+    term: Catalog
+    definition: The shared global database of products or recipes accessible to all users; entries are owned by their creator for edit/delete purposes.
+    context: unknown
+    aliases: [global catalog, product catalog, recipe database]
+    source: [US-PA-001, US-RA-001]
+
+  - id: TERM-017
+    term: Favorite
+    definition: A per-user flag on a recipe indicating affinity; used to filter to a personal shortlist without affecting the shared catalog.
+    context: unknown
+    aliases: [starred, bookmarked]
+    source: [US-RA-007, US-RA-004]
+
+  - id: TERM-018
+    term: Section
+    definition: A named grouping within a day card or the meal-prep summary (e.g. breakfast, lunch, dinner, snacks) that organises items in the meal plan.
+    context: unknown
+    aliases: [menu section, category slot]
+    source: [US-MP-005, US-MP-006]

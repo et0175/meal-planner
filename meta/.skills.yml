@@ -1,0 +1,26 @@
+version: 1
+stage: early-mvp
+language: en
+
+paths:
+  architecture: meta/architecture/
+  kanban: meta/kanban/
+  backlog: meta/kanban/backlog.md
+  backlog_scored: meta/kanban/backlog-scored.yml
+  roadmap: meta/kanban/roadmap.md
+  review_reports: meta/review/
+  fix_suppress: .claude/fix-suppress.yaml
+  retro: meta/kanban/retro.md
+
+methodology:
+  default: rice
+  per_category:
+    feature: rice
+    enabler: wsjf
+    tech-debt: wsjf
+    compliance: wsjf
+    ops: fifo
+
+# models:
+#   profile: balanced   # uncomment to pin agent models
+#                       # profile: budget (cost), quality (best), balanced (default)

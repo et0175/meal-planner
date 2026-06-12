@@ -1,0 +1,304 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-12
+# tier: large
+
+commands:
+  # ── Product Analyser ──────────────────────────────────────────────────────
+
+  - id: CMD-001
+    name: CreateProduct
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: [INV-001]
+    produces: [EVT-001]
+    source: [US-PA-005]
+
+  - id: CMD-002
+    name: UpdateProduct
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: [INV-001, INV-002]
+    produces: [EVT-002]
+    source: [US-PA-006]
+
+  - id: CMD-003
+    name: DeleteProduct
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: [INV-002]
+    produces: [EVT-003]
+    source: [US-PA-006]
+
+  - id: CMD-004
+    name: MarkProductForWeek
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: []
+    produces: [EVT-004]
+    source: [US-PA-007]
+
+  - id: CMD-005
+    name: UnmarkProductFromWeek
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: []
+    produces: [EVT-005]
+    source: [US-PA-007]
+
+  - id: CMD-006
+    name: TagProductWithDiet
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: []
+    produces: [EVT-006]
+    source: [US-DA-003]
+
+  # ── Recipe Analyser ───────────────────────────────────────────────────────
+
+  - id: CMD-007
+    name: CreateRecipe
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: [INV-003, INV-004]
+    produces: [EVT-007]
+    source: [US-RA-009]
+
+  - id: CMD-008
+    name: ImportRecipe
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: [INV-003]
+    produces: [EVT-008]
+    source: [US-RA-010]
+
+  - id: CMD-009
+    name: UpdateRecipe
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: [INV-003, INV-004, INV-005]
+    produces: [EVT-009]
+    source: [US-RA-012, US-RA-013]
+
+  - id: CMD-010
+    name: DeleteRecipe
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: [INV-005]
+    produces: [EVT-010]
+    source: [US-RA-012]
+
+  - id: CMD-011
+    name: MarkRecipeAsFavorite
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: []
+    produces: [EVT-011]
+    source: [US-RA-007]
+
+  - id: CMD-012
+    name: UnmarkRecipeAsFavorite
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: []
+    produces: [EVT-012]
+    source: [US-RA-007]
+
+  - id: CMD-013
+    name: MarkRecipeForWeek
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: []
+    produces: [EVT-013]
+    source: [US-RA-008]
+
+  - id: CMD-014
+    name: UnmarkRecipeFromWeek
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: []
+    produces: [EVT-014]
+    source: [US-RA-008]
+
+  - id: CMD-015
+    name: TagRecipeWithDiet
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: []
+    produces: [EVT-015]
+    source: [US-DA-004]
+
+  # ── Personal Cabinet ──────────────────────────────────────────────────────
+
+  - id: CMD-016
+    name: RegisterUser
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: [INV-006]
+    produces: [EVT-016]
+    source: [US-PC-001]
+
+  - id: CMD-017
+    name: UpdateUserCredentials
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: [INV-006]
+    produces: [EVT-017]
+    source: [US-PC-001]
+
+  - id: CMD-018
+    name: UpdateUserProfile
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: [INV-007, INV-008]
+    produces: [EVT-018]
+    source: [US-PC-002, US-PC-003, US-PC-004, US-PC-005]
+
+  # ── Meal Log ─────────────────────────────────────────────────────────────
+
+  - id: CMD-019
+    name: AddMealLogEntry
+    actor: ACT-001
+    target_aggregate: AGG-004
+    preconditions: [INV-009]
+    produces: [EVT-019]
+    source: [US-PC-006]
+
+  - id: CMD-020
+    name: UpdateMealLogEntry
+    actor: ACT-001
+    target_aggregate: AGG-004
+    preconditions: [INV-009]
+    produces: [EVT-020]
+    source: [US-PC-006]
+
+  - id: CMD-021
+    name: DeleteMealLogEntry
+    actor: ACT-001
+    target_aggregate: AGG-004
+    preconditions: []
+    produces: [EVT-021]
+    source: [US-PC-006]
+
+  # ── Meal Planner ──────────────────────────────────────────────────────────
+
+  - id: CMD-022
+    name: CreateMealPlan
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: [INV-011]
+    produces: [EVT-022]
+    source: [US-MP-001]
+
+  - id: CMD-023
+    name: SetMealPlanDateRange
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: [INV-011]
+    produces: [EVT-023]
+    source: [US-MP-001]
+
+  - id: CMD-024
+    name: AddItemToSummary
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: [INV-012]
+    produces: [EVT-024]
+    source: [US-MP-003, US-MP-004]
+
+  - id: CMD-025
+    name: AddSummarySection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: []
+    produces: [EVT-025]
+    source: [US-MP-005]
+
+  - id: CMD-026
+    name: DeleteSummarySection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: []
+    produces: [EVT-026]
+    source: [US-MP-005]
+
+  - id: CMD-027
+    name: RenameSummarySection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: []
+    produces: [EVT-027]
+    source: [US-MP-005]
+
+  - id: CMD-028
+    name: AssignItemToDaySection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: [INV-012, INV-014]
+    produces: [EVT-028]
+    source: [US-MP-007, US-MP-009]
+
+  - id: CMD-029
+    name: MoveItemBetweenDays
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: [INV-012]
+    produces: [EVT-029]
+    source: [US-MP-008]
+
+  - id: CMD-030
+    name: RemoveItemFromDaySection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: []
+    produces: [EVT-030]
+    source: [US-MP-010]
+
+  - id: CMD-031
+    name: SetDishServings
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: [INV-014]
+    produces: [EVT-031]
+    source: [US-MP-011]
+
+  - id: CMD-032
+    name: AddDayCardSection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: []
+    produces: [EVT-032]
+    source: [US-MP-006]
+
+  - id: CMD-033
+    name: DeleteDayCardSection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: []
+    produces: [EVT-033]
+    source: [US-MP-006]
+
+  - id: CMD-034
+    name: RenameDayCardSection
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: []
+    produces: [EVT-034]
+    source: [US-MP-006]
+
+  # ── Shopping List ─────────────────────────────────────────────────────────
+
+  - id: CMD-035
+    name: GenerateShoppingList
+    actor: ACT-001
+    target_aggregate: AGG-006
+    preconditions: [INV-015, INV-016]
+    produces: [EVT-035]
+    source: [US-MP-013]
+
+  - id: CMD-036
+    name: RefreshShoppingList
+    actor: ACT-001
+    target_aggregate: AGG-006
+    preconditions: [INV-015, INV-016]
+    produces: [EVT-036]
+    source: [US-MP-013]
