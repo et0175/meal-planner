@@ -1,172 +1,161 @@
 # User stories: meal planner
 
-Requirements: [05_meal_planner.md](../requirements/05_meal_planner.md)
+Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 ---
 
-## US-MP-001 Choose planning date range
+## US-MP-001 Navigate between weeks
 
 **As a** user planning meals  
-**I want** to set a from–to date range with the current week as the default  
-**So that** I can plan exactly the period I care about.
+**I want** to move forward and backward through calendar weeks and jump to the current week  
+**So that** I can plan ahead or review past weeks.
 
 **Acceptance criteria**
 
-- [ ] Date range defaults to the current calendar week (start through end).
-- [ ] User can change start and end dates; the planner updates to that span.
+- [ ] Planner defaults to the current calendar week (Monday–Sunday).
+- [ ] "Prev" and "Next" buttons shift the week by 7 days.
+- [ ] "This week" button returns to the current calendar week regardless of where the user has navigated.
+- [ ] The displayed week label updates to reflect the selected range.
 
 ---
 
-## US-MP-002 See one card per day and a meal-prep summary
+## US-MP-002 Switch between planner views
 
 **As a** user  
-**I want** one card per day in the range plus a summary of all dishes in the period  
-**So that** I see both the weekly pool and the per-day layout.
+**I want** to switch between Weekly summary, Day cards, and Calendar tabs  
+**So that** I can edit, browse, or review my plan in the format that suits the task.
 
 **Acceptance criteria**
 
-- [ ] Each day in the selected range renders as its own card.
-- [ ] A meal-prep summary section lists all dishes planned for the entire selected period.
+- [ ] Three tabs are visible: Weekly summary, Day cards, Calendar.
+- [ ] Selecting a tab shows its content and hides the others.
+- [ ] All three tabs reflect the same selected week and the same underlying assignments.
 
 ---
 
-## US-MP-003 Weekly selections feed the summary
+## US-MP-003 Build a weekly meal plan in the summary grid
 
 **As a** user  
-**I want** products and recipes I marked for the current week to appear in the summary area  
-**So that** I plan from the set I already shortlisted.
+**I want** to fill in a spreadsheet-style grid with items and servings per day per meal slot  
+**So that** I can see and edit my entire week at a glance.
 
 **Acceptance criteria**
 
-- [ ] Items marked “selected for current week” in product and recipe modules appear in the planner summary (per integration contract).
-- [ ] User can filter and select from these items to add them into planning UI state.
+- [ ] The grid is grouped into four sections: Breakfast, Lunch, Dinner, Snacks.
+- [ ] Each row has a product/recipe search input and seven day columns (Mon–Sun).
+- [ ] Entering a number in a day cell creates or updates that assignment.
+- [ ] Clearing or zeroing a cell removes the assignment.
 
 ---
 
-## US-MP-004 Build summary with drag-and-drop or equivalent
+## US-MP-004 Add and remove items from the weekly summary
 
 **As a** user  
-**I want** to move products and recipes into the summary using drag-and-drop or another clear interaction  
-**So that** assembling the weekly pool feels fast.
+**I want** to add new rows to any meal slot and remove rows I no longer need  
+**So that** my summary reflects the current plan.
 
 **Acceptance criteria**
 
-- [ ] User can place items into the summary via drag-and-drop if the platform supports it, with an accessible alternative if not.
-- [ ] Summary content updates immediately when items are added or removed.
+- [ ] Each meal slot section has an "Add item" button that appends a blank row to that section.
+- [ ] Removing a row removes all assignments for that item+meal-slot combination; other slots for the same item are unaffected.
 
 ---
 
-## US-MP-005 Organize summary into menu sections
+## US-MP-005 Toggle between servings and grams per row
+
+**As a** user who thinks in weight rather than servings  
+**I want** to switch a row in the summary grid between servings mode and grams mode  
+**So that** I can enter the quantity in the unit I actually measure.
+
+**Acceptance criteria**
+
+- [ ] Each row shows a "srv / g" toggle.
+- [ ] Grams mode is available only for items that have a gram weight per serving defined.
+- [ ] Switching modes converts existing values without changing the underlying serving count.
+- [ ] In grams mode, a secondary label shows the equivalent serving count, and vice versa.
+
+---
+
+## US-MP-006 Weekly-selected items populate the summary automatically
 
 **As a** user  
-**I want** to group summary items into sections such as breakfasts, lunches, dinners, desserts, salads, and snacks  
-**So that** the weekly pool matches how I think about menus.
+**I want** products and recipes I mark "This week" to appear in the planner summary  
+**So that** I do not have to add them manually.
 
 **Acceptance criteria**
 
-- [ ] Default section set matches requirements or sensible defaults; user can assign items to sections.
-- [ ] User can add, delete, and rename summary sections.
+- [ ] Marking an item "This week" in All products or Recipes adds it to the Lunch slot of the Weekly summary.
+- [ ] Items are not duplicated if already present in that slot.
 
 ---
 
-## US-MP-006 Configure sections on day cards
+## US-MP-007 View and manage meals on day cards
 
 **As a** user  
-**I want** each day card to start with breakfast, lunch, dinner, and snacks and let me change sections  
-**So that** unusual schedules still fit.
+**I want** each day of the week to show its planned meals divided by Breakfast, Lunch, Dinner, and Snacks  
+**So that** I can see and adjust what I am eating each day.
 
 **Acceptance criteria**
 
-- [ ] New day cards include breakfast, lunch, dinner, and snacks by default.
-- [ ] User can add, delete, and rename sections on a day card independently of other days if that is the product rule (or per UX spec).
+- [ ] Day cards view shows seven cards, one per day, in horizontal scroll.
+- [ ] Each card has four sections: Breakfast, Lunch, Dinner, Snacks.
+- [ ] Each section lists the items assigned to that slot on that day, with kcal and servings.
+- [ ] The day card shows an aggregated nutrition strip (kcal, protein, fat, carbs) when there is at least one item.
 
 ---
 
-## US-MP-007 Place items from summary onto days without removing from summary
+## US-MP-008 Add and remove meals from day card sections
 
 **As a** user  
-**I want** to drag items from the summary onto a day and section while keeping them in the summary  
-**So that** the weekly pool stays visible as I assign meals.
+**I want** to add items directly to a specific meal slot on a day card and remove items I no longer want  
+**So that** I can fine-tune each day without going back to the summary grid.
 
 **Acceptance criteria**
 
-- [ ] Dragging from summary to a day card adds the item to that section without removing it from the summary.
-- [ ] A section can hold zero or more items.
+- [ ] Each section has an "+ Add" button that opens an inline search input.
+- [ ] Selecting an item creates an assignment for that day+meal and adds the item to the weekly summary if absent.
+- [ ] Each item has a remove button; clicking it deletes the assignment.
 
 ---
 
-## US-MP-008 Reorder across days and sections
+## US-MP-009 Adjust servings on day cards
 
 **As a** user  
-**I want** to drag items between day cards and between sections on the same day  
-**So that** I can rebalance the week quickly.
+**I want** to increase or decrease the number of servings for an item on a day card  
+**So that** portion sizes match what I will actually eat.
 
 **Acceptance criteria**
 
-- [ ] Moves between days update both source and target sections correctly.
-- [ ] Moves within one day between sections behave consistently with the same interaction model.
+- [ ] Each item has + and − controls.
+- [ ] Reducing servings to zero or below removes the item from the section.
+- [ ] The day's kcal total updates immediately.
 
 ---
 
-## US-MP-009 Select items without drag-and-drop
-
-**As a** user who prefers clicks or keyboard  
-**I want** to assign items to days or summary without relying on drag-and-drop  
-**So that** the planner remains usable for everyone.
-
-**Acceptance criteria**
-
-- [ ] Non-drag selection path exists (menus, buttons, or pickers) that achieves the same placements.
-- [ ] Behavior matches requirement: selections still integrate with the summary as specified.
-
----
-
-## US-MP-010 Remove items from day cards and sync summary
+## US-MP-010 Drag items between meal slots and days
 
 **As a** user  
-**I want** removing an item from a day to remove it from the summary only when it is not used on any other day  
-**So that** unused dishes drop out of the weekly pool automatically.
+**I want** to drag a planned item from one meal slot or day to another  
+**So that** I can rebalance my week quickly.
 
 **Acceptance criteria**
 
-- [ ] Deleting from a day card removes the item from that section only.
-- [ ] If the item appears on no other day card, it is removed from the summary; otherwise it remains in the summary.
+- [ ] Items are draggable; a visual cue (opacity change) indicates the dragged item.
+- [ ] Dropping on a different section of the same card changes the meal slot.
+- [ ] Dropping on a section of a different day card changes both the day and the meal slot.
+- [ ] The source card updates (item removed from old slot) and the target updates (item added to new slot).
 
 ---
 
-## US-MP-011 Set servings per dish on a day
+## US-MP-011 View the week at a glance in Calendar view
 
 **As a** user  
-**I want** to set the number of servings for each dish on a day card  
-**So that** nutrition and shopping quantities scale correctly.
+**I want** a compact calendar grid showing all planned items across the week  
+**So that** I can quickly sense-check the week without scrolling through day cards.
 
 **Acceptance criteria**
 
-- [ ] Servings control exists per dish on a day card with sensible defaults (for example 1).
-- [ ] Nutrition summary for the day respects servings multipliers.
-
----
-
-## US-MP-012 Day card nutrition summary
-
-**As a** user  
-**I want** each day card to show a nutrition summary for everything scheduled that day  
-**So that** I can see if daily targets are met before I shop.
-
-**Acceptance criteria**
-
-- [ ] Day card displays aggregated nutrition for all items in all sections for that day.
-- [ ] Totals update when items or servings change.
-
----
-
-## US-MP-013 Generate or refresh shopping list from plan
-
-**As a** user  
-**I want** to generate a shopping list from the meal plan or refresh an existing list from the current plan  
-**So that** buying matches what I intend to cook.
-
-**Acceptance criteria**
-
-- [ ] User can create a shopping list from the current meal plan state.
-- [ ] User can refresh an existing shopping list so it reflects the latest plan without orphan items (per merge rules defined by the product).
+- [ ] Calendar view shows seven columns (Mon–Sun).
+- [ ] Each column lists item thumbnails, names, and servings for that day.
+- [ ] Total kcal per day is shown.
+- [ ] Content reflects the same assignments as the other two tabs.

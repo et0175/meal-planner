@@ -1,6 +1,6 @@
-# User stories: product analyser
+# User stories: products database
 
-Requirements: [01_products-analyser.md](../requirements/01_products-analyser.md)
+Requirements: [01_products-database.md](../requirements/01_products-database.md)
 
 ---
 
@@ -81,13 +81,29 @@ Requirements: [01_products-analyser.md](../requirements/01_products-analyser.md)
 
 ---
 
-## US-PA-007 Mark product for the current week
+## US-PA-007 Mark product for this week or next week
 
 **As a** user planning weekly meals  
-**I want** to mark a product as selected for the current week  
-**So that** it surfaces in weekly planning and shopping workflows.
+**I want** to mark a product as planned for the current week or the next week (independently)  
+**So that** it surfaces in the appropriate weekly plan and can be filtered accordingly.
 
 **Acceptance criteria**
 
-- [ ] User can toggle or set a “selected for current week” state on a product.
-- [ ] That state is visible in the UI and available to the meal planner or shopping list as required by downstream modules.
+- [ ] User can toggle “This week” and “Next week” flags on any product independently.
+- [ ] Both flags are visible on product cards and in the list view.
+- [ ] Marking “This week” adds the product to the Meal planner Weekly summary (Lunch slot by default).
+- [ ] User can filter the product list to show only “This week” or “Next week” items.
+
+---
+
+## US-PA-008 Switch between list and cards view
+
+**As a** user  
+**I want** to toggle the All products view between a card layout and a table layout  
+**So that** I can either browse visually or compare nutrition values across products at a glance.
+
+**Acceptance criteria**
+
+- [ ] A toggle control switches between list view and cards view.
+- [ ] List view shows products in a table with columns: name, category, protein (g), fat (g), carbs (g), kcal.
+- [ ] Cards view shows product cards with image, macros strip, and diet tags.

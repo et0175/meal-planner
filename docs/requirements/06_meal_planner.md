@@ -1,32 +1,61 @@
 # Business requirements: meal planner
 
-A module for choosing meals across a date range.
+A module for planning meals across a selected calendar week.
 
-## Date range
+## Week selection
 
-- By default, the range is the current calendar week (start through end), but the user can change it.
-- The system shows one card per day in the selected range.
-- The page also includes a meal-prep summary listing all dishes planned for that range.
+- The planner operates on a single calendar week (Monday–Sunday).
+- By default, the current calendar week is selected.
+- The user can navigate to previous or next weeks, and jump back to the current week.
 
-## Building the plan (summary and categories)
+## Three views (tabs)
 
-- Products and recipes marked for the current week appear in the summary area.
-- The user can filter and select products and recipes (for example via drag-and-drop) and place them into the summary.
+The planner offers three tab-switchable views that share the same selected week.
 
-1. Selected products and recipes can be organized into menu sections such as: breakfasts, lunches, dinners, desserts, salads, and snacks.
-2. The user can add, delete, or rename these sections.
+---
 
-## Day cards
+### Tab 1 — Weekly summary
 
-1. Each day card includes breakfast, lunch, dinner, and snacks by default.
-2. The user can add, delete, or rename sections on a day card.
-3. The user can drag items from the summary into a day card section. Each section can hold zero or more items. Items remain in the summary after they are placed on a day card.
-4. The user can drag items between different day cards and between sections on the same day card.
-5. The user can select items in another way (not only drag-and-drop); those selections should also appear in the summary as appropriate.
-6. The user can remove an item from a day card. If the item does not appear on any other day card, it is removed from the summary as well.
-7. The user can set the number of servings for each dish on a day card.
-8. Each day card shows a nutrition summary for its contents.
+Displays the week's meal plan as a spreadsheet grid, grouped by meal slot.
 
-## Shopping list
+- The grid is divided into four sections: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
+- Within each section, each row represents one product or recipe.
+- **Column 1 — Item:** free-text search input that narrows the list as the user types; selecting a match pins the item to that row.
+- **Columns 2–8 — Mon–Sun:** numeric input for the number of servings on each day; empty cells mean that item is not planned for that day.
+- The user can toggle each row between **servings** mode and **grams** mode (grams mode is available only when the item has a gram weight per serving defined).
+- When grams mode is active, the secondary label shows the equivalent servings count, and vice versa.
+- The user can add rows to any meal slot via an "Add item" button at the bottom of each section.
+- The user can remove individual rows; doing so also removes the corresponding assignments for that item and meal slot only (other meal slots for the same item are unaffected).
+- Items marked "This week" in the All products or Recipes catalog are automatically added to the Lunch slot of the summary.
 
-- Generate a shopping list from the meal plan, or refresh an existing shopping list from the current plan.
+---
+
+### Tab 2 — Day cards
+
+Displays one scrollable card per day of the selected week.
+
+- Each card shows the day name and date.
+- Each card is divided into four meal sections: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
+- Each section shows the items assigned to that meal slot on that day, with their serving count and kcal contribution.
+- The user can add an item to a section via an inline search input (the item is also added to the weekly summary in the corresponding meal slot if not already present).
+- The user can remove an item from a section.
+- The user can adjust servings per item with +/− controls.
+- **Drag and drop:** items are draggable within and across cards:
+  - Drag to a different section on the same card to change the meal slot.
+  - Drag to a section on a different day card to reassign the day (and optionally the meal slot).
+- Each day card shows a total nutrition summary (kcal, protein, fat, carbs) for all items across all sections that day.
+
+---
+
+### Tab 3 — Calendar
+
+- A compact 7-column grid (Mon–Sun) showing all planned items per day at a glance.
+- Each day column shows item thumbnails, names, and servings counts.
+- Intended as a read-only overview; editing is done in the Day cards tab.
+
+---
+
+## Data consistency
+
+- Assignments made in the Weekly summary are immediately reflected in Day cards and Calendar, and vice versa.
+- The weekly summary and day cards share the same underlying assignment data keyed by (item, day, meal slot).
