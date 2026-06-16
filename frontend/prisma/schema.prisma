@@ -1,0 +1,242 @@
+// MealPlanner MVP1 — Database schema
+// Skeleton for all four bounded contexts (CARD-001).
+// Full columns are added per-increment in subsequent cards.
+//
+// Contexts:
+//   CTX-002  Identity         — User, Session
+//   CTX-001  Catalog          — Product, Diet, ProductDietTag, Recipe, RecipeIngredient, WeeklySelection
+//   CTX-003  Nutrition         — MealLogEntry
+//   CTX-004  Planning         — MealPlan, SummaryPoolItem, DayCard, DayCardItem, ShoppingList
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── CTX-002: Identity ────────────────────────────────────────────────────────
+// COMP-014  Identity DB
+// Full columns (password hash, language, unit system, calorie corridor, etc.) added in CARD-002.
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  sessions          Session[]
+  products          Product[]
+  recipes           Recipe[]
+  weeklySelections  WeeklySelection[]
+  mealLogEntries    MealLogEntry[]
+  mealPlans         MealPlan[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// ─── CTX-001: Catalog ─────────────────────────────────────────────────────────
+// COMP-008  Catalog DB
+// Full nutrition columns, import source, ownership enforcement added in CARD-004/005/006.
+
+model Product {
+  id        String   @id @default(cuid())
+  name      String
+  calories  Float
+  protein   Float
+  fat       Float
+  carbs     Float
+  userId    String?  // null = system-seeded (OpenFoodFacts)
+  createdAt DateTime @default(now())
+
+  user             User?              @relation(fields: [userId], references: [id])
+  dietTags         ProductDietTag[]
+  weeklySelections WeeklySelection[]
+  recipeIngredients RecipeIngredient[]
+  mealLogEntries   MealLogEntry[]
+  summaryPoolItems SummaryPoolItem[]
+
+  @@map("products")
+}
+
+model Diet {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String
+  proteinPct  Float?  // null when macro guidance is not applicable (e.g. Intermittent Fasting)
+  fatPct      Float?
+  carbsPct    Float?
+
+  productTags ProductDietTag[]
+  recipeTags  RecipeDietTag[]
+
+  @@map("diets")
+}
+
+model ProductDietTag {
+  productId String
+  dietId    String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  diet    Diet    @relation(fields: [dietId], references: [id], onDelete: Cascade)
+
+  @@id([productId, dietId])
+  @@map("product_diet_tags")
+}
+
+model Recipe {
+  id           String   @id @default(cuid())
+  title        String
+  servings     Int      @default(1)
+  instructions String?
+  userId       String?  // null = system-seeded
+  isFavorite   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user             User?              @relation(fields: [userId], references: [id])
+  ingredients      RecipeIngredient[]
+  dietTags         RecipeDietTag[]
+  weeklySelections WeeklySelection[]
+  summaryPoolItems SummaryPoolItem[]
+
+  @@map("recipes")
+}
+
+model RecipeIngredient {
+  id        String @id @default(cuid())
+  recipeId  String
+  productId String
+  qty       Float
+  unit      String @default("g")
+
+  recipe  Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("recipe_ingredients")
+}
+
+model RecipeDietTag {
+  recipeId String
+  dietId   String
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  diet   Diet   @relation(fields: [dietId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, dietId])
+  @@map("recipe_diet_tags")
+}
+
+model WeeklySelection {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String?
+  recipeId  String?
+  weekStart DateTime // Monday of the selected week
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+  recipe  Recipe?  @relation(fields: [recipeId], references: [id])
+
+  @@unique([userId, productId, weekStart])
+  @@unique([userId, recipeId, weekStart])
+  @@map("weekly_selections")
+}
+
+// ─── CTX-003: Nutrition Tracking ─────────────────────────────────────────────
+// COMP-017  Nutrition Tracking DB
+// Daily nutrition aggregation logic added in CARD-011.
+
+model MealLogEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String?
+  recipeId  String?
+  qty       Float
+  unit      String   @default("g")
+  date      DateTime @db.Date
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@map("meal_log_entries")
+}
+
+// ─── CTX-004: Planning ───────────────────────────────────────────────────────
+// COMP-022  Planning DB
+// Interactive planning, sections, and shopping list details added in CARD-012/013/014.
+
+model MealPlan {
+  id        String   @id @default(cuid())
+  userId    String
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  createdAt DateTime @default(now())
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  summaryPoolItems SummaryPoolItem[]
+  dayCards         DayCard[]
+  shoppingList     ShoppingList?
+
+  @@map("meal_plans")
+}
+
+model SummaryPoolItem {
+  id        String  @id @default(cuid())
+  planId    String
+  productId String?
+  recipeId  String?
+
+  plan        MealPlan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  product     Product?      @relation(fields: [productId], references: [id])
+  recipe      Recipe?       @relation(fields: [recipeId], references: [id])
+  dayCardItems DayCardItem[]
+
+  @@map("summary_pool_items")
+}
+
+model DayCard {
+  id     String   @id @default(cuid())
+  planId String
+  date   DateTime @db.Date
+
+  plan  MealPlan      @relation(fields: [planId], references: [id], onDelete: Cascade)
+  items DayCardItem[]
+
+  @@unique([planId, date])
+  @@map("day_cards")
+}
+
+model DayCardItem {
+  id              String  @id @default(cuid())
+  dayCardId       String
+  summaryPoolItemId String
+  servings        Float   @default(1)
+  sectionName     String? // null = unsectioned
+
+  dayCard         DayCard         @relation(fields: [dayCardId], references: [id], onDelete: Cascade)
+  summaryPoolItem SummaryPoolItem @relation(fields: [summaryPoolItemId], references: [id])
+
+  @@map("day_card_items")
+}
+
+model ShoppingList {
+  id        String   @id @default(cuid())
+  planId    String   @unique
+  stale     Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  plan MealPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@map("shopping_lists")
+}
