@@ -28,6 +28,7 @@ model User {
   sessions          Session[]
   products          Product[]
   recipes           Recipe[]
+  recipeFavorites   UserRecipeFavorite[]
   weeklySelections  WeeklySelection[]
   mealLogEntries    MealLogEntry[]
   mealPlans         MealPlan[]
@@ -38,6 +39,8 @@ model User {
 model Session {
   id        String   @id @default(cuid())
   userId    String
+  token     String   @unique
+  expiresAt DateTime
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -66,6 +69,7 @@ model Product {
   mealLogEntries   MealLogEntry[]
   summaryPoolItems SummaryPoolItem[]
 
+  @@index([name])
   @@map("products")
 }
 
@@ -100,15 +104,17 @@ model Recipe {
   servings     Int      @default(1)
   instructions String?
   userId       String?  // null = system-seeded
-  isFavorite   Boolean  @default(false)
   createdAt    DateTime @default(now())
 
   user             User?              @relation(fields: [userId], references: [id])
   ingredients      RecipeIngredient[]
   dietTags         RecipeDietTag[]
+  favorites        UserRecipeFavorite[]
   weeklySelections WeeklySelection[]
+  mealLogEntries   MealLogEntry[]
   summaryPoolItems SummaryPoolItem[]
 
+  @@index([title])
   @@map("recipes")
 }
 
@@ -136,6 +142,18 @@ model RecipeDietTag {
   @@map("recipe_diet_tags")
 }
 
+// Per-user recipe favorites (FR-013). System recipes can be favorited per user without sharing state.
+model UserRecipeFavorite {
+  userId   String
+  recipeId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, recipeId])
+  @@map("user_recipe_favorites")
+}
+
 model WeeklySelection {
   id        String   @id @default(cuid())
   userId    String
@@ -147,6 +165,9 @@ model WeeklySelection {
   product Product? @relation(fields: [productId], references: [id])
   recipe  Recipe?  @relation(fields: [recipeId], references: [id])
 
+  // NULL-bypass note: PostgreSQL treats NULL as distinct in unique indexes, so these constraints
+  // only deduplicate non-null values. The XOR invariant (exactly one of productId/recipeId set)
+  // is enforced at the application layer (CARD-007/CARD-009).
   @@unique([userId, productId, weekStart])
   @@unique([userId, recipeId, weekStart])
   @@map("weekly_selections")
@@ -168,7 +189,9 @@ model MealLogEntry {
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id])
+  recipe  Recipe?  @relation(fields: [recipeId], references: [id])
 
+  @@index([userId, date])
   @@map("meal_log_entries")
 }
 
@@ -202,6 +225,12 @@ model SummaryPoolItem {
   recipe      Recipe?       @relation(fields: [recipeId], references: [id])
   dayCardItems DayCardItem[]
 
+  // NULL-bypass note: PostgreSQL treats NULL as distinct in unique indexes, so these constraints
+  // only deduplicate non-null values. The XOR invariant (exactly one of productId/recipeId set)
+  // is enforced at the application layer.
+  @@unique([planId, productId])
+  @@unique([planId, recipeId])
+  @@index([planId])
   @@map("summary_pool_items")
 }
 
@@ -225,7 +254,7 @@ model DayCardItem {
   sectionName     String? // null = unsectioned
 
   dayCard         DayCard         @relation(fields: [dayCardId], references: [id], onDelete: Cascade)
-  summaryPoolItem SummaryPoolItem @relation(fields: [summaryPoolItemId], references: [id])
+  summaryPoolItem SummaryPoolItem @relation(fields: [summaryPoolItemId], references: [id], onDelete: Cascade)
 
   @@map("day_card_items")
 }
