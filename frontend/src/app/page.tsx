@@ -27,7 +27,7 @@ import {
   Utensils,
   X
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type View = "planner" | "products" | "analyser" | "recipes" | "diets" | "profile" | "shopping";
@@ -597,6 +597,12 @@ export default function Home() {
   const [logItemId, setLogItemId] = useState("");
   const [logServings, setLogServings] = useState("1");
 
+  // Modal refs — used for focus management
+  const lastFocusRef = useRef<HTMLElement | null>(null);
+  const detailModalRef = useRef<HTMLDivElement>(null);
+  const formModalRef = useRef<HTMLDivElement>(null);
+  const importModalRef = useRef<HTMLDivElement>(null);
+
   // ── Computed ─────────────────────────────────────────────────────────────────
   const days = useMemo(
     () => Array.from({ length: 7 }, (_, i) => inputDate(addDays(selectedWeekMonday, i))),
@@ -653,6 +659,23 @@ export default function Home() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [detailItem, showForm, showImport]);
+
+  // Move focus into an opening modal; restore it on close
+  useEffect(() => {
+    const isOpen = detailItem !== null || showForm || showImport;
+    if (isOpen) {
+      lastFocusRef.current = document.activeElement as HTMLElement;
+      const activeModal = detailItem ? detailModalRef.current
+        : showForm ? formModalRef.current
+        : importModalRef.current;
+      const firstFocusable = activeModal?.querySelector<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+      );
+      firstFocusable?.focus();
+    } else {
+      lastFocusRef.current?.focus();
+    }
   }, [detailItem, showForm, showImport]);
 
   // ── Navigation ───────────────────────────────────────────────────────────────
@@ -867,10 +890,28 @@ export default function Home() {
   }
 
   // ── Render helpers ────────────────────────────────────────────────────────────
+
+  // Trap Tab/Shift+Tab within an open modal
+  function handleModalKeyDown(e: React.KeyboardEvent, ref: React.RefObject<HTMLDivElement | null>) {
+    if (e.key !== "Tab") return;
+    const modal = ref.current;
+    if (!modal) return;
+    const focusable = Array.from(modal.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+    ));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
+      e.preventDefault();
+      (e.shiftKey ? last : first).focus();
+    }
+  }
+
   function renderMacroStrip(macros: Macro, compact = false) {
     return (
       <div className={compact ? "macro-strip compact" : "macro-strip"}>
-        <span><Flame size={15} /> {Math.round(macros.calories)} kcal</span>
+        <span><Flame size={15} aria-hidden="true" /> {Math.round(macros.calories)} kcal</span>
         <span>{fmt(macros.protein)} protein</span>
         <span>{fmt(macros.fat)} fat</span>
         <span>{fmt(macros.carbs)} carbs</span>
@@ -882,21 +923,22 @@ export default function Home() {
   function renderItemCard(item: CatalogItem) {
     return (
       <article className="item-card" key={item.id}>
-        <img src={item.image} alt="" style={{ cursor: "pointer" }} onClick={() => setDetailItem(item)} />
+        <img src={item.image} alt={item.name} style={{ cursor: "pointer" }} onClick={() => setDetailItem(item)} />
         <div className="item-body">
           <div className="item-title-row">
             <div style={{ minWidth: 0 }}>
               <p className="eyebrow">{item.kind === "recipe" ? "Recipe" : "Product"} / {item.category}</p>
               <h3 style={{ cursor: "pointer" }} onClick={() => setDetailItem(item)}>{item.name}</h3>
             </div>
-            <span
+            <button
               className={item.favorite ? "icon-pill fav-active" : "icon-pill"}
-              title={item.favorite ? "Remove favorite" : "Add to favorites"}
+              aria-label={item.favorite ? "Remove from favorites" : "Add to favorites"}
+              aria-pressed={item.favorite}
               onClick={() => toggleFavorite(item.id)}
-              style={{ cursor: "pointer", flexShrink: 0 }}
+              style={{ flexShrink: 0 }}
             >
-              <Heart size={15} fill={item.favorite ? "currentColor" : "none"} />
-            </span>
+              <Heart size={15} fill={item.favorite ? "currentColor" : "none"} aria-hidden="true" />
+            </button>
           </div>
           <p className="muted">{item.serving}</p>
           {renderMacroStrip(item.macros, true)}
@@ -904,19 +946,19 @@ export default function Home() {
             {item.diets.slice(0, 3).map((d) => <span key={d}>{d}</span>)}
           </div>
           <div className="button-row">
-              <button className={item.thisWeek ? "soft-button active" : "soft-button"} onClick={() => toggleThisWeek(item.id)}>
-                <Sparkles size={16} /> This week
+              <button className={item.thisWeek ? "soft-button active" : "soft-button"} aria-pressed={!!item.thisWeek} onClick={() => toggleThisWeek(item.id)}>
+                <Sparkles size={16} aria-hidden="true" /> This week
               </button>
-              <button className={item.nextWeek ? "soft-button active" : "soft-button"} onClick={() => toggleNextWeek(item.id)}>
-                <CalendarDays size={16} /> Next week
+              <button className={item.nextWeek ? "soft-button active" : "soft-button"} aria-pressed={!!item.nextWeek} onClick={() => toggleNextWeek(item.id)}>
+                <CalendarDays size={16} aria-hidden="true" /> Next week
               </button>
               <button className="dark-button" onClick={() => addToSummary(item.id, "lunch")}>
-                <Plus size={16} /> Add to plan
+                <Plus size={16} aria-hidden="true" /> Add to plan
               </button>
               {item.mine && (
                 <>
-                  <button className="icon-button" title="Edit" onClick={() => openEditForm(item)}><Edit2 size={15} /></button>
-                  <button className="icon-button" title="Delete" onClick={() => deleteItem(item.id)}><Trash2 size={15} /></button>
+                  <button className="icon-button" aria-label={`Edit ${item.name}`} onClick={() => openEditForm(item)}><Edit2 size={15} aria-hidden="true" /></button>
+                  <button className="icon-button" aria-label={`Delete ${item.name}`} onClick={() => deleteItem(item.id)}><Trash2 size={15} aria-hidden="true" /></button>
                 </>
               )}
             </div>
@@ -931,15 +973,23 @@ export default function Home() {
     const item = itemById.get(detailItem.id) ?? detailItem;
     return (
       <div className="modal-overlay" onClick={() => setDetailItem(null)}>
-        <div className="modal detail-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal detail-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="detail-modal-title"
+          ref={detailModalRef}
+          onKeyDown={(e) => handleModalKeyDown(e, detailModalRef)}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="modal-header">
             <div>
               <p className="eyebrow">{item.kind === "recipe" ? "Recipe" : "Product"} / {item.category}</p>
-              <h2>{item.name}</h2>
+              <h2 id="detail-modal-title">{item.name}</h2>
             </div>
-            <button className="icon-button" onClick={() => setDetailItem(null)}><X size={18} /></button>
+            <button className="icon-button" aria-label="Close detail" onClick={() => setDetailItem(null)}><X size={18} aria-hidden="true" /></button>
           </div>
-          <img className="detail-image" src={item.image} alt="" />
+          <img className="detail-image" src={item.image} alt={item.name} />
           <div className="detail-meta">
             <div><p className="eyebrow">Serving</p><strong>{item.serving}</strong></div>
             {item.kind === "recipe" && item.prepTime && (
@@ -988,24 +1038,27 @@ export default function Home() {
           <p className="eyebrow" style={{ marginTop: 16, marginBottom: 8 }}>Diet compatibility — click to toggle</p>
           <div className="tag-row">
             {ALL_DIET_NAMES.map((d) => (
-              <span
+              <button
                 key={d}
                 className={item.diets.includes(d) ? "diet-toggle active" : "diet-toggle"}
+                aria-pressed={item.diets.includes(d)}
                 onClick={() => toggleDietTag(item.id, d)}
               >
                 {d}
-              </span>
+              </button>
             ))}
           </div>
           <div className="modal-actions">
             <button className="soft-button" onClick={() => { addToSummary(item.id, "lunch"); setDetailItem(null); }}>
-              <Plus size={16} /> Add to plan
+              <Plus size={16} aria-hidden="true" /> Add to plan
             </button>
             <button
               className={item.favorite ? "soft-button active" : "soft-button"}
+              aria-pressed={item.favorite}
+              aria-label={item.favorite ? "Remove from favorites" : "Add to favorites"}
               onClick={() => toggleFavorite(item.id)}
             >
-              <Heart size={16} fill={item.favorite ? "currentColor" : "none"} />
+              <Heart size={16} fill={item.favorite ? "currentColor" : "none"} aria-hidden="true" />
               {item.favorite ? "Unfavorite" : "Favorite"}
             </button>
             {item.mine && (
@@ -1027,15 +1080,23 @@ export default function Home() {
 
     return (
       <div className="modal-overlay" onClick={() => setShowForm(false)}>
-        <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="form-modal-title"
+          ref={formModalRef}
+          onKeyDown={(e) => handleModalKeyDown(e, formModalRef)}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="modal-header">
-            <h2>{isEdit ? `Edit — ${editingItem!.name}` : `Add ${formDraft.kind}`}</h2>
-            <button className="icon-button" onClick={() => setShowForm(false)}><X size={18} /></button>
+            <h2 id="form-modal-title">{isEdit ? `Edit — ${editingItem!.name}` : `Add ${formDraft.kind}`}</h2>
+            <button className="icon-button" aria-label="Close form" onClick={() => setShowForm(false)}><X size={18} aria-hidden="true" /></button>
           </div>
           <div className="form-grid">
             <label>
               Name
-              <input value={formDraft.name} onChange={(e) => setFormDraft((d) => ({ ...d, name: e.target.value }))} />
+              <input required aria-required="true" value={formDraft.name} onChange={(e) => setFormDraft((d) => ({ ...d, name: e.target.value }))} />
             </label>
             {!isEdit && (
               <label>
@@ -1083,9 +1144,11 @@ export default function Home() {
               <p className="eyebrow" style={{ marginBottom: 8 }}>Diets</p>
               <div className="tag-row">
                 {ALL_DIET_NAMES.map((d) => (
-                  <span
+                  <button
                     key={d}
+                    type="button"
                     className={formDraft.diets.includes(d) ? "diet-toggle active" : "diet-toggle"}
+                    aria-pressed={formDraft.diets.includes(d)}
                     onClick={() =>
                       setFormDraft((fd) => ({
                         ...fd,
@@ -1094,7 +1157,7 @@ export default function Home() {
                     }
                   >
                     {d}
-                  </span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -1134,9 +1197,11 @@ export default function Home() {
                   />
                   <button
                     className="icon-button tiny"
+                    type="button"
+                    aria-label="Remove ingredient"
                     onClick={() => setFormDraft((d) => ({ ...d, ingredients: d.ingredients.filter((_, j) => j !== i) }))}
                   >
-                    <Trash2 size={12} />
+                    <Trash2 size={12} aria-hidden="true" />
                   </button>
                 </div>
               ))}
@@ -1169,10 +1234,19 @@ export default function Home() {
     if (!showImport) return null;
     return (
       <div className="modal-overlay" onClick={() => setShowImport(false)}>
-        <div className="modal" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+        <div
+          className="modal"
+          style={{ maxWidth: 480 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="import-modal-title"
+          ref={importModalRef}
+          onKeyDown={(e) => handleModalKeyDown(e, importModalRef)}
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="modal-header">
-            <h2>Import recipe</h2>
-            <button className="icon-button" onClick={() => setShowImport(false)}><X size={18} /></button>
+            <h2 id="import-modal-title">Import recipe</h2>
+            <button className="icon-button" aria-label="Close import" onClick={() => setShowImport(false)}><X size={18} aria-hidden="true" /></button>
           </div>
           <p className="muted">Paste a URL from a recipe website, YouTube video, or leave blank to import a sample recipe.</p>
           <label>
@@ -1198,13 +1272,13 @@ export default function Home() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img
               src={item.image}
-              alt=""
+              alt={item.name}
               style={{ width: 36, height: 36, objectFit: "cover", borderRadius: 6, cursor: "pointer", flexShrink: 0 }}
               onClick={() => setDetailItem(item)}
             />
-            <span style={{ cursor: "pointer", fontWeight: 600 }} onClick={() => setDetailItem(item)}>
+            <button style={{ fontWeight: 600, background: "none", border: "none", padding: 0, color: "inherit", cursor: "pointer", textAlign: "left" }} onClick={() => setDetailItem(item)}>
               {item.name}
-            </span>
+            </button>
           </div>
         </td>
         <td><span className="muted">{item.category}</span></td>
@@ -1216,31 +1290,33 @@ export default function Home() {
         <td className="num-cell">{item.macros.calories} kcal</td>
         <td>
           <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
-            <span
+            <button
               className={item.thisWeek ? "diet-toggle active" : "diet-toggle"}
               style={{ padding: "4px 10px", fontSize: "0.8rem" }}
+              aria-pressed={!!item.thisWeek}
               onClick={() => toggleThisWeek(item.id)}
             >
               This week
-            </span>
-            <span
+            </button>
+            <button
               className={item.nextWeek ? "diet-toggle active" : "diet-toggle"}
               style={{ padding: "4px 10px", fontSize: "0.8rem" }}
+              aria-pressed={!!item.nextWeek}
               onClick={() => toggleNextWeek(item.id)}
             >
               Next week
-            </span>
+            </button>
             <button
               className="dark-button"
               style={{ minHeight: 30, padding: "0 10px", fontSize: "0.8rem" }}
               onClick={() => addToSummary(item.id, "lunch")}
             >
-              <Plus size={14} /> Summary
+              <Plus size={14} aria-hidden="true" /> Summary
             </button>
             {item.mine && (
               <>
-                <button className="icon-button" title="Edit" onClick={() => openEditForm(item)}><Edit2 size={15} /></button>
-                <button className="icon-button" title="Delete" onClick={() => deleteItem(item.id)}><Trash2 size={15} /></button>
+                <button className="icon-button" aria-label={`Edit ${item.name}`} onClick={() => openEditForm(item)}><Edit2 size={15} aria-hidden="true" /></button>
+                <button className="icon-button" aria-label={`Delete ${item.name}`} onClick={() => deleteItem(item.id)}><Trash2 size={15} aria-hidden="true" /></button>
               </>
             )}
           </div>
@@ -1257,14 +1333,14 @@ export default function Home() {
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <img
               src={item.image}
-              alt=""
+              alt={item.name}
               style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 6, cursor: "pointer", flexShrink: 0 }}
               onClick={() => setDetailItem(item)}
             />
             <div>
-              <span style={{ cursor: "pointer", fontWeight: 600, display: "block" }} onClick={() => setDetailItem(item)}>
+              <button style={{ fontWeight: 600, background: "none", border: "none", padding: 0, color: "inherit", cursor: "pointer", textAlign: "left", display: "block" }} onClick={() => setDetailItem(item)}>
                 {item.name}
-              </span>
+              </button>
               <span className="muted" style={{ fontSize: "0.78rem" }}>{item.serving}</span>
             </div>
           </div>
@@ -1285,23 +1361,24 @@ export default function Home() {
           <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
             <button
               className={item.favorite ? "icon-button active" : "icon-button"}
-              title={item.favorite ? "Unfavorite" : "Favorite"}
+              aria-label={item.favorite ? `Remove ${item.name} from favorites` : `Add ${item.name} to favorites`}
+              aria-pressed={item.favorite}
               style={{ minHeight: 30, width: 30 }}
               onClick={() => toggleFavorite(item.id)}
             >
-              <Heart size={14} fill={item.favorite ? "currentColor" : "none"} />
+              <Heart size={14} fill={item.favorite ? "currentColor" : "none"} aria-hidden="true" />
             </button>
             <button
               className="dark-button"
               style={{ minHeight: 30, padding: "0 10px", fontSize: "0.8rem" }}
               onClick={() => addToSummary(item.id, "lunch")}
             >
-              <Plus size={14} /> Plan
+              <Plus size={14} aria-hidden="true" /> Plan
             </button>
             {item.mine && (
               <>
-                <button className="icon-button" style={{ minHeight: 30, width: 30 }} title="Edit" onClick={() => openEditForm(item)}><Edit2 size={14} /></button>
-                <button className="icon-button" style={{ minHeight: 30, width: 30 }} title="Delete" onClick={() => deleteItem(item.id)}><Trash2 size={14} /></button>
+                <button className="icon-button" style={{ minHeight: 30, width: 30 }} aria-label={`Edit ${item.name}`} onClick={() => openEditForm(item)}><Edit2 size={14} aria-hidden="true" /></button>
+                <button className="icon-button" style={{ minHeight: 30, width: 30 }} aria-label={`Delete ${item.name}`} onClick={() => deleteItem(item.id)}><Trash2 size={14} aria-hidden="true" /></button>
               </>
             )}
           </div>
@@ -1399,17 +1476,17 @@ export default function Home() {
             <table className="analyser-table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Unit</th>
-                  <th>Qty</th>
-                  <th>Protein</th>
-                  <th>Fat</th>
-                  <th>Carbs</th>
-                  <th>Fiber</th>
-                  <th>kcal</th>
-                  <th className="center-cell">This week</th>
-                  <th className="center-cell">Next week</th>
-                  <th></th>
+                  <th scope="col">Product</th>
+                  <th scope="col">Unit</th>
+                  <th scope="col">Qty</th>
+                  <th scope="col">Protein</th>
+                  <th scope="col">Fat</th>
+                  <th scope="col">Carbs</th>
+                  <th scope="col">Fiber</th>
+                  <th scope="col">kcal</th>
+                  <th scope="col" className="center-cell">This week</th>
+                  <th scope="col" className="center-cell">Next week</th>
+                  <th scope="col"><span className="visually-hidden">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -1458,26 +1535,30 @@ export default function Home() {
                     <td className="num-cell">{row.itemId ? fmt(macros.fiber) : "—"}</td>
                     <td className="num-cell">{row.itemId ? Math.round(macros.calories) : "—"}</td>
                     <td className="center-cell">
-                      <span
+                      <button
                         className={row.thisWeek ? "diet-toggle active" : "diet-toggle"}
-                        style={{ padding: "3px 8px", fontSize: "0.78rem", display: "inline-block" }}
+                        style={{ padding: "3px 8px", fontSize: "0.78rem" }}
+                        aria-pressed={row.thisWeek}
+                        aria-label="Mark for this week"
                         onClick={() => updateRow(row.id, { thisWeek: !row.thisWeek })}
                       >
                         ✓
-                      </span>
+                      </button>
                     </td>
                     <td className="center-cell">
-                      <span
+                      <button
                         className={row.nextWeek ? "diet-toggle active" : "diet-toggle"}
-                        style={{ padding: "3px 8px", fontSize: "0.78rem", display: "inline-block" }}
+                        style={{ padding: "3px 8px", fontSize: "0.78rem" }}
+                        aria-pressed={row.nextWeek}
+                        aria-label="Mark for next week"
                         onClick={() => updateRow(row.id, { nextWeek: !row.nextWeek })}
                       >
                         ✓
-                      </span>
+                      </button>
                     </td>
                     <td>
-                      <button className="icon-button tiny" onClick={() => removeRow(row.id)}>
-                        <Trash2 size={13} />
+                      <button className="icon-button tiny" aria-label="Remove row" onClick={() => removeRow(row.id)}>
+                        <Trash2 size={13} aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -1564,10 +1645,10 @@ export default function Home() {
                               <small>{Math.round(item.macros.calories * a.servings)} kcal · {a.servings}×</small>
                             </div>
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-                              <button className="icon-button tiny" onClick={() => { const s = a.servings + 0.5; setAssignments((cur) => cur.map((x) => x.uid === a.uid ? { ...x, servings: s } : x)); }}><Plus size={12} /></button>
-                              <button className="icon-button tiny" onClick={() => { const s = a.servings - 0.5; if (s <= 0) removeAssignment(a.uid); else setAssignments((cur) => cur.map((x) => x.uid === a.uid ? { ...x, servings: s } : x)); }}><Minus size={12} /></button>
+                              <button className="icon-button tiny" aria-label={`Add half serving of ${item.name}`} onClick={() => { const s = a.servings + 0.5; setAssignments((cur) => cur.map((x) => x.uid === a.uid ? { ...x, servings: s } : x)); }}><Plus size={12} aria-hidden="true" /></button>
+                              <button className="icon-button tiny" aria-label={`Remove half serving of ${item.name}`} onClick={() => { const s = a.servings - 0.5; if (s <= 0) removeAssignment(a.uid); else setAssignments((cur) => cur.map((x) => x.uid === a.uid ? { ...x, servings: s } : x)); }}><Minus size={12} aria-hidden="true" /></button>
                             </div>
-                            <button className="icon-button tiny" onClick={() => removeAssignment(a.uid)} title="Remove"><X size={12} /></button>
+                            <button className="icon-button tiny" aria-label={`Remove ${item.name} from plan`} onClick={() => removeAssignment(a.uid)}><X size={12} aria-hidden="true" /></button>
                           </div>
                         );
                       })}
@@ -1667,7 +1748,7 @@ export default function Home() {
                   <button
                     className="cal-item-remove"
                     onClick={() => removeAssignment(a.uid)}
-                    title="Remove"
+                    aria-label={`Remove ${item.name} from plan`}
                   >×</button>
                 </div>
               );
@@ -1716,10 +1797,12 @@ export default function Home() {
           <div className="cal-sub-toggle">
             <button
               className={!isMonth ? "soft-button active" : "soft-button"}
+              aria-pressed={!isMonth}
               onClick={() => setCalendarSubView("week")}
             >Week</button>
             <button
               className={isMonth ? "soft-button active" : "soft-button"}
+              aria-pressed={isMonth}
               onClick={() => {
                 setCalendarSubView("month");
                 setCalendarMonthDate(new Date(selectedWeekMonday.getFullYear(), selectedWeekMonday.getMonth(), 1));
@@ -1769,14 +1852,14 @@ export default function Home() {
         </div>
 
         {/* Tab bar */}
-        <div className="planner-view-tabs">
-          <button className={plannerViewMode === "summary" ? "soft-button active" : "soft-button"} onClick={() => setPlannerViewMode("summary")}>
+        <div className="planner-view-tabs" role="group" aria-label="Planner view">
+          <button className={plannerViewMode === "summary" ? "soft-button active" : "soft-button"} aria-pressed={plannerViewMode === "summary"} onClick={() => setPlannerViewMode("summary")}>
             Weekly summary
           </button>
-          <button className={plannerViewMode === "cards" ? "soft-button active" : "soft-button"} onClick={() => setPlannerViewMode("cards")}>
+          <button className={plannerViewMode === "cards" ? "soft-button active" : "soft-button"} aria-pressed={plannerViewMode === "cards"} onClick={() => setPlannerViewMode("cards")}>
             Day cards
           </button>
-          <button className={plannerViewMode === "calendar" ? "soft-button active" : "soft-button"} onClick={() => setPlannerViewMode("calendar")}>
+          <button className={plannerViewMode === "calendar" ? "soft-button active" : "soft-button"} aria-pressed={plannerViewMode === "calendar"} onClick={() => setPlannerViewMode("calendar")}>
             Calendar
           </button>
         </div>
@@ -1934,9 +2017,10 @@ export default function Home() {
             {activeView === "recipes" && (
               <button
                 className={showFavorites ? "soft-button active" : "soft-button"}
+                aria-pressed={showFavorites}
                 onClick={() => setShowFavorites((f) => !f)}
               >
-                <Heart size={16} fill={showFavorites ? "currentColor" : "none"} />
+                <Heart size={16} fill={showFavorites ? "currentColor" : "none"} aria-hidden="true" />
                 Favorites
               </button>
             )}
@@ -1944,30 +2028,34 @@ export default function Home() {
               <>
                 <button
                   className={showThisWeek ? "soft-button active" : "soft-button"}
+                  aria-pressed={showThisWeek}
                   onClick={() => setShowThisWeek((v) => !v)}
                 >
-                  <Sparkles size={15} /> This week
+                  <Sparkles size={15} aria-hidden="true" /> This week
                 </button>
                 <button
                   className={showNextWeek ? "soft-button active" : "soft-button"}
+                  aria-pressed={showNextWeek}
                   onClick={() => setShowNextWeek((v) => !v)}
                 >
-                  <CalendarDays size={15} /> Next week
+                  <CalendarDays size={15} aria-hidden="true" /> Next week
                 </button>
               </>
             )}
             <button
               className={showMine ? "soft-button active" : "soft-button"}
+              aria-pressed={showMine}
               onClick={() => setShowMine((m) => !m)}
             >
               Mine
             </button>
             <button
               className="soft-button"
-              title={viewMode === "cards" ? "Switch to list view" : "Switch to cards view"}
+              aria-label={viewMode === "cards" ? "Switch to list view" : "Switch to cards view"}
+              aria-pressed={viewMode === "list"}
               onClick={() => setViewMode((m) => (m === "cards" ? "list" : "cards"))}
             >
-              {viewMode === "cards" ? <LayoutList size={16} /> : <LayoutGrid size={16} />}
+              {viewMode === "cards" ? <LayoutList size={16} aria-hidden="true" /> : <LayoutGrid size={16} aria-hidden="true" />}
               {viewMode === "cards" ? "List" : "Cards"}
             </button>
           </div>
@@ -1990,28 +2078,28 @@ export default function Home() {
                 <tr>
                   {kind === "recipe" ? (
                     <>
-                      <th>Recipe</th>
-                      <th>Category</th>
-                      <th className="center-cell">Prep time</th>
-                      <th className="num-cell">Protein</th>
-                      <th className="num-cell">Fat</th>
-                      <th className="num-cell">Carbs</th>
-                      <th className="num-cell">Fiber</th>
-                      <th className="num-cell">kcal/serving</th>
-                      <th className="num-cell">kcal/100 g</th>
-                      <th></th>
+                      <th scope="col">Recipe</th>
+                      <th scope="col">Category</th>
+                      <th scope="col" className="center-cell">Prep time</th>
+                      <th scope="col" className="num-cell">Protein</th>
+                      <th scope="col" className="num-cell">Fat</th>
+                      <th scope="col" className="num-cell">Carbs</th>
+                      <th scope="col" className="num-cell">Fiber</th>
+                      <th scope="col" className="num-cell">kcal/serving</th>
+                      <th scope="col" className="num-cell">kcal/100 g</th>
+                      <th scope="col"><span className="visually-hidden">Actions</span></th>
                     </>
                   ) : (
                     <>
-                      <th>Product</th>
-                      <th>Category</th>
-                      <th>Serving</th>
-                      <th className="num-cell">Protein</th>
-                      <th className="num-cell">Fat</th>
-                      <th className="num-cell">Carbs</th>
-                      <th className="num-cell">Fiber</th>
-                      <th className="num-cell">kcal</th>
-                      <th></th>
+                      <th scope="col">Product</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">Serving</th>
+                      <th scope="col" className="num-cell">Protein</th>
+                      <th scope="col" className="num-cell">Fat</th>
+                      <th scope="col" className="num-cell">Carbs</th>
+                      <th scope="col" className="num-cell">Fiber</th>
+                      <th scope="col" className="num-cell">kcal</th>
+                      <th scope="col"><span className="visually-hidden">Actions</span></th>
                     </>
                   )}
                 </tr>
@@ -2258,12 +2346,19 @@ export default function Home() {
               <h2 style={{ marginBottom: 0 }}>Today&apos;s meal log</h2>
             </div>
             <span className="top-metrics" style={{ marginTop: 0 }}>
-              <span><Flame size={14} /> {Math.round(todayMacro.calories)} / {profile.calories} kcal</span>
+              <span><Flame size={14} aria-hidden="true" /> {Math.round(todayMacro.calories)} / {profile.calories} kcal</span>
             </span>
           </div>
           {renderMacroStrip(todayMacro)}
           {profile.calories > 0 && (
-            <div className="progress-wrap">
+            <div
+              className="progress-wrap"
+              role="progressbar"
+              aria-valuenow={Math.round(todayMacro.calories)}
+              aria-valuemin={0}
+              aria-valuemax={profile.calories}
+              aria-label={`Today's calories: ${Math.round(todayMacro.calories)} of ${profile.calories} kcal`}
+            >
               <div className="progress-bar" style={{ width: `${calorieProgress}%` }} />
             </div>
           )}
@@ -2323,41 +2418,43 @@ export default function Home() {
   // ── Shell ─────────────────────────────────────────────────────────────────────
   return (
     <>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       {renderDetailModal()}
       {renderFormModal()}
       {renderImportModal()}
       <main className="app-shell">
-        <aside className="sidebar">
+        <aside className="sidebar" aria-label="Application sidebar">
           <div className="brand">
-            <span className="brand-mark"><Utensils size={23} /></span>
+            <span className="brand-mark"><Utensils size={23} aria-hidden="true" /></span>
             <div>
               <strong>Meal Forge</strong>
               <small>MVP prototype</small>
             </div>
           </div>
-          <nav>
+          <nav aria-label="Main navigation">
             {viewConfig.map(({ id, label, icon: Icon }) => (
               <button
                 key={id}
                 className={activeView === id ? "nav-button active" : "nav-button"}
+                aria-current={activeView === id ? "page" : undefined}
                 onClick={() => switchView(id)}
               >
-                <Icon size={18} /> {label}
+                <Icon size={18} aria-hidden="true" /> {label}
               </button>
             ))}
           </nav>
         </aside>
 
-        <section className="workspace">
+        <section className="workspace" id="main-content" tabIndex={-1}>
           <header className="topbar">
             <div>
               <p className="eyebrow">MealPlanner / Client prototype</p>
               <h1>{viewConfig.find((v) => v.id === activeView)?.label}</h1>
             </div>
-            <div className="top-metrics">
+            <div className="top-metrics" aria-label="Daily summary">
               <span>{summaryRows.length} plan items</span>
               <span>{assignments.length} servings</span>
-              <span><Flame size={14} /> {Math.round(plannedMacro.calories)} / {profile.calories} kcal</span>
+              <span><Flame size={14} aria-hidden="true" /> {Math.round(plannedMacro.calories)} / {profile.calories} kcal</span>
             </div>
           </header>
 
