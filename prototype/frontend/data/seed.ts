@@ -61,12 +61,13 @@ export const SEED_DIETS: Diet[] = [
 ]
 
 export const SEED_ASSIGNMENTS: Assignment[] = [
-  { id:'a-001', itemId:'r-001', day:'Mon', slot:'Breakfast', servings:1 },
-  { id:'a-002', itemId:'r-004', day:'Mon', slot:'Lunch', servings:1 },
-  { id:'a-003', itemId:'r-006', day:'Tue', slot:'Dinner', servings:1 },
-  { id:'a-004', itemId:'r-003', day:'Wed', slot:'Breakfast', servings:1 },
-  { id:'a-005', itemId:'r-010', day:'Wed', slot:'Lunch', servings:2 },
-  { id:'a-006', itemId:'r-002', day:'Fri', slot:'Breakfast', servings:1 },
-  { id:'a-007', itemId:'r-005', day:'Fri', slot:'Lunch', servings:1 },
-  { id:'a-008', itemId:'r-009', day:'Sun', slot:'Dinner', servings:2 },
+  { id:'a-001', itemId:'r-001', day:'Mon', slot:'Breakfast', servings:1, weekOffset:0 },
+  { id:'a-002', itemId:'r-004', day:'Mon', slot:'Lunch', servings:1, weekOffset:0 },
+  { id:'a-003', itemId:'r-006', day:'Tue', slot:'Dinner', servings:1, weekOffset:0 },
+  { id:'a-004', itemId:'r-003', day:'Wed', slot:'Breakfast', servings:1, weekOffset:0 },
+  { id:'a-005', itemId:'r-010', day:'Wed', slot:'Lunch', servings:2, weekOffset:0 },
+  { id:'a-006', itemId:'r-002', day:'Fri', slot:'Breakfast', servings:1, weekOffset:0 },
+  { id:'a-007', itemId:'r-005', day:'Fri', slot:'Lunch', servings:1, weekOffset:0 },
+  { id:'a-008', itemId:'r-009', day:'Sun', slot:'Dinner', servings:2, weekOffset:0 },
+  { id:'a-009', itemId:'p-008', day:'Mon', slot:'Lunch', servings:1, weekOffset:0, autoAdded:true },
 ]

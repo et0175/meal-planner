@@ -1,6 +1,8 @@
 # Detailed Test Cases — Meal Forge MVP Prototype
 
-> **This is the authoritative test case document.** [`prototype-test-cases.md`](prototype-test-cases.md) is a legacy prototype results log only.
+> ⚠️ **Deprecated.** This monolithic file has been split into per-module files. Use the index at **[README.md](README.md)** instead. This file is kept as a historical reference only and will not be updated going forward.
+
+> [`prototype-test-cases.md`](prototype-test-cases.md) is a separate legacy prototype results log.
 
 **App:** `http://localhost:3001`  
 **Scope:** UI prototype — no persistence, no user management. All data is in-memory dummy data.  
@@ -23,18 +25,20 @@
 9. [TC-SHP — Shopping list](#tc-shp--shopping-list)
 10. [TC-PRF — Personal cabinet / profile](#tc-prf--personal-cabinet--profile)
 11. [TC-MLT — Meal tracking](#tc-mlt--meal-tracking)
+12. [TC-AUTH — Authentication](#tc-auth--authentication)
 
 ---
 
 ## TC-NAV — Navigation
 
-**Requirement:** Navigation structure  
+**Requirement:** Navigation structure (implied by all modules)  
+**User stories:** [`navigation.md`](../user-stories/navigation.md) — US-NAV-001 – US-NAV-005  
 **Test data:** App seed state (all 27 products + 12 recipes pre-loaded)
 
 ---
 
 ### TC-NAV-001: Sidebar shows all seven navigation items
-**AC:** Sidebar is visible with all seven module entries  
+**AC:** US-NAV-001 — sidebar contains exactly 7 items in defined order  
 **Priority:** High
 
 **Preconditions:** App loaded at `http://localhost:3001`
@@ -54,7 +58,7 @@
 ---
 
 ### TC-NAV-002: Default view is Planner
-**AC:** Planner is the default landing view  
+**AC:** US-NAV-002 — app root opens Planner with Planner sidebar item active  
 **Priority:** High
 
 **Steps:**
@@ -69,7 +73,7 @@
 ---
 
 ### TC-NAV-003: Active nav item is highlighted
-**AC:** Selected nav item has visual active state  
+**AC:** US-NAV-003 — active sidebar item has distinct visual state; only one active at a time  
 **Priority:** Medium
 
 **Steps:**
@@ -87,7 +91,7 @@
 ---
 
 ### TC-NAV-004: Topbar reflects the current view name
-**AC:** Page title updates on navigation  
+**AC:** US-NAV-004 — topbar heading matches active module name; updates on navigation  
 **Priority:** Medium
 
 **Steps:**
@@ -101,7 +105,7 @@
 ---
 
 ### TC-NAV-005: Topbar summary metrics update when plan changes
-**AC:** Metrics in topbar are reactive to plan state  
+**AC:** US-NAV-005 — topbar plan metrics (kcal, item count) update immediately when assignments change  
 **Priority:** Medium
 
 **Preconditions:** Planner view is active; seed data loaded (8 assignments from `plannerSeeds` in test-data.json)
@@ -171,8 +175,8 @@
 
 **Expected result:**
 - Layout switches to a table
-- Columns visible: Name, Category, Protein (g), Fat (g), Carbs (g), kcal
-- **Atlantic salmon** (p-005) row shows: Fish, 20 g, 13 g, 0 g, 208
+- Columns visible: Name, Category, Protein (g), Fat (g), Carbs (g), Fiber (g), kcal, Serving size
+- **Atlantic salmon** (p-005) row shows: Fish, 20 g, 13 g, 0 g, 0 g, 208, 100 g
 
 **Status:** ✅
 
@@ -346,7 +350,7 @@
 - Brown rice no longer appears in Planner weekly summary
 - No confirmation prompt shown (no day assignments exist)
 
-**Status:** ❌
+**Status:** ✅
 
 ---
 
@@ -561,6 +565,61 @@ kcal: 0, protein: 0, fat: 0, carbs: 0
 
 ---
 
+### TC-PRD-024: Category cards view shows one card per category
+**AC:** US-PA-009 — category cards view with item counts  
+**Priority:** High
+
+**Steps:**
+1. In Products view, click the **CAT** (category cards) toggle button.
+
+**Expected result:**
+- One card per distinct category (Dairy, Fish, Grains, Produce, Meat, Legumes, Nuts & Seeds, Condiments, Other)
+- Each card shows category name and the count of products in that category
+- No individual products shown in the grid — only category cards
+
+**Status:** ✅
+
+---
+
+### TC-PRD-025: Click category card to see its products
+**AC:** US-PA-009 — clicking category card filters to that category  
+**Priority:** High
+
+**Steps:**
+1. In category cards view, click the **Dairy** card.
+
+**Expected result:**
+- Transitions to a filtered product list showing only Dairy products (Greek yogurt, Whole milk, Cheddar cheese, Butter, Whole eggs — 5 items)
+- A "← All categories" breadcrumb is visible to return to the category grid
+
+**Steps:**
+2. Click "← All categories".
+
+**Expected result:**
+- Full category cards grid is shown again
+
+**Status:** ✅
+
+---
+
+### TC-PRD-026: Click product to open detail card with pie chart and units conversion
+**AC:** US-PA-010 — product detail with nutrient pie chart and units conversion table  
+**Priority:** High
+
+**Steps:**
+1. In Products view (any browse mode), click on **Greek yogurt** (p-001).
+
+**Expected result:**
+- A product detail modal opens
+- A CSS pie chart (conic-gradient circle) shows caloric proportions for protein, fat, and carbs
+- Macro values shown with percentages
+- Units conversion table shows at minimum 100 g row and serving row
+- Close button dismisses the modal
+
+**Status:** ✅
+
+---
+
 ## TC-PAN — Products analyser
 
 **Requirement:** [`02_products-analyser.md`](../requirements/02_products-analyser.md)  
@@ -609,6 +668,67 @@ kcal: 0, protein: 0, fat: 0, carbs: 0
 ### TC-PAN-008: Add new product from within analyser
 **AC:** User can add a product without leaving the analyser  
 **Priority:** Low  
+**Status:** 🚫
+
+### TC-PAN-009: Select a recipe as a row item
+**AC:** US-PAN-002 — merged product + recipe search; recipe pins with unit = "serving"  
+**Priority:** High  
+**Test data:** Type "Berry" → should suggest **Berry overnight oats** (r-001)
+
+**Steps:**
+1. Open Products analyser and add a row.
+2. Type `berry` in Column 1.
+3. Select **Berry overnight oats** from the suggestions.
+
+**Expected result:**
+- Row shows "Berry overnight oats" pinned in Column 1 (with "recipe" label)
+- Column 2 (Unit) shows "serving" (read-only/fixed — not a dropdown)
+- Column 3 (Quantity) defaults to 1
+- Nutrition columns populate: kcal 385, protein 15 g, fat 8 g, carbs 65 g
+- No "TW" / "NW" flag buttons shown for this row (only shown for product rows)
+**Status:** ✅
+
+### TC-PAN-010: Recently used items appear first in analyser search
+**AC:** US-PAN-002 — recently planned/logged items sorted first  
+**Priority:** Medium  
+
+**Preconditions:** Seed assignments include Berry overnight oats (r-001) and Chicken quinoa bowl (r-004) in current week
+
+**Steps:**
+1. Open Products analyser and add a row.
+2. Clear the search field and observe the default suggestions (or type a single generic character).
+
+**Expected result:**
+- Berry overnight oats and Chicken quinoa bowl (recently planned) appear at or near the top of the suggestions
+- Items not used recently appear below
+**Status:** 🚫
+
+---
+
+### TC-PAN-011: Analyser week-flag mirrors catalog (bidirectional sync)
+**AC:** US-PAN-006 — toggling "This week" / "Next week" in analyser reflects in All products, and vice versa  
+**Priority:** High
+
+**Preconditions:** **Broccoli** (p-013) has `thisWeek: false`, `nextWeek: false`
+
+**Steps (analyser → catalog):**
+1. Open Products analyser.
+2. Add a row and select **Broccoli**.
+3. In the row, toggle **"This week"** ON.
+4. Navigate to **Products** and locate Broccoli.
+
+**Expected result (analyser → catalog):**
+- Broccoli shows "This week" flag as active in the Products list / card
+- No duplicate entries; the state is mirrored, not duplicated
+
+**Steps (catalog → analyser):**
+5. In Products, toggle Broccoli **"Next week"** ON.
+6. Return to Products analyser; the Broccoli row still exists in the session.
+
+**Expected result (catalog → analyser):**
+- Broccoli row in analyser now shows "Next week" flag as active
+- "This week" flag still active (both flags can be set independently)
+
 **Status:** 🚫
 
 ---
@@ -916,7 +1036,7 @@ ingredients: (none)
 - Recipe deleted successfully without a confirmation prompt about active assignments
 - Recipe removed from list
 
-**Status:** ❌
+**Status:** ✅
 
 ---
 
@@ -1246,6 +1366,45 @@ ingredients: (none)
 - Not duplicated if already present
 
 **Status:** ✅
+
+---
+
+### TC-PLN-012: Day card shows kcal as percentage of calorie target
+**AC:** US-MP-019 — each day card shows planned kcal as % of calorie corridor  
+**Priority:** Medium
+
+**Preconditions:** User u-001 has calorie target 2000 kcal; seed data loaded (Mon has r-001 385 kcal + r-004 450 kcal = 835 kcal); navigate to Day cards tab
+
+**Steps:**
+1. Open Planner > Day cards.
+2. Inspect the **Monday** card.
+
+**Expected result:**
+- Monday card shows: "835 kcal" and a percentage indicator such as "42%" (835 / 2000)
+- Percentage is shown as a bar, label, or numeric indicator
+- If no calorie target is set (user u-003), percentage strip is absent
+
+**Status:** 🚫
+
+---
+
+### TC-PLN-013: Planner item search sorts recently used items first
+**AC:** US-MP-020 — search suggestions in planner show recently planned items at top  
+**Priority:** Medium
+
+**Preconditions:** Seed assignments include Berry overnight oats (r-001) on Monday Breakfast
+
+**Steps:**
+1. Open Planner > Weekly summary.
+2. In any meal-slot row, click the item search input.
+3. Observe default suggestions (no text typed or type a single generic letter).
+
+**Expected result:**
+- Berry overnight oats (r-001) and other seeded items appear at or near the top
+- Items with no recent usage appear below the recently-used group
+- Typing additional characters narrows results but preserves the recently-used ordering within the visible set
+
+**Status:** 🚫
 
 ---
 
@@ -1631,6 +1790,163 @@ ingredients: (none)
 
 ---
 
+### TC-CAL-014: Calendar tab has Day / 4 Days / Week / Month sub-view buttons
+**AC:** US-MP-017 — four-way sub-view toggle  
+**Priority:** High
+
+**Steps:**
+1. Click **Calendar** tab in Planner.
+
+**Expected result:**
+- A button group with four options is visible: **Day**, **4 Days**, **Week**, **Month**
+- "Week" is the default active sub-view (or whichever was previously selected)
+
+**Status:** ✅
+
+---
+
+### TC-CAL-015: Day sub-view shows a single day's assignments
+**AC:** US-MP-017 — Day sub-view displays one day column  
+**Priority:** High
+
+**Steps:**
+1. Open Calendar tab, click **Day** button.
+
+**Expected result:**
+- One column is shown for the currently active day
+- Items are grouped by meal slot (Breakfast, Lunch, Dinner, Snacks)
+- Monday items visible (Berry overnight oats — Breakfast, Chicken quinoa bowl — Lunch)
+- Add, remove, and serving-count controls are present
+
+**Status:** ✅
+
+---
+
+### TC-CAL-016: 4 Days sub-view shows 4 consecutive days
+**AC:** US-MP-017 — 4 Days sub-view shows 4 columns  
+**Priority:** High
+
+**Steps:**
+1. Open Calendar tab, click **4 Days** button.
+
+**Expected result:**
+- Four columns visible (Mon, Tue, Wed, Thu if Monday is the selected start day)
+- Each column shows the correct seeded assignments
+- Drag between the four visible columns works (see TC-DAY-009 pattern)
+
+**Status:** ✅
+
+---
+
+### TC-CAL-017: Calendar plan summary panel is shown above the grid
+**AC:** US-MP-018 — plan summary lists all items in visible range  
+**Priority:** High
+
+**Steps:**
+1. Open Calendar tab (Week sub-view; current week).
+
+**Expected result:**
+- A plan summary section appears above the 7-column grid
+- Lists all 8 seeded items with their total servings and kcal contribution
+- Example: "Berry overnight oats — 1 serving — 385 kcal"
+
+**Status:** ✅
+
+---
+
+### TC-CAL-018: Drag item from summary panel to a day cell
+**AC:** US-MP-018 — drag from summary creates assignment; item remains in summary  
+**Priority:** Medium
+
+**Steps:**
+1. In Calendar Week sub-view, locate **Greek salad** in the plan summary (currently Friday Lunch).
+2. Drag **Greek salad** from the summary panel to the **Thursday** cell.
+3. Select meal slot **Dinner**.
+
+**Expected result:**
+- A new assignment is created: Thursday Dinner — Greek salad
+- Greek salad **still appears** in the plan summary (it was already planned; this adds a new day)
+- Thursday cell in the grid now shows Greek salad
+- Weekly summary: Thursday Dinner column shows Greek salad
+
+**Status:** ✅
+
+---
+
+### TC-CAL-019: Drag item from one day cell to another in calendar
+**AC:** US-MP-018 — drag between day cells moves assignment (disappears from source)  
+**Priority:** Medium
+
+**Steps:**
+1. In Calendar Week sub-view, drag **Avocado toast** from the Friday cell to the Saturday cell.
+
+**Expected result:**
+- Avocado toast **disappears** from Friday
+- Avocado toast appears in Saturday with the same meal slot (Breakfast)
+- Weekly summary: Friday Breakfast clears; Saturday Breakfast shows Avocado toast
+
+**Status:** ✅
+
+---
+
+### TC-CAL-020: Log this day from Planner
+**AC:** US-MP-016 — "Log this day" creates tracking entries for the selected day  
+**Priority:** High
+
+**Steps:**
+1. In Planner (any view), select **Monday**.
+2. Trigger **"Log this day"** action.
+3. Navigate to Profile > Meal tracking.
+
+**Expected result:**
+- Today's tracking log contains entries for Berry overnight oats (1 serving, 385 kcal) and Chicken quinoa bowl (1 serving, 450 kcal)
+- Entries are editable
+- No new planner assignments were created
+
+**Status:** 🚫
+
+---
+
+### TC-CAL-021: Log this week from Planner
+**AC:** US-MP-016 — "Log this week" creates tracking entries for all assignments across Mon–Sun of the selected week  
+**Priority:** High
+
+**Preconditions:** Seed data loaded; current week selected; 8 seeded assignments across Mon / Tue / Wed / Fri / Sun
+
+**Steps:**
+1. In Planner (any view), trigger **"Log this week"** action.
+2. Navigate to Profile > Meal tracking.
+3. Check entries for each day that has a seed assignment.
+
+**Expected result:**
+- Meal tracking shows entries for all 8 seeded assignments, grouped by day
+- Each entry shows item name, serving count, and meal slot pre-filled
+- All entries are editable
+- No planner assignments were added, changed, or removed
+
+**Status:** 🚫
+
+---
+
+### TC-CAL-022: Log this day — duplicate-prevention (adds to existing entry)
+**AC:** US-MP-016 AC#5 — if a tracking entry already exists for the same day and item, the action adds to it rather than duplicating  
+**Priority:** Medium
+
+**Preconditions:** "Log this day" has already been triggered for Monday; tracking log contains Berry overnight oats 1 serving for Monday
+
+**Steps:**
+1. In Planner, select **Monday** and trigger **"Log this day"** a second time.
+2. Navigate to Profile > Meal tracking and inspect Monday's entries.
+
+**Expected result:**
+- Berry overnight oats entry shows **2 servings** (original 1 + new 1), not two separate 1-serving entries
+- Chicken quinoa bowl entry similarly shows 2 servings
+- No orphaned duplicate entries for Monday
+
+**Status:** 🚫
+
+---
+
 ## TC-SHP — Shopping list
 
 **Requirement:** [`07_shopping_list.md`](../requirements/07_shopping_list.md)  
@@ -1769,7 +2085,7 @@ ingredients: (none)
 - Thursday–Sunday assignments excluded
 - Grocery list recalculates to reflect only Mon–Wed items
 
-**Status:** ❌
+**Status:** ✅
 
 ---
 
@@ -1834,7 +2150,41 @@ ingredients: (none)
 - Plan summary shows no items
 - Grocery list is empty or shows "No items planned for this period"
 
-**Status:** ❌
+**Status:** ✅
+
+---
+
+### TC-SHP-012: Grocery list auto-generates on navigation
+**AC:** US-SL-006 — list is generated automatically on navigating to Shopping list  
+**Priority:** High
+
+**Steps:**
+1. Ensure seed plan data is loaded.
+2. Click **Shopping list** in the sidebar.
+
+**Expected result:**
+- Plan summary and grocery list are populated immediately on arrival — no "Generate" button press required
+- Default date range is current calendar week
+- Plan summary and grocery list match the seeded assignments (same content as TC-SHP-003 and TC-SHP-004)
+
+**Status:** ✅
+
+---
+
+### TC-SHP-013: Changing date range auto-regenerates list
+**AC:** US-SL-006 — date range change triggers immediate regeneration  
+**Priority:** High
+
+**Preconditions:** Shopping list is open and auto-generated for current week
+
+**Steps:**
+1. Change the **"To"** date to Wednesday of the current week.
+
+**Expected result:**
+- Plan summary and grocery list update immediately without a separate button press
+- Only Mon–Wed assignments shown (same filtering as TC-SHP-007)
+
+**Status:** ✅
 
 ---
 
@@ -2029,6 +2379,75 @@ All sections present:
 
 ---
 
+### TC-PRF-012: Change email address
+**AC:** US-PC-001 — email change requires password confirmation and new address must be unique  
+**Priority:** High
+
+**Test data:** User u-001 (ol.melnikowa@gmail.com); existing user u-002 has a different email
+
+**Steps (happy path):**
+1. Open Profile.
+2. Locate the **Change email** control.
+3. Enter a new unique email address and the current password.
+4. Submit.
+
+**Expected result:**
+- Email is updated; new address is shown in the profile
+- No error shown
+
+**Steps (duplicate email):**
+5. Repeat with an email address already in use by another account.
+
+**Expected result:**
+- Change is rejected with an error message
+- Error does not reveal whether the address belongs to an existing account (per US-AUTH-001 enumeration rule)
+
+**Steps (wrong password):**
+6. Repeat with the correct new email but an incorrect current password.
+
+**Expected result:**
+- Change is rejected with a "wrong password" error
+
+**Status:** 🚫
+
+---
+
+### TC-PRF-013: Change password
+**AC:** US-PC-001 — password change requires current password; after change, current session is invalidated  
+**Priority:** High
+
+**Test data:** User u-001; current password known
+
+**Steps (happy path):**
+1. Open Profile.
+2. Locate the **Change password** control.
+3. Enter the current password and a new password of 8+ characters.
+4. Submit.
+
+**Expected result:**
+- Password is changed
+- Current session is invalidated immediately
+- User is redirected to the sign-in screen
+- Old password no longer grants access
+
+**Steps (short new password):**
+5. Attempt with a new password of 7 characters.
+
+**Expected result:**
+- Change is rejected with a clear minimum-length validation message
+- Session is not invalidated
+
+**Steps (wrong current password):**
+6. Attempt with an incorrect current password and a valid new password.
+
+**Expected result:**
+- Change is rejected with a "wrong password" error
+- Session is not invalidated
+
+**Status:** 🚫
+
+---
+
 ## TC-MLT — Meal tracking
 
 **Requirement:** [`05_personal_cabinet.md`](../requirements/05_personal_cabinet.md) — Meal tracking section  
@@ -2171,6 +2590,319 @@ All sections present:
 - Daily total decreases by 385 kcal
 
 **Status:** ✅
+
+---
+
+### TC-MLT-009: Meal tracking calendar view is accessible
+**AC:** US-PC-007 — calendar view shows logged days  
+**Priority:** High
+
+**Steps:**
+1. Log **Greek yogurt 200 g** (TC-MLT-002) and **Berry overnight oats 1 serving** (TC-MLT-003).
+2. In Profile > Meal tracking, switch to the calendar view.
+
+**Expected result:**
+- Calendar view renders with day cells for the current week
+- Today's cell shows Greek yogurt and Berry overnight oats (or total kcal 502)
+- A visual indicator shows whether today's logged kcal is within the calorie corridor
+
+**Status:** 🚫
+
+---
+
+### TC-MLT-010: Calendar tracking view navigates between weeks
+**AC:** US-PC-007 — week/month navigation in tracking calendar  
+**Priority:** Medium
+
+**Steps:**
+1. In the tracking calendar view, click **Prev week**.
+2. Click **Next week**.
+
+**Expected result:**
+- Calendar shifts to the previous / next week
+- Empty cells shown for days with no logged entries
+
+**Status:** 🚫
+
+---
+
+### TC-MLT-011: Daily goal corridor summary — within target
+**AC:** US-PC-008 — "Within goal" shown when kcal is in corridor  
+**Priority:** High
+
+**Test data:** User u-001: calorie target 2000 kcal → corridor 1850–2150 kcal
+
+**Preconditions:** Log entries totalling **1950 kcal** for today
+
+**Steps:**
+1. Log entries summing to 1950 kcal.
+2. View the goal corridor summary panel.
+
+**Expected result:**
+- Panel shows today's logged kcal: 1950
+- Status label: "Within goal" (or equivalent positive indicator)
+- Corridor shown: 1850–2150 kcal
+
+**Status:** 🚫
+
+---
+
+### TC-MLT-012: Daily goal corridor summary — below target
+**AC:** US-PC-008 — "Below target" shown when kcal is under corridor  
+**Priority:** Medium
+
+**Preconditions:** Log entries totalling **1200 kcal** for today; user corridor 1850–2150
+
+**Steps:**
+1. Log entries summing to 1200 kcal.
+2. View corridor summary panel.
+
+**Expected result:**
+- Status label: "Below target" (or equivalent warning indicator)
+
+**Status:** 🚫
+
+---
+
+### TC-MLT-013: Weekly corridor summary — days on target count
+**AC:** US-PC-008 — weekly summary shows days on target out of 7  
+**Priority:** Medium
+
+**Preconditions:** Mock scenario: 4 days this week have logged kcal within 1850–2150; 3 days do not
+
+**Steps:**
+1. View the weekly corridor summary in Meal tracking.
+
+**Expected result:**
+- Summary shows: "4 / 7 days on target" (or equivalent)
+
+**Status:** 🚫
+
+---
+
+### TC-MLT-014: Daily nutrition progress percentages
+**AC:** US-PC-009 — consumed macros shown as % of target  
+**Priority:** High
+
+**Test data:** User u-001: calorie target 2000 kcal; macros protein 30% (150 g), fat 35% (78 g), carbs 35% (175 g)  
+**Preconditions:** Log entries: Greek yogurt 200 g + Berry overnight oats 1 serving → total kcal 502
+
+**Steps:**
+1. View daily nutrition progress in Meal tracking.
+
+**Expected result:**
+- kcal consumed: 502 → **25%** of 2000 target shown
+- Protein: ~35 g → ~23% of 150 g target shown
+- Fat: ~8.8 g → ~11% of 78 g target shown
+- Carbs: ~72 g → ~41% of 175 g target shown
+- Percentage values update when a new entry is added or removed
+
+**Status:** 🚫
+
+---
+
+## TC-AUTH — Authentication
+
+**Requirement:** [`08_authentication.md`](../requirements/08_authentication.md)  
+**User stories:** [`authentication.md`](../user-stories/authentication.md) — US-AUTH-001 – US-AUTH-006  
+**Test data:** User u-001 (registered); user u-002 (registered, different email); user u-003 (no diet set)
+
+---
+
+### TC-AUTH-001: Registration form is accessible without sign-in
+**AC:** US-AUTH-001 — registration form reachable by unauthenticated visitors  
+**Priority:** High
+
+**Preconditions:** No user is signed in
+
+**Steps:**
+1. Navigate to the app root.
+2. Locate the registration / sign-up option.
+
+**Expected result:**
+- Registration form is accessible without credentials
+- Form contains at minimum an email field and a password field
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-002: Registration — validation rejects empty fields and short passwords
+**AC:** US-AUTH-001 — empty fields rejected; passwords < 8 chars rejected  
+**Priority:** High
+
+**Steps (empty fields):**
+1. Open registration form.
+2. Submit without filling any fields.
+
+**Expected result:**
+- Submission blocked; error shown for each empty required field
+
+**Steps (short password):**
+3. Enter a valid email and a 7-character password; submit.
+
+**Expected result:**
+- Submission blocked; clear validation message states minimum password length (8 characters)
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-003: Registration — duplicate email rejected without enumeration
+**AC:** US-AUTH-001 — duplicate email rejected; error does not confirm address exists  
+**Priority:** High
+
+**Test data:** Email already registered to u-001
+
+**Steps:**
+1. Submit registration form with an email already in use.
+
+**Expected result:**
+- Registration is rejected
+- Error message does not confirm whether the address is already registered (e.g. "If this email is available, your account has been created" or equivalent)
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-004: Successful registration signs user in and lands on Planner
+**AC:** US-AUTH-001 — successful registration auto signs in and redirects to Planner  
+**Priority:** High
+
+**Steps:**
+1. Submit registration form with a unique email and password of 8+ characters.
+
+**Expected result:**
+- Account created
+- User is signed in automatically
+- Landing view is Planner (not sign-in screen)
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-005: Sign in with correct credentials
+**AC:** US-AUTH-002 — correct email + password grants access and lands on Planner  
+**Priority:** High
+
+**Preconditions:** Signed out
+
+**Steps:**
+1. Navigate to sign-in screen.
+2. Enter email and password for u-001.
+3. Submit.
+
+**Expected result:**
+- Access granted; landing view is Planner
+- Sidebar and topbar are visible
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-006: Sign in with wrong credentials shows generic error
+**AC:** US-AUTH-002 — incorrect credentials show a generic error (no email/password specificity)  
+**Priority:** High
+
+**Steps:**
+1. Enter a valid email and an incorrect password.
+2. Submit.
+
+**Expected result:**
+- Access denied
+- Error message is generic (e.g. "Invalid email or password") — does not specify which field is wrong
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-007: Sign in — rate limiting after repeated failures
+**AC:** US-AUTH-002 — account locked or rate-limited after configurable number of consecutive failures  
+**Priority:** Medium
+
+**Steps:**
+1. Repeatedly submit wrong credentials for the same email address until the configured threshold is reached.
+
+**Expected result:**
+- After the threshold, sign-in attempts are blocked or delayed
+- Message indicates when the user can try again (or how to unlock)
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-008: Sign out — session invalidated, back button does not restore session
+**AC:** US-AUTH-003 — sign out accessible from anywhere; session invalidated; back button does not restore  
+**Priority:** High
+
+**Preconditions:** Signed in as u-001
+
+**Steps:**
+1. Trigger sign-out action from the navigation or profile area.
+2. Verify redirect to sign-in screen.
+3. Press the browser back button.
+
+**Expected result:**
+- Redirect to sign-in after sign-out
+- Back button does not return to an authenticated view; user remains on sign-in or is redirected there
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-009: Password reset — link sent; no enumeration; link is single-use and expiring
+**AC:** US-AUTH-004 — "Forgot password?" available; reset link sent; confirmation identical for registered and unregistered emails; link single-use and expires  
+**Priority:** High
+
+**Steps:**
+1. Click **"Forgot password?"** on the sign-in screen.
+2. Submit with the email of u-001 (registered).
+3. Note the confirmation message.
+4. Submit with a non-existent email.
+
+**Expected result:**
+- Confirmation message is identical in both cases (no enumeration)
+- A reset link is sent to u-001's inbox (or captured by the test harness)
+- Following the reset link opens a form to set a new password
+- Following the same link a second time (after it has been used) shows an "expired or already used" message
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-010: Unauthenticated access to protected routes redirects to sign-in
+**AC:** US-AUTH-006 — direct URL to any protected route redirects to sign-in; after sign-in redirects to originally requested URL  
+**Priority:** High
+
+**Preconditions:** Signed out
+
+**Steps:**
+1. Navigate directly to a protected route (e.g. `/planner` or `/products`).
+2. Sign in.
+
+**Expected result:**
+- Step 1: Redirected to sign-in screen; no application data visible
+- Step 2: After sign-in, redirected to the originally requested URL (not the default Planner), or to Planner if no specific URL was requested
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-011: Session persists across page reloads
+**AC:** US-AUTH-005 — session persists within the same browser session without re-authentication  
+**Priority:** Medium
+
+**Preconditions:** Signed in as u-001
+
+**Steps:**
+1. Reload the browser tab.
+2. Navigate between several modules.
+
+**Expected result:**
+- No re-authentication required within the same browser session
+- All previously visible data remains accessible after reload
+
+**Status:** 🚫
 
 ---
 

@@ -86,3 +86,14 @@ The UI should surface this distinction clearly so users understand that planning
 The requirement said "metric or other" without defining what "other" means.
 
 **Decision:** ✅ Metric + US customary. Supported systems: metric (g, kg, ml, l, etc.) and US customary (oz, lb, fl oz, cups, tbsp, tsp). UK Imperial is not in scope. Non-metric support beyond US customary is deferred post-MVP based on user demand.
+
+---
+
+## OQ-008 — Should "log from plan" be included in MVP, overriding OQ-006?
+
+**Affects:** `05_personal_cabinet.md`, `06_meal_planner.md`, US-PC-006, US-MP-016
+
+**Context:**
+OQ-006 (2026-06-17) intentionally decoupled the Meal planner and Meal tracking, deferring a "log from plan" shortcut to post-MVP. A subsequent product review (2026-06-17) requested adding "a possibility to log a day and a week from the planner" with the ability to edit log entries afterwards in the personal page.
+
+**Decision:** ✅ Log from plan is now included in MVP. A user can trigger "Log this day" or "Log this week" from the Meal planner, which creates Meal tracking entries pre-filled from the planned items and quantities. Created entries are editable in the Meal tracking section of the Personal cabinet. Tracking and planning data stores remain independent — the log action copies data; it does not link the two stores. This overrides the post-MVP deferral in OQ-006.

@@ -40,6 +40,8 @@ export interface Assignment {
   day: Day
   slot: Slot
   servings: number
+  weekOffset?: number
+  autoAdded?: boolean
 }
 
 export interface Diet {

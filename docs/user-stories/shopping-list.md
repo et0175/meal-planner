@@ -73,3 +73,20 @@ Requirements: [07_shopping_list.md](../requirements/07_shopping_list.md)
 - [ ] A "Refresh" action regenerates the list from the current plan state; the stale indicator clears.
 - [ ] Changing the date range also clears the previous list and triggers regeneration.
 - [ ] An invalid date range (end date before start date) shows a validation error and does not generate a list.
+
+---
+
+## US-SL-006 Grocery list generated automatically on navigation
+
+**As a** user navigating to the Shopping list  
+**I want** the grocery list to be generated immediately without any extra action  
+**So that** I can see my shopping needs at a glance as soon as I open the view.
+
+Source: [07_shopping_list.md](../requirements/07_shopping_list.md)
+
+**Acceptance criteria**
+
+- [ ] Navigating to the Shopping list view automatically generates the grocery list for the default date range (current calendar week) without requiring a button press.
+- [ ] The plan summary and grocery list sections are populated on first load.
+- [ ] Changing the date range immediately regenerates the list from the new range without requiring a separate trigger.
+- [ ] Stale detection still applies: if the plan changes after the auto-generated list is shown, the stale indicator appears.

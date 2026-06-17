@@ -22,6 +22,12 @@ A dedicated module for generating a grocery list from the meal plan. It is a sep
 - The grocery list is grouped by product category: Produce, Dairy, Meat, Fish, Grains, Legumes, Nuts & Seeds, Beverages, Condiments, Other.
 - Each line shows: ingredient name, total quantity, and unit.
 
+## Auto-generation
+
+- The grocery list is **generated automatically** as soon as the user navigates to the Shopping list view. No explicit "Generate" button press is required.
+- The list is generated from the default date range (current calendar week) on first load.
+- Changing the date range immediately regenerates the list from the new range.
+
 ## Stale state and refresh
 
 - After a grocery list is generated, any change to the meal plan within the selected date range marks the list as stale.

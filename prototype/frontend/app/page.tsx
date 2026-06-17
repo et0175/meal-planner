@@ -242,16 +242,89 @@ function Topbar({
 
 // ─── products view ────────────────────────────────────────────────────────────
 
+function ProductDetailModal({ product: p, onClose }: { product: Item; onClose: () => void }) {
+  const protKcal = p.protein * 4
+  const fatKcal = p.fat * 9
+  const carbKcal = p.carbs * 4
+  const totalMacroKcal = protKcal + fatKcal + carbKcal || 1
+  const pPct = Math.round((protKcal / totalMacroKcal) * 100)
+  const fPct = Math.round((fatKcal / totalMacroKcal) * 100)
+  const cPct = 100 - pPct - fPct
+
+  const pieGradient = `conic-gradient(#3b82f6 0% ${pPct}%, #ef4444 ${pPct}% ${pPct + fPct}%, #22c55e ${pPct + fPct}% 100%)`
+
+  const baseG = p.unit === 'g' || p.unit === 'ml' ? (p.servingAmount ?? 100) : (p.servingG ?? p.servingAmount ?? 100)
+  const scale = (n: number, g: number) => fmtMacro((n / baseG) * g)
+  const convUnits = [
+    { label: `100 ${p.unit === 'ml' ? 'ml' : 'g'}`, g: 100 },
+    { label: `${p.servingAmount ?? 100} ${p.unit ?? 'g'} (1 serving)`, g: baseG },
+    ...(p.servingG && p.unit !== 'g' && p.unit !== 'ml' ? [{ label: `1 ${p.unit}`, g: p.servingG }] : []),
+  ]
+
+  return (
+    <Modal title={p.name} onClose={onClose} wide>
+      <div className="space-y-5">
+        <div className="flex items-center gap-5">
+          <div style={{ width: 96, height: 96, borderRadius: '50%', background: pieGradient, flexShrink: 0 }} />
+          <div className="space-y-1 text-sm">
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /><span className="text-gray-600">Protein: {fmtMacro(p.protein)} g ({pPct}%)</span></div>
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" /><span className="text-gray-600">Fat: {fmtMacro(p.fat)} g ({fPct}%)</span></div>
+            <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" /><span className="text-gray-600">Carbs: {fmtMacro(p.carbs)} g ({cPct}%)</span></div>
+            {p.fiber !== undefined && <div className="text-xs text-gray-400">Fiber: {fmtMacro(p.fiber)} g</div>}
+            <div className="font-semibold text-gray-900">{p.kcal} kcal per {p.servingLabel ?? `${p.servingAmount ?? 100} ${p.unit ?? 'g'}`}</div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Units conversion</h3>
+          <table className="w-full text-xs border-collapse">
+            <thead>
+              <tr className="bg-gray-50 text-gray-500">
+                <th className="text-left px-3 py-2 font-medium">Amount</th>
+                <th className="text-right px-3 py-2 font-medium">kcal</th>
+                <th className="text-right px-3 py-2 font-medium">Protein</th>
+                <th className="text-right px-3 py-2 font-medium">Fat</th>
+                <th className="text-right px-3 py-2 font-medium">Carbs</th>
+              </tr>
+            </thead>
+            <tbody>
+              {convUnits.map(({ label, g }) => (
+                <tr key={label} className="border-t border-gray-100">
+                  <td className="px-3 py-2 text-gray-700">{label}</td>
+                  <td className="px-3 py-2 text-right text-gray-700">{Math.round((p.kcal / baseG) * g)}</td>
+                  <td className="px-3 py-2 text-right text-gray-600">{scale(p.protein, g)} g</td>
+                  <td className="px-3 py-2 text-right text-gray-600">{scale(p.fat, g)} g</td>
+                  <td className="px-3 py-2 text-right text-gray-600">{scale(p.carbs, g)} g</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {p.dietTags.length > 0 && (
+          <div>
+            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Diet compatibility</h3>
+            <div className="flex flex-wrap gap-1">
+              {p.dietTags.map(t => <span key={t} className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full">{DIET_LABELS[t] ?? t}</span>)}
+            </div>
+          </div>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
 function ProductCard({
-  product: p, onToggleFlag, onEdit, onDelete,
+  product: p, onToggleFlag, onEdit, onDelete, onDetail,
 }: {
   product: Item
   onToggleFlag: (id: string, flag: 'thisWeek' | 'nextWeek') => void
   onEdit: () => void
   onDelete: () => void
+  onDetail: () => void
 }) {
   return (
-    <article className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+    <article className="bg-white rounded-2xl border border-gray-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow cursor-pointer" onClick={onDetail}>
       {p.imageUrl ? (
         <img src={p.imageUrl} alt={p.name} className="w-full h-28 object-cover" />
       ) : (
@@ -272,7 +345,7 @@ function ProductCard({
             </span>
           </div>
           {p.isUserAdded && (
-            <div className="flex gap-0.5 flex-shrink-0">
+            <div className="flex gap-0.5 flex-shrink-0" onClick={e => e.stopPropagation()}>
               <button onClick={onEdit} aria-label="Edit product" className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-teal-600 cursor-pointer"><Edit2 size={12} /></button>
               <button onClick={onDelete} aria-label="Delete product" className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 size={12} /></button>
             </div>
@@ -314,7 +387,7 @@ function ProductCard({
           </div>
         )}
 
-        <div className="flex gap-1.5 pt-1 border-t border-gray-100 mt-auto">
+        <div className="flex gap-1.5 pt-1 border-t border-gray-100 mt-auto" onClick={e => e.stopPropagation()}>
           <button
             onClick={() => onToggleFlag(p.id, 'thisWeek')}
             className={cn(
@@ -463,10 +536,13 @@ function ProductsView({
   const [dietFilter, setDietFilter] = useState('All')
   const [mineOnly, setMineOnly] = useState(false)
   const [weekFilter, setWeekFilter] = useState<'all' | 'this' | 'next'>('all')
-  const [listView, setListView] = useState(false)
+  const [browseMode, setBrowseMode] = useState<'cards' | 'list' | 'categories'>('cards')
+  const listView = browseMode === 'list'
+  const [catCardsSelected, setCatCardsSelected] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
+  const [detailProduct, setDetailProduct] = useState<Item | null>(null)
 
   const products = items.filter(i => i.kind === 'product')
   const categories = ['All', ...Array.from(new Set(products.map(p => p.category))).sort()]
@@ -489,14 +565,14 @@ function ProductsView({
     const item = items.find(i => i.id === id)!
     const isRemoving = item.weekFlags[flag]
     if (isRemoving && flag === 'thisWeek') {
-      const hasA = assignments.some(a => a.itemId === id)
-      if (hasA && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
-      if (hasA) setAssignments(prev => prev.filter(a => a.itemId !== id))
+      const hasManual = assignments.some(a => a.itemId === id && !a.autoAdded)
+      if (hasManual && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
+      setAssignments(prev => prev.filter(a => a.itemId !== id))
     }
     if (!isRemoving && flag === 'thisWeek') {
       setAssignments(prev => {
         const already = prev.some(a => a.itemId === id && a.slot === 'Lunch')
-        return already ? prev : [...prev, { id: uid(), itemId: id, day: 'Mon', slot: 'Lunch', servings: 1 }]
+        return already ? prev : [...prev, { id: uid(), itemId: id, day: 'Mon', slot: 'Lunch', servings: 1, weekOffset: 0, autoAdded: true }]
       })
     }
     setItems(prev => prev.map(i => i.id === id ? { ...i, weekFlags: { ...i.weekFlags, [flag]: !i.weekFlags[flag] } } : i))
@@ -549,8 +625,9 @@ function ProductsView({
         </button>
 
         <div className="flex rounded-xl overflow-hidden border border-gray-200">
-          <button onClick={() => setListView(false)} aria-label="Cards view" className={cn('px-2.5 py-2 cursor-pointer', !listView ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><LayoutGrid size={14} /></button>
-          <button onClick={() => setListView(true)} aria-label="List view" className={cn('px-2.5 py-2 cursor-pointer', listView ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><List size={14} /></button>
+          <button onClick={() => setBrowseMode('cards')} aria-label="Cards view" className={cn('px-2.5 py-2 cursor-pointer', browseMode === 'cards' ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><LayoutGrid size={14} /></button>
+          <button onClick={() => setBrowseMode('list')} aria-label="List view" className={cn('px-2.5 py-2 cursor-pointer', browseMode === 'list' ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><List size={14} /></button>
+          <button onClick={() => { setBrowseMode('categories'); setCatCardsSelected(null) }} aria-label="Category cards view" title="Browse by category" className={cn('px-2.5 py-2 cursor-pointer text-xs font-bold', browseMode === 'categories' ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}>CAT</button>
         </div>
 
         <button
@@ -569,9 +646,45 @@ function ProductsView({
         </div>
       )}
 
-      <p className="text-xs text-gray-400">{filtered.length} product{filtered.length !== 1 ? 's' : ''}</p>
+      {browseMode !== 'categories' && (
+        <p className="text-xs text-gray-400">{filtered.length} product{filtered.length !== 1 ? 's' : ''}</p>
+      )}
 
-      {listView ? (
+      {browseMode === 'categories' ? (
+        catCardsSelected ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <button onClick={() => setCatCardsSelected(null)} className="text-xs text-teal-600 hover:underline cursor-pointer">← All categories</button>
+              <span className="text-xs text-gray-400">/</span>
+              <span className="text-xs font-medium text-gray-700">{catCardsSelected}</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {products.filter(p => p.category === catCardsSelected).map(p => (
+                <ProductCard key={p.id} product={p} onToggleFlag={toggleWeekFlag}
+                  onEdit={() => { setEditId(p.id); setShowForm(true) }}
+                  onDelete={() => deleteProduct(p.id)}
+                  onDetail={() => setDetailProduct(p)} />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+            {Array.from(new Set(products.map(p => p.category))).sort().map(cat => {
+              const count = products.filter(p => p.category === cat).length
+              return (
+                <button key={cat} onClick={() => setCatCardsSelected(cat)}
+                  className={cn('bg-white border border-gray-200 rounded-2xl p-5 text-left hover:shadow-md transition-shadow cursor-pointer', CATEGORY_COLOURS[cat] ? '' : '')}>
+                  <div className={cn('text-2xl mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
+                    {cat === 'Dairy' ? '🥛' : cat === 'Fish' ? '🐟' : cat === 'Grains' ? '🌾' : cat === 'Produce' ? '🥦' : cat === 'Meat' ? '🥩' : cat === 'Legumes' ? '🫘' : cat === 'Nuts & Seeds' ? '🥜' : cat === 'Condiments' ? '🧂' : '📦'}
+                  </div>
+                  <p className="font-semibold text-gray-900 text-sm">{cat}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{count} item{count !== 1 ? 's' : ''}</p>
+                </button>
+              )
+            })}
+          </div>
+        )
+      ) : listView ? (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -586,7 +699,8 @@ function ProductsView({
               </thead>
               <tbody>
                 {filtered.map((p, idx) => (
-                  <tr key={p.id} className={cn('border-b border-gray-50 hover:bg-gray-50/50', idx % 2 === 0 ? '' : 'bg-gray-50/30')}>
+                  <tr key={p.id} onClick={() => setDetailProduct(p)}
+                    className={cn('border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer', idx % 2 === 0 ? '' : 'bg-gray-50/30')}>
                     <td className="px-4 py-2.5 font-medium text-gray-900">{p.name}</td>
                     <td className="px-4 py-2.5">
                       <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', CATEGORY_COLOURS[p.category] ?? 'bg-gray-100 text-gray-600')}>
@@ -599,7 +713,7 @@ function ProductsView({
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(p.carbs)}g</td>
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{p.fiber !== undefined ? `${fmtMacro(p.fiber)}g` : '—'}</td>
                     <td className="px-4 py-2.5 text-xs text-gray-400">{p.servingLabel ?? `${p.servingAmount ?? 100} ${p.unit ?? 'g'}`}</td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
                       {p.isUserAdded && (
                         <div className="flex items-center gap-1">
                           <button onClick={() => { setEditId(p.id); setShowForm(true) }} aria-label="Edit" className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-teal-600 cursor-pointer"><Edit2 size={12} /></button>
@@ -622,18 +736,23 @@ function ProductsView({
               onToggleFlag={toggleWeekFlag}
               onEdit={() => { setEditId(p.id); setShowForm(true) }}
               onDelete={() => deleteProduct(p.id)}
+              onDetail={() => setDetailProduct(p)}
             />
           ))}
         </div>
       )}
 
-      {filtered.length === 0 && (
+      {browseMode !== 'categories' && filtered.length === 0 && (
         <EmptyState
           icon={<Apple size={32} />}
           message="No products match your filters."
           action={() => { setSearch(''); setCatFilter('All'); setDietFilter('All'); setMineOnly(false); setWeekFilter('all') }}
           actionLabel="Clear filters"
         />
+      )}
+
+      {detailProduct && (
+        <ProductDetailModal product={detailProduct} onClose={() => setDetailProduct(null)} />
       )}
 
       {showForm && (
@@ -703,27 +822,28 @@ function RecipesView({
     const item = items.find(i => i.id === id)!
     const isRemoving = item.weekFlags[flag]
     if (isRemoving && flag === 'thisWeek') {
-      const hasA = assignments.some(a => a.itemId === id)
-      if (hasA && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
-      if (hasA) setAssignments(prev => prev.filter(a => a.itemId !== id))
+      const hasManual = assignments.some(a => a.itemId === id && !a.autoAdded)
+      if (hasManual && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
+      setAssignments(prev => prev.filter(a => a.itemId !== id))
     }
     if (!isRemoving && flag === 'thisWeek') {
       setAssignments(prev => {
         const already = prev.some(a => a.itemId === id && a.slot === 'Lunch')
-        return already ? prev : [...prev, { id: uid(), itemId: id, day: 'Mon', slot: 'Lunch', servings: 1 }]
+        return already ? prev : [...prev, { id: uid(), itemId: id, day: 'Mon', slot: 'Lunch', servings: 1, weekOffset: 0, autoAdded: true }]
       })
     }
     setItems(prev => prev.map(i => i.id === id ? { ...i, weekFlags: { ...i.weekFlags, [flag]: !i.weekFlags[flag] } } : i))
   }
 
   function deleteRecipe(id: string) {
-    const futureA = assignments.filter(a => a.itemId === id)
-    if (futureA.length) {
+    const currentFutureA = assignments.filter(a => a.itemId === id && (a.weekOffset ?? 0) >= 0)
+    if (currentFutureA.length) {
       const item = items.find(i => i.id === id)!
-      setDeleteError(`Cannot delete "${item.name}": it has ${futureA.length} planner assignment${futureA.length > 1 ? 's' : ''}. Remove them first.`)
+      setDeleteError(`Cannot delete "${item.name}": it has ${currentFutureA.length} planner assignment${currentFutureA.length > 1 ? 's' : ''}. Remove them first.`)
       return
     }
     setItems(prev => prev.filter(i => i.id !== id))
+    setAssignments(prev => prev.filter(a => a.itemId !== id))
   }
 
   return (
@@ -1147,21 +1267,33 @@ interface AnalyserRow {
   quantity: number
 }
 
-function calcRowMacros(row: AnalyserRow, products: Item[]) {
-  const prod = products.find(p => p.id === row.productId)
-  if (!prod) return { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, grams: 0 }
-  const ratio = row.quantity / (prod.servingAmount ?? 100)
+function calcRowMacros(row: AnalyserRow, allItems: Item[]) {
+  const item = allItems.find(p => p.id === row.productId)
+  if (!item) return { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, grams: 0 }
+  if (item.kind === 'recipe') {
+    const servings = item.servings ?? 1
+    const ratio = row.quantity / servings
+    return {
+      kcal: item.kcal * ratio,
+      protein: item.protein * ratio,
+      fat: item.fat * ratio,
+      carbs: item.carbs * ratio,
+      fiber: 0,
+      grams: row.quantity * (item.servingG ?? 100),
+    }
+  }
+  const ratio = row.quantity / (item.servingAmount ?? 100)
   const grams = row.unit === 'serving'
-    ? row.quantity * (prod.servingG ?? prod.servingAmount ?? 100)
+    ? row.quantity * (item.servingG ?? item.servingAmount ?? 100)
     : row.unit === 'g' || row.unit === 'ml'
       ? row.quantity
-      : row.quantity * (prod.servingG ? prod.servingG / (prod.servingAmount ?? 1) : 1)
+      : row.quantity * (item.servingG ? item.servingG / (item.servingAmount ?? 1) : 1)
   return {
-    kcal: prod.kcal * ratio,
-    protein: prod.protein * ratio,
-    fat: prod.fat * ratio,
-    carbs: prod.carbs * ratio,
-    fiber: (prod.fiber ?? 0) * ratio,
+    kcal: item.kcal * ratio,
+    protein: item.protein * ratio,
+    fat: item.fat * ratio,
+    carbs: item.carbs * ratio,
+    fiber: (item.fiber ?? 0) * ratio,
     grams,
   }
 }
@@ -1179,6 +1311,7 @@ function ProductsAnalyserView({
   const [showAddProduct, setShowAddProduct] = useState(false)
 
   const products = items.filter(i => i.kind === 'product')
+  const allSearchableItems = items
 
   function addRow() {
     setRows(prev => [...prev, { id: uid(), productId: '', unit: 'g', quantity: 100 }])
@@ -1199,19 +1332,19 @@ function ProductsAnalyserView({
     if (!isRemoving && flag === 'thisWeek') {
       setAssignments(prev => {
         const already = prev.some(a => a.itemId === productId && a.slot === 'Lunch')
-        return already ? prev : [...prev, { id: uid(), itemId: productId, day: 'Mon', slot: 'Lunch', servings: 1 }]
+        return already ? prev : [...prev, { id: uid(), itemId: productId, day: 'Mon', slot: 'Lunch', servings: 1, weekOffset: 0, autoAdded: true }]
       })
     }
     if (isRemoving && flag === 'thisWeek') {
-      const hasA = assignments.some(a => a.itemId === productId)
-      if (hasA && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
-      if (hasA) setAssignments(prev => prev.filter(a => a.itemId !== productId))
+      const hasManual = assignments.some(a => a.itemId === productId && !a.autoAdded)
+      if (hasManual && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
+      setAssignments(prev => prev.filter(a => a.itemId !== productId))
     }
     setItems(prev => prev.map(i => i.id === productId ? { ...i, weekFlags: { ...i.weekFlags, [flag]: !i.weekFlags[flag] } } : i))
   }
 
   const totals = rows.reduce((acc, row) => {
-    const m = calcRowMacros(row, products)
+    const m = calcRowMacros(row, allSearchableItems)
     return { kcal: acc.kcal + m.kcal, protein: acc.protein + m.protein, fat: acc.fat + m.fat, carbs: acc.carbs + m.carbs, fiber: acc.fiber + m.fiber, grams: acc.grams + m.grams }
   }, { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, grams: 0 })
 
@@ -1247,39 +1380,54 @@ function ProductsAnalyserView({
             </thead>
             <tbody>
               {rows.map(row => {
-                const prod = products.find(p => p.id === row.productId)
-                const m = prod ? calcRowMacros(row, products) : null
+                const selItem = allSearchableItems.find(p => p.id === row.productId)
+                const isRecipe = selItem?.kind === 'recipe'
+                const m = selItem ? calcRowMacros(row, allSearchableItems) : null
                 const search = searches[row.id] ?? ''
-                const matched = search ? products.filter(p => p.name.toLowerCase().includes(search.toLowerCase())).slice(0, 6) : []
+                const matched = search ? allSearchableItems.filter(p => p.name.toLowerCase().includes(search.toLowerCase())).slice(0, 8) : []
                 return (
                   <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50/30">
                     <td className="px-3 py-2 relative">
-                      <input
-                        value={prod ? prod.name : search}
-                        onChange={e => {
-                          setSearches(prev => ({ ...prev, [row.id]: e.target.value }))
-                          if (prod) updateRow(row.id, { productId: '' })
-                        }}
-                        placeholder="Search product…"
-                        className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-teal-400"
-                      />
-                      {!prod && search && matched.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        {isRecipe && <span className="text-xs bg-purple-100 text-purple-700 px-1 rounded flex-shrink-0">recipe</span>}
+                        <input
+                          value={selItem ? selItem.name : search}
+                          onChange={e => {
+                            setSearches(prev => ({ ...prev, [row.id]: e.target.value }))
+                            if (selItem) updateRow(row.id, { productId: '' })
+                          }}
+                          placeholder="Search product or recipe…"
+                          className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-teal-400"
+                        />
+                      </div>
+                      {!selItem && search && matched.length > 0 && (
                         <div className="absolute top-full left-3 right-3 bg-white border border-gray-200 rounded-xl shadow-lg z-20 mt-0.5 max-h-40 overflow-y-auto">
                           {matched.map(p => (
                             <button key={p.id} type="button"
-                              onMouseDown={() => { updateRow(row.id, { productId: p.id, unit: p.unit ?? 'g' }); setSearches(prev => ({ ...prev, [row.id]: '' })) }}
-                              className="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 cursor-pointer">
-                              {p.name} <span className="text-gray-400">({p.kcal} kcal / {p.servingLabel})</span>
+                              onMouseDown={() => {
+                                const unit = p.kind === 'recipe' ? 'serving' : (p.unit ?? 'g')
+                                const qty = p.kind === 'recipe' ? 1 : 100
+                                updateRow(row.id, { productId: p.id, unit, quantity: qty })
+                                setSearches(prev => ({ ...prev, [row.id]: '' }))
+                              }}
+                              className="w-full text-left px-3 py-1.5 text-xs hover:bg-gray-50 cursor-pointer flex items-center gap-2">
+                              {p.kind === 'recipe' && <span className="text-xs bg-purple-100 text-purple-600 px-1 rounded flex-shrink-0">recipe</span>}
+                              <span>{p.name}</span>
+                              <span className="text-gray-400 ml-auto">{p.kcal} kcal / {p.kind === 'recipe' ? `1 srv` : p.servingLabel}</span>
                             </button>
                           ))}
                         </div>
                       )}
                     </td>
                     <td className="px-3 py-2">
-                      <select value={row.unit} onChange={e => updateRow(row.id, { unit: e.target.value })}
-                        className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none focus:border-teal-400">
-                        {['g','ml','pc','tbsp','tsp','serving'].map(u => <option key={u}>{u}</option>)}
-                      </select>
+                      {isRecipe ? (
+                        <span className="text-xs text-gray-400 px-2">serving</span>
+                      ) : (
+                        <select value={row.unit} onChange={e => updateRow(row.id, { unit: e.target.value })}
+                          className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none focus:border-teal-400">
+                          {['g','ml','pc','tbsp','tsp','serving'].map(u => <option key={u}>{u}</option>)}
+                        </select>
+                      )}
                     </td>
                     <td className="px-3 py-2">
                       <input type="number" min="0" step="any" value={row.quantity}
@@ -1292,14 +1440,14 @@ function ProductsAnalyserView({
                     <td className={tdCls}>{m ? fmtMacro(m.fiber) : '—'}</td>
                     <td className={tdCls}>{m ? Math.round(m.kcal) : '—'}</td>
                     <td className="px-3 py-2 text-center">
-                      {prod && (
+                      {selItem && !isRecipe && (
                         <div className="flex gap-1 justify-center">
-                          <button onClick={() => toggleWeekFlag(prod.id, 'thisWeek')}
-                            className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', prod.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>
+                          <button onClick={() => toggleWeekFlag(selItem.id, 'thisWeek')}
+                            className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', selItem.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>
                             TW
                           </button>
-                          <button onClick={() => toggleWeekFlag(prod.id, 'nextWeek')}
-                            className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', prod.weekFlags.nextWeek ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>
+                          <button onClick={() => toggleWeekFlag(selItem.id, 'nextWeek')}
+                            className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', selItem.weekFlags.nextWeek ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>
                             NW
                           </button>
                         </div>
@@ -1706,14 +1854,63 @@ function CalendarView({
   upsertAssignment: (itemId: string, day: Day, slot: Slot, servings: number) => void
   setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>
 }) {
-  const [subView, setSubView] = useState<'week' | 'month'>('week')
+  const [subView, setSubView] = useState<'day' | '4days' | 'week' | 'month'>('week')
   const [monthOffset, setMonthOffset] = useState(0)
+  const [selectedDayIdx, setSelectedDayIdx] = useState(0)
   const today = new Date()
 
   const ViewToggle = () => (
     <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit ml-auto">
-      <button onClick={() => setSubView('week')} className={cn('px-3 py-1 rounded-lg text-xs font-medium cursor-pointer', subView === 'week' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:bg-white')}>Week</button>
-      <button onClick={() => setSubView('month')} className={cn('px-3 py-1 rounded-lg text-xs font-medium cursor-pointer', subView === 'month' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:bg-white')}>Month</button>
+      {(['day', '4days', 'week', 'month'] as const).map(v => (
+        <button key={v} onClick={() => setSubView(v)}
+          className={cn('px-3 py-1 rounded-lg text-xs font-medium cursor-pointer',
+            subView === v ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:bg-white')}>
+          {v === '4days' ? '4 Days' : v.charAt(0).toUpperCase() + v.slice(1)}
+        </button>
+      ))}
+    </div>
+  )
+
+  // Plan summary for visible date range
+  const visibleDays = subView === 'day' ? [days[selectedDayIdx]]
+    : subView === '4days' ? days.slice(selectedDayIdx, selectedDayIdx + 4)
+    : subView === 'week' ? days
+    : days
+
+  const calPlanSummary = useMemo(() => {
+    const visible = subView === 'month' ? assignments : assignments.filter(a => visibleDays.includes(a.day))
+    return visible.reduce<{ id: string; name: string; servings: number; kcal: number }[]>((acc, a) => {
+      const item = items.find(i => i.id === a.itemId)
+      if (!item) return acc
+      const ex = acc.find(x => x.id === a.itemId)
+      if (ex) { ex.servings += a.servings; ex.kcal += item.kcal * a.servings }
+      else acc.push({ id: a.itemId, name: item.name, servings: a.servings, kcal: item.kcal * a.servings })
+      return acc
+    }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignments, items, subView, selectedDayIdx])
+
+  const PlanSummaryBar = () => calPlanSummary.length === 0 ? null : (
+    <div className="bg-white rounded-2xl border border-gray-200 p-3">
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Plan summary ({calPlanSummary.length} items)</h3>
+      <p className="text-xs text-gray-400 mb-2">Drag an item onto a day cell to assign it.</p>
+      <div className="flex flex-wrap gap-1.5">
+        {calPlanSummary.map(s => (
+          <span
+            key={s.id}
+            draggable
+            onDragStart={e => {
+              e.dataTransfer.setData('drag-type', 'summary')
+              e.dataTransfer.setData('item-id', s.id)
+              e.dataTransfer.setData('item-name', s.name)
+              e.dataTransfer.effectAllowed = 'copy'
+            }}
+            className="text-xs bg-teal-50 text-teal-700 border border-teal-100 rounded-lg px-2 py-1 cursor-grab active:cursor-grabbing select-none"
+          >
+            {s.name} · {s.servings} srv · {Math.round(s.kcal)} kcal
+          </span>
+        ))}
+      </div>
     </div>
   )
 
@@ -1741,6 +1938,7 @@ function CalendarView({
           </div>
           <ViewToggle />
         </div>
+        <PlanSummaryBar />
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50">
             {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
@@ -1774,9 +1972,85 @@ function CalendarView({
     )
   }
 
+  if (subView === 'day') {
+    const day = days[selectedDayIdx]
+    const date = dates[selectedDayIdx]
+    const dayAssignments = assignments.filter(a => a.day === day)
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setSelectedDayIdx(p => Math.max(0, p - 1))} disabled={selectedDayIdx === 0}
+              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
+              <ChevronLeft size={14} />
+            </button>
+            <h2 className="text-sm font-semibold text-gray-700 min-w-28 text-center">
+              {day} · {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+            </h2>
+            <button onClick={() => setSelectedDayIdx(p => Math.min(6, p + 1))} disabled={selectedDayIdx === 6}
+              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
+              <ChevronRight size={14} />
+            </button>
+          </div>
+          <ViewToggle />
+        </div>
+        <PlanSummaryBar />
+        <div className="max-w-sm">
+          <CalendarWeekCell
+            day={day} date={date}
+            isToday={date.toDateString() === today.toDateString()}
+            assignments={dayAssignments} items={items}
+            onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
+            onAdd={(itemId, slot) => upsertAssignment(itemId, day, slot, 1)}
+            onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day } : a))}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  if (subView === '4days') {
+    const visIdx = Array.from({ length: 4 }, (_, k) => Math.min(selectedDayIdx + k, 6))
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <button onClick={() => setSelectedDayIdx(p => Math.max(0, p - 1))} disabled={selectedDayIdx === 0}
+              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
+              <ChevronLeft size={14} />
+            </button>
+            <h2 className="text-sm font-semibold text-gray-700">4-day view</h2>
+            <button onClick={() => setSelectedDayIdx(p => Math.min(3, p + 1))} disabled={selectedDayIdx >= 3}
+              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
+              <ChevronRight size={14} />
+            </button>
+          </div>
+          <ViewToggle />
+        </div>
+        <PlanSummaryBar />
+        <div className="grid grid-cols-4 gap-2">
+          {visIdx.map(idx => {
+            const d = days[idx]
+            const dt = dates[idx]
+            return (
+              <CalendarWeekCell key={d} day={d} date={dt}
+                isToday={dt.toDateString() === today.toDateString()}
+                assignments={assignments.filter(a => a.day === d)} items={items}
+                onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
+                onAdd={(itemId, slot) => upsertAssignment(itemId, d, slot, 1)}
+                onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day: d } : a))}
+              />
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-3">
       <div className="flex justify-end"><ViewToggle /></div>
+      <PlanSummaryBar />
       <div className="grid grid-cols-7 gap-2">
         {days.map((day, i) => (
           <CalendarWeekCell
@@ -1788,6 +2062,7 @@ function CalendarView({
             items={items}
             onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
             onAdd={(itemId, slot) => upsertAssignment(itemId, day, slot, 1)}
+            onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day } : a))}
           />
         ))}
       </div>
@@ -1796,27 +2071,47 @@ function CalendarView({
 }
 
 function CalendarWeekCell({
-  day, date, isToday, assignments, items, onRemove, onAdd,
+  day, date, isToday, assignments, items, onRemove, onAdd, onMove,
 }: {
   day: Day; date: Date; isToday: boolean
   assignments: Assignment[]; items: Item[]
   onRemove: (id: string) => void
   onAdd: (itemId: string, slot: Slot) => void
+  onMove?: (assignmentId: string) => void
 }) {
   const [adding, setAdding] = useState(false)
   const [search, setSearch] = useState('')
   const [slot, setSlot] = useState<Slot>('Lunch')
+  const [dragOver, setDragOver] = useState(false)
   const matched = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase())).slice(0, 5)
   const selected = items.find(i => i.name.toLowerCase() === search.toLowerCase())
 
-  function confirm() {
+  function confirmAdd() {
     if (!selected) return
     onAdd(selected.id, slot)
     setSearch(''); setAdding(false)
   }
 
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+    const type = e.dataTransfer.getData('drag-type')
+    if (type === 'summary') {
+      const name = e.dataTransfer.getData('item-name')
+      if (name) { setSearch(name); setSlot('Lunch'); setAdding(true) }
+    } else if (type === 'cell') {
+      const aid = e.dataTransfer.getData('assignment-id')
+      if (aid && onMove) onMove(aid)
+    }
+  }
+
   return (
-    <div className={cn('bg-white rounded-xl border p-2 min-h-36', isToday ? 'border-teal-400' : 'border-gray-200')}>
+    <div
+      className={cn('bg-white rounded-xl border p-2 min-h-36 transition-colors', isToday ? 'border-teal-400' : 'border-gray-200', dragOver && 'bg-teal-50 border-teal-500')}
+      onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+    >
       <div className="flex items-center justify-between mb-2">
         <span className={cn('inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold', isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700')}>
           {date.getDate()}
@@ -1826,7 +2121,17 @@ function CalendarWeekCell({
       {assignments.map(a => {
         const item = items.find(x => x.id === a.itemId)
         return item ? (
-          <div key={a.id} className="flex items-start gap-1 mb-1 group">
+          <div
+            key={a.id}
+            draggable
+            onDragStart={e => {
+              e.dataTransfer.setData('drag-type', 'cell')
+              e.dataTransfer.setData('assignment-id', a.id)
+              e.dataTransfer.effectAllowed = 'move'
+              e.stopPropagation()
+            }}
+            className="flex items-start gap-1 mb-1 group cursor-grab active:cursor-grabbing"
+          >
             <div className="flex-1 min-w-0">
               <p className="text-xs text-gray-700 truncate leading-tight">{item.name}</p>
               <p className="text-xs text-gray-400">{a.slot} · {a.servings}×</p>
@@ -1868,7 +2173,7 @@ function CalendarWeekCell({
             {(['Breakfast','Lunch','Dinner','Snacks'] as Slot[]).map(s => <option key={s}>{s}</option>)}
           </select>
           <div className="flex gap-1">
-            <button onClick={confirm} disabled={!selected}
+            <button onClick={confirmAdd} disabled={!selected}
               className="flex-1 text-xs py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer disabled:opacity-40">
               Add
             </button>
@@ -1899,10 +2204,10 @@ function PlannerView({
 
   function upsertAssignment(itemId: string, day: Day, slot: Slot, servings: number) {
     setAssignments(prev => {
-      const existing = prev.find(a => a.itemId === itemId && a.day === day && a.slot === slot)
-      if (servings <= 0) return prev.filter(a => !(a.itemId === itemId && a.day === day && a.slot === slot))
-      if (existing) return prev.map(a => a.itemId === itemId && a.day === day && a.slot === slot ? { ...a, servings } : a)
-      return [...prev, { id: uid(), itemId, day, slot, servings }]
+      const existing = prev.find(a => a.itemId === itemId && a.day === day && a.slot === slot && (a.weekOffset ?? 0) === weekOffset)
+      if (servings <= 0) return prev.filter(a => !(a.itemId === itemId && a.day === day && a.slot === slot && (a.weekOffset ?? 0) === weekOffset))
+      if (existing) return prev.map(a => a.itemId === itemId && a.day === day && a.slot === slot && (a.weekOffset ?? 0) === weekOffset ? { ...a, servings } : a)
+      return [...prev, { id: uid(), itemId, day, slot, servings, weekOffset }]
     })
   }
 
@@ -1940,13 +2245,13 @@ function PlannerView({
       </div>
 
       {tab === 'summary' && (
-        <WeeklySummary items={items} assignments={assignments} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
+        <WeeklySummary items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
       )}
       {tab === 'daycards' && (
-        <DayCardsView items={items} assignments={assignments} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
+        <DayCardsView items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
       )}
       {tab === 'calendar' && (
-        <CalendarView items={items} assignments={assignments} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
+        <CalendarView items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
       )}
     </div>
   )
@@ -1954,7 +2259,11 @@ function PlannerView({
 
 // ─── shopping list view ───────────────────────────────────────────────────────
 
-function ShoppingListView({ assignments, items }: { assignments: Assignment[]; items: Item[] }) {
+function ShoppingListView({ assignments, items, list, setList, stale, setStale }: {
+  assignments: Assignment[]; items: Item[]
+  list: ShoppingLine[] | null; setList: React.Dispatch<React.SetStateAction<ShoppingLine[] | null>>
+  stale: boolean; setStale: React.Dispatch<React.SetStateAction<boolean>>
+}) {
   const { dates } = getWeekDates(0)
   const fmt = (d: Date) => {
     const y = d.getFullYear()
@@ -1965,17 +2274,23 @@ function ShoppingListView({ assignments, items }: { assignments: Assignment[]; i
 
   const [fromDate, setFromDate] = useState(fmt(dates[0]))
   const [toDate, setToDate] = useState(fmt(dates[6]))
-  const [list, setList] = useState<ShoppingLine[] | null>(null)
-  const [stale, setStale] = useState(false)
   const [dateError, setDateError] = useState('')
-  const listRef = useRef(list)
-  listRef.current = list
-  useEffect(() => {
-    if (listRef.current !== null) setStale(true)
-  }, [assignments])
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { generate() }, [fromDate, toDate])
+
+  function inRange(a: Assignment) {
+    const d = getWeekDates(a.weekOffset ?? 0).dates[DAYS.indexOf(a.day)]
+    const ds = fmt(d)
+    return ds >= fromDate && ds <= toDate
+  }
 
   const planSummary = useMemo(() =>
-    assignments.reduce<{ id: string; name: string; servings: number; kcal: number }[]>((acc, a) => {
+    assignments.filter(a => {
+      const d = getWeekDates(a.weekOffset ?? 0).dates[DAYS.indexOf(a.day)]
+      const ds = fmt(d)
+      return ds >= fromDate && ds <= toDate
+    }).reduce<{ id: string; name: string; servings: number; kcal: number }[]>((acc, a) => {
       const item = items.find(i => i.id === a.itemId)
       if (!item) return acc
       const existing = acc.find(x => x.id === a.itemId)
@@ -1983,13 +2298,14 @@ function ShoppingListView({ assignments, items }: { assignments: Assignment[]; i
       else acc.push({ id: a.itemId, name: item.name, servings: a.servings, kcal: item.kcal * a.servings })
       return acc
     }, []),
-  [assignments, items])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [assignments, items, fromDate, toDate])
 
   function generate() {
     if (fromDate > toDate) { setDateError('End date must be after start date.'); return }
     setDateError('')
     const lines: Record<string, ShoppingLine> = {}
-    assignments.forEach(a => {
+    assignments.filter(inRange).forEach(a => {
       const item = items.find(i => i.id === a.itemId)
       if (!item) return
       const ings = item.kind === 'recipe'
@@ -2015,15 +2331,17 @@ function ShoppingListView({ assignments, items }: { assignments: Assignment[]; i
         <h2 className="text-sm font-semibold text-gray-700">Date range</h2>
         <div className="flex flex-wrap gap-3 items-end">
           <Field label="From">
-            <input type="date" value={fromDate} onChange={e => { setFromDate(e.target.value); if (list) setStale(true) }} className={inputCls} />
+            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className={inputCls} />
           </Field>
           <span className="text-gray-400 pb-2">→</span>
           <Field label="To">
-            <input type="date" value={toDate} onChange={e => { setToDate(e.target.value); if (list) setStale(true) }} className={inputCls} />
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className={inputCls} />
           </Field>
-          <button onClick={generate} className="flex items-center gap-1.5 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 cursor-pointer">
-            {list ? <><RefreshCw size={13} /> Refresh</> : <><Plus size={13} /> Generate</>}
-          </button>
+          {stale && (
+            <button onClick={generate} className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-xl hover:bg-amber-700 cursor-pointer">
+              <RefreshCw size={13} /> Refresh
+            </button>
+          )}
         </div>
         {dateError && <p className="text-xs text-red-600">{dateError}</p>}
         {stale && (
@@ -2051,7 +2369,7 @@ function ShoppingListView({ assignments, items }: { assignments: Assignment[]; i
       )}
 
       {list === null && (
-        <EmptyState icon={<ShoppingBasket size={32} />} message="Set your date range and generate a grocery list from your meal plan." />
+        <EmptyState icon={<ShoppingBasket size={32} />} message="Generating grocery list from your meal plan…" />
       )}
 
       {list !== null && list.length === 0 && (
@@ -2321,6 +2639,14 @@ export default function App() {
   const [weekOffset, setWeekOffset] = useState(0)
   const [profile, setProfile] = useState<Profile>(DEFAULT_PROFILE)
   const [logEntries, setLogEntries] = useState<MealLogEntry[]>([])
+  const [shoppingList, setShoppingList] = useState<ShoppingLine[] | null>(null)
+  const [shoppingStale, setShoppingStale] = useState(false)
+
+  const shoppingListRef = useRef(shoppingList)
+  shoppingListRef.current = shoppingList
+  useEffect(() => {
+    if (shoppingListRef.current !== null) setShoppingStale(true)
+  }, [assignments])
 
   return (
     <div className="flex h-full overflow-hidden" style={{ background: '#F1F5F4' }}>
@@ -2339,7 +2665,7 @@ export default function App() {
             <RecipesView items={items} setItems={setItems} assignments={assignments} setAssignments={setAssignments} />
           )}
           {activeView === 'diets' && <DietsView diets={SEED_DIETS} />}
-          {activeView === 'shopping' && <ShoppingListView assignments={assignments} items={items} />}
+          {activeView === 'shopping' && <ShoppingListView assignments={assignments} items={items} list={shoppingList} setList={setShoppingList} stale={shoppingStale} setStale={setShoppingStale} />}
           {activeView === 'profile' && (
             <ProfileView profile={profile} setProfile={setProfile} diets={SEED_DIETS} logEntries={logEntries} setLogEntries={setLogEntries} items={items} />
           )}

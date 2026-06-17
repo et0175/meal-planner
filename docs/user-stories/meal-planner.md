@@ -218,3 +218,94 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 - [ ] When a diet is selected in Personal cabinet, its name appears as a label in the Meal planner header.
 - [ ] The label is informational only — the planner does not filter or enforce diet rules automatically.
 - [ ] If no diet is selected in the profile, no label is shown.
+
+---
+
+## US-MP-016 Log planned meals to Meal tracking
+
+**As a** user who wants to record what I ate without re-entering data  
+**I want** to log a single day or an entire week from the planner in one action  
+**So that** my Meal tracking entries are pre-filled from my plan.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Log from plan
+
+**Acceptance criteria**
+
+- [ ] A "Log this day" action is available in the Meal planner for the currently selected day; triggering it creates Meal tracking entries for all assignments on that day.
+- [ ] A "Log this week" action is available; triggering it creates Meal tracking entries for all assignments across the selected week (Mon–Sun).
+- [ ] Created entries appear in the Meal tracking section of the Personal cabinet with the item name, serving count, and meal slot pre-filled.
+- [ ] Created entries are editable in the Meal tracking section after creation.
+- [ ] If a Meal tracking entry already exists for the same day and item, the action adds to it rather than duplicating or silently overwriting.
+- [ ] Triggering "Log this day" or "Log this week" does not alter any planner assignments.
+
+---
+
+## US-MP-017 Day and 4-day sub-views in Calendar
+
+**As a** user who wants a focused view of one or a few days  
+**I want** to switch the Calendar to a single-day or 4-day layout  
+**So that** I can see and edit meals in more detail than the full-week grid allows.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Tab 3
+
+**Acceptance criteria**
+
+- [ ] A **Day / 4 Days / Week / Month** button group appears within the Calendar tab.
+- [ ] Day sub-view shows one day column for the currently selected day; items are grouped by meal slot with serving count and kcal.
+- [ ] 4 Days sub-view shows 4 consecutive day columns starting from the currently selected day.
+- [ ] Both Day and 4 Days sub-views support add, remove, and serving-count adjustment.
+- [ ] Drag-and-drop between the visible day columns is supported in 4 Days sub-view.
+- [ ] Selecting a day in Week or Month sub-view and switching to Day sub-view shows that selected day.
+
+---
+
+## US-MP-018 Calendar plan summary and drag from summary
+
+**As a** user planning in the Calendar tab  
+**I want** to see a summary of all planned items above the calendar grid and drag items from that summary to a day  
+**So that** I can quickly assign planned items to specific days without switching tabs.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Plan summary
+
+**Acceptance criteria**
+
+- [ ] A plan summary panel is shown at the top of the Calendar tab listing all planned items in the visible date range with name, total servings, and kcal.
+- [ ] The user can drag an item from the summary panel onto a day cell to create an assignment for that day in a chosen meal slot.
+- [ ] After dragging from the summary, the item remains in the summary (it is still part of the plan; only a new day assignment is created).
+- [ ] Dragging an item from one day cell to another moves the assignment: the item disappears from the source day and appears on the target day in the same meal slot.
+- [ ] The plan summary updates immediately when assignments are added or removed.
+
+---
+
+## US-MP-019 Nutrition progress percentages in planner
+
+**As a** user tracking my nutritional goals  
+**I want** to see the percentage of my target corridor consumed for each planned day, and weekly and monthly summaries  
+**So that** I can plan ahead to stay on target.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Nutrition progress
+
+**Acceptance criteria**
+
+- [ ] In Day cards view, each day card shows the day's planned kcal as a percentage of the user's calorie target corridor.
+- [ ] In Weekly summary, a summary strip shows average % of target for calories, protein, fat, and carbs across the planned week.
+- [ ] A monthly summary view shows the same averages aggregated across the selected month.
+- [ ] Percentage bars or labels use a visual indicator (e.g. green for within corridor, amber for approaching, red for above).
+- [ ] If no diet/calorie target is set in the profile, the percentage strip is not shown.
+
+---
+
+## US-MP-020 Search results sorted by recently used
+
+**As a** user adding items to the planner  
+**I want** the item search suggestions to show recently used items at the top  
+**So that** I can quickly re-add items I commonly plan without scrolling past unfamiliar options.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Search sorting
+
+**Acceptance criteria**
+
+- [ ] In all item search inputs within the planner (Weekly summary, Day cards, Calendar), suggestions are sorted with recently planned or recently logged items appearing first.
+- [ ] "Recently used" is defined as items that appear in the current or previous week's assignments, or in recent tracking log entries.
+- [ ] Items not recently used are shown after the recently-used group, sorted alphabetically.
+- [ ] The sort order is applied in real time as the user types.

@@ -103,14 +103,52 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 
 ---
 
-## US-PA-008 Switch between list and cards view
+## US-PA-008 Switch between list, cards, and category cards views
 
 **As a** user  
-**I want** to toggle All products between a card layout and a table layout  
-**So that** I can either browse visually or compare nutrition values across products at a glance.
+**I want** to toggle All products between a card layout, a table layout, and a category browsing layout  
+**So that** I can browse visually, compare nutrition in a table, or quickly jump to a category.
 
 **Acceptance criteria**
 
-- [ ] A toggle control switches between list view and cards view.
-- [ ] List view shows products in a table with columns: name, category, protein (g), fat (g), carbs (g), kcal.
+- [ ] A three-way toggle control switches between list view, cards view, and category cards view.
+- [ ] List view shows products in a table with columns: name, category, protein (g), fat (g), carbs (g), fiber (g), kcal, and serving size (amount + unit where defined).
 - [ ] Cards view shows product cards with image, macros strip, and diet tags.
+- [ ] Category cards view shows one card per product category; clicking a category card displays all products in that category.
+- [ ] Returning from a category in category cards view shows the full category list again.
+
+---
+
+## US-PA-009 Browse products by category cards
+
+**As a** user  
+**I want** to see product categories as clickable cards, and see the products within a category when I click  
+**So that** I can navigate to a specific food group quickly without scrolling through the full catalog.
+
+Source: [01_products-database.md](../requirements/01_products-database.md)
+
+**Acceptance criteria**
+
+- [ ] In category cards view, one card is shown per distinct product category in the database.
+- [ ] Each category card shows the category name and an item count badge.
+- [ ] Clicking a category card shows the products in that category (filtered list or cards view).
+- [ ] A "back" or breadcrumb control returns the user to the full category cards grid.
+- [ ] Active search and diet filters still apply inside the category view.
+
+---
+
+## US-PA-010 View detailed product card with nutrient pie chart and units conversion
+
+**As a** user  
+**I want** to click on a product and see a detailed breakdown with a pie chart and units conversion table  
+**So that** I can understand the macro balance at a glance and know exactly how much I need in different measurement units.
+
+Source: [01_products-database.md](../requirements/01_products-database.md)
+
+**Acceptance criteria**
+
+- [ ] Clicking a product in any view (list, cards, or category cards) opens a product detail panel or modal.
+- [ ] The detail view shows a **pie chart** with slices proportional to the caloric contribution of protein, fat, and carbs.
+- [ ] The detail view shows absolute macro values: protein (g), fat (g), carbs (g), kcal, fiber (g) if applicable.
+- [ ] The detail view shows a **units conversion table** listing, for each applicable unit (g, ml, pc, tbsp, tsp, serving), the equivalent gram weight and scaled nutrition values.
+- [ ] The detail view is dismissible (modal close or back navigation).

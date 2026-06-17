@@ -18,17 +18,19 @@ Requirements: [02_products-analyser.md](../requirements/02_products-analyser.md)
 
 ---
 
-## US-PAN-002 Select a product per row with live search
+## US-PAN-002 Select a product or recipe per row with live search
 
 **As a** user building an ingredient list  
-**I want** to type a product name in the first column and see matching suggestions from the database  
-**So that** I can pick the right item quickly without knowing the exact name.
+**I want** to type a product or recipe name in the first column and see matching suggestions from both the product database and the recipe catalog  
+**So that** I can analyse any combination of standalone products and complete recipes.
 
 **Acceptance criteria**
 
-- [ ] Column 1 is a free-text search input that narrows results from All products as the user types.
-- [ ] Selecting a suggestion pins it to the row; the nutrition columns populate immediately.
-- [ ] If no match is found, the user is offered an option to add a new product (see US-PAN-008).
+- [ ] Column 1 is a free-text search input that narrows results from a merged list of All products and All recipes as the user types.
+- [ ] Search results are sorted with recently used items (recently planned or logged) shown first.
+- [ ] Selecting a product suggestion pins it to the row; the nutrition columns populate from the product's per-serving values immediately.
+- [ ] Selecting a recipe suggestion pins it to the row; the unit is fixed to "serving" and the nutrition columns populate from the recipe's total ingredient nutrition per serving.
+- [ ] If no match is found among products, the user is offered an option to add a new product (see US-PAN-008).
 
 ---
 
@@ -114,3 +116,19 @@ Requirements: [02_products-analyser.md](../requirements/02_products-analyser.md)
 - [ ] Completing the form adds the product to the database and pre-selects it in the current row.
 - [ ] The new product is immediately visible to all users in All products.
 - [ ] Only the creator can edit or delete the product they added.
+
+---
+
+## US-PAN-009 Flag columns are suppressed for recipe rows
+
+**As a** user analysing a mix of products and recipes  
+**I want** the "This week" and "Next week" flag columns to appear only for product rows, not for recipe rows  
+**So that** the interface is clean and I am not confused about what the flags do.
+
+Source: [02_products-analyser.md](../requirements/02_products-analyser.md)
+
+**Acceptance criteria**
+
+- [ ] Rows where the selected item is a recipe do not show "This week" or "Next week" toggle columns.
+- [ ] Rows where the selected item is a product still show both flag columns as before.
+- [ ] Removing a product from a row that had flags set does not leave ghost flag states if a recipe is then selected for that row.

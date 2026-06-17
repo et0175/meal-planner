@@ -49,7 +49,26 @@ Displays one scrollable card per day of the selected week.
 
 ### Tab 3 — Calendar
 
-The calendar offers two sub-views toggled by a **Week / Month** button pair.
+The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** button group. All sub-views share the same selected week and underlying assignments.
+
+#### Plan summary (all sub-views)
+
+- A collapsible **plan summary panel** is shown at the top of the Calendar tab (above the sub-view grid), similar in structure to the plan summary in the Shopping list.
+- The panel lists all items planned within the visible date range, showing item name, total servings across the range, and total kcal contribution.
+- **Drag from summary:** the user can drag an item from the summary panel onto any day cell to create an assignment for that day. The item remains in the summary after the drag (it is still planned; only a new day assignment is added).
+- **Drag between days:** items are draggable between day cells; dropping an item from one day cell onto another moves the assignment (the item disappears from the source day and appears on the target day in the same meal slot).
+
+#### Day sub-view
+
+- Shows a single day column: the currently selected day.
+- Lists all planned items for that day, grouped by meal slot, with serving count and kcal.
+- Supports add, remove, and serving adjustment.
+
+#### 4 Days sub-view
+
+- Shows 4 consecutive day columns starting from the currently selected day.
+- Each column lists planned items grouped by meal slot.
+- Supports add, remove, drag between the four visible day columns, and drag from the summary.
 
 #### Week sub-view
 
@@ -75,6 +94,25 @@ The calendar offers two sub-views toggled by a **Week / Month** button pair.
 - Assignments made in the Weekly summary are immediately reflected in Day cards and Calendar, and vice versa.
 - The weekly summary and day cards share the same underlying assignment data keyed by (item, day, meal slot).
 - Adding an item in the calendar automatically registers it in the weekly summary in the selected meal slot.
+
+## Search sorting
+
+- In all item search inputs within the planner (Weekly summary, Day cards, Calendar), results are sorted with **recently used items** (recently planned or recently logged in tracking) shown first.
+
+## Log from plan
+
+> **Decision (OQ-008):** Log from plan is now included in MVP.
+
+- The planner provides **"Log this day"** and **"Log this week"** actions:
+  - **Log this day** — creates Meal tracking entries in the Personal cabinet for all assignments on the currently selected day. The item, serving count, and meal slot are pre-filled.
+  - **Log this week** — creates Meal tracking entries for all assignments across the selected week (Mon–Sun).
+- Created entries are editable in the Meal tracking section of the Personal cabinet.
+
+## Nutrition progress
+
+- The planner (Weekly summary and Day cards) shows, for each day, the **percentage of the calorie corridor consumed** relative to the user's target corridor (as set in Personal cabinet).
+- A weekly summary strip shows the average % of target for calories, protein, fat, and carbs across the planned week.
+- A monthly summary shows the same averages aggregated by month.
 
 ## Profile integration
 

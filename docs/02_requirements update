@@ -1,0 +1,12 @@
+1. In product analyzer add also posibility to analyze recipies (make a merged list of products and recipes instead of list of products)
+2. Add a posibility to log a day and a week from the planner. It should be possible to update it inside logs on a personal page after.
+3. Add a day and 4 days views in calendar planner 
+4. In calendar planner add a summary at the top (similar to Plan summary on the shopping list) and a possibility to drag and drop items from the summary to day cards and from one day card to another. When the user drags an item from the summary section it still remains in the summary, when the item is moved from one day to another, then it'll disapear from the source
+5. Generate grossery list as soon as the user navigates to the "Shopping list"
+6. Meal tracking log - add calendar view similar to the planner's view
+7. Add summary for meal tracker - if the corridor goal is reached.
+8. Planner and personal logs - show % of consumed calories/protein/fat/carbs to target corridor. And summary by week and month.
+9. When typing a product or a recipe in a search field or product analyser row the results should be sorted by 
+"recently used" in meal plan or log
+10. All product list - should appear as category cards - click on the card and you'll have a list for the category
+11. Product - when we click on product - open a product card with break down on nutrients (as a pie chart) and units conversion info
