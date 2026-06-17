@@ -27,7 +27,7 @@ import {
   Utensils,
   X
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 type View = "planner" | "products" | "analyser" | "recipes" | "diets" | "profile" | "shopping";
@@ -566,6 +566,10 @@ export default function Home() {
   const [addingMeal, setAddingMeal] = useState<{ day: string; meal: MealSlot } | null>(null);
   const [addingMealSearch, setAddingMealSearch] = useState("");
   const [calendarSubView, setCalendarSubView] = useState<"week" | "month">("week");
+  const [calendarMonthDate, setCalendarMonthDate] = useState(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [calendarAddDay, setCalendarAddDay] = useState<string | null>(null);
   const [calendarAddSearch, setCalendarAddSearch] = useState("");
   const [calendarAddMeal, setCalendarAddMeal] = useState<MealSlot>("lunch");
@@ -639,6 +643,18 @@ export default function Home() {
     return item ? addMacro(acc, item.macros, e.servings) : acc;
   }, zeroMacro());
 
+  // Close any open modal on Escape
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (detailItem) { setDetailItem(null); return; }
+      if (showForm) { setShowForm(false); return; }
+      if (showImport) { setShowImport(false); return; }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [detailItem, showForm, showImport]);
+
   // ── Navigation ───────────────────────────────────────────────────────────────
   // Fix: reset all filters when switching views so search never bleeds across
   function switchView(view: View) {
@@ -657,16 +673,10 @@ export default function Home() {
   function nextWeek() { setSelectedWeekMonday((d) => addDays(d, 7)); }
   function goToThisWeek() { setSelectedWeekMonday(startOfWeek(new Date())); }
   function prevMonth() {
-    setSelectedWeekMonday((d) => {
-      const m = new Date(d.getFullYear(), d.getMonth() - 1, 1);
-      return startOfWeek(m);
-    });
+    setCalendarMonthDate((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   }
   function nextMonth() {
-    setSelectedWeekMonday((d) => {
-      const m = new Date(d.getFullYear(), d.getMonth() + 1, 1);
-      return startOfWeek(m);
-    });
+    setCalendarMonthDate((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
   }
   function handleDropToCalendarDay(targetDay: string, uid: string) {
     setAssignments((cur) => cur.map((a) => a.uid === uid ? { ...a, day: targetDay } : a));
@@ -1602,9 +1612,7 @@ export default function Home() {
 
   function renderCalendarGrid() {
     const isMonth = calendarSubView === "month";
-    const refDate = selectedWeekMonday;
-    const monthStart = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
-    const monthEnd = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0);
+    const monthStart = isMonth ? calendarMonthDate : new Date(selectedWeekMonday.getFullYear(), selectedWeekMonday.getMonth(), 1);
     const gridStart = isMonth ? startOfWeek(monthStart) : selectedWeekMonday;
     const gridDays = isMonth
       ? Array.from({ length: 42 }, (_, i) => inputDate(addDays(gridStart, i)))
@@ -1712,7 +1720,10 @@ export default function Home() {
             >Week</button>
             <button
               className={isMonth ? "soft-button active" : "soft-button"}
-              onClick={() => setCalendarSubView("month")}
+              onClick={() => {
+                setCalendarSubView("month");
+                setCalendarMonthDate(new Date(selectedWeekMonday.getFullYear(), selectedWeekMonday.getMonth(), 1));
+              }}
             >Month</button>
           </div>
           {isMonth && (

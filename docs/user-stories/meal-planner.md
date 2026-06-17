@@ -156,6 +156,50 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 **Acceptance criteria**
 
 - [ ] Calendar view shows seven columns (Mon–Sun).
-- [ ] Each column lists item thumbnails, names, and servings for that day.
-- [ ] Total kcal per day is shown.
+- [ ] Each column lists item thumbnails, names, meal slot label, and servings for that day.
+- [ ] Today's date is visually highlighted.
 - [ ] Content reflects the same assignments as the other two tabs.
+
+---
+
+## US-MP-012 Switch between week and month calendar sub-views
+
+**As a** user  
+**I want** to toggle the Calendar between a single-week view and a full-month view  
+**So that** I can zoom out to see how my meals are distributed across the month.
+
+**Acceptance criteria**
+
+- [ ] A Week / Month toggle appears within the Calendar tab.
+- [ ] Week sub-view shows the 7 days of the currently selected week.
+- [ ] Month sub-view shows a 6-week grid (42 cells, Mon–Sun columns) for the month containing the selected week.
+- [ ] Days outside the current month are visually de-emphasised in the month view.
+- [ ] Prev / Next month navigation buttons appear in month sub-view.
+
+---
+
+## US-MP-013 Add and remove meals in Calendar view
+
+**As a** user  
+**I want** to add items to a day and remove them directly in the Calendar  
+**So that** I can edit my plan without switching to Day cards.
+
+**Acceptance criteria**
+
+- [ ] Each day cell has a "+ Add" button that opens an inline search + meal-slot picker.
+- [ ] Confirming the add creates an assignment for that day and slot and registers the item in the Weekly summary.
+- [ ] Hovering an item reveals an × button; clicking it removes that assignment.
+
+---
+
+## US-MP-014 Drag items between days in Calendar view
+
+**As a** user  
+**I want** to drag planned items from one day to another in the Calendar  
+**So that** I can move meals to different days without re-entering them.
+
+**Acceptance criteria**
+
+- [ ] Items in calendar cells are draggable.
+- [ ] Dropping on a different day cell moves the assignment to that day while keeping the original meal slot.
+- [ ] The source and target cells update immediately.

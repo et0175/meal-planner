@@ -8,11 +8,7 @@
 **Issues log:** [`issues.md`](issues.md)  
 **Status key:** ✅ Pass | ❌ Fail | 🚫 Not implemented | ❓ Not tested
 
-> **⚠️ Note — test cases require update:** The prototype was significantly redesigned after these test cases were written. The following sections are affected and need new test cases written against the updated prototype:
-> - **TC-PRD** — Products renamed to "All products"; list view now shows a nutrition table; "Week" button split into "This week" / "Next week"; filter toggles added.
-> - **TC-PLN** — Planner redesigned: week-only navigation, three tabs (Weekly summary / Day cards / Calendar), summary grid grouped by meal slots (Breakfast/Lunch/Dinner/Snacks), servings/grams toggle per row, day cards split by meal section with add/delete/drag-drop.
-> - **TC-NAV** — Navigation now has 7 items: Planner, All products, Products analyser, Recipes, Diets, Profile, Shopping list.
-> - **TC-SHP** (new) — Shopping list is now a separate nav item with date range and grocery list grouped by category.
+> **⚠️ Note — TC-PRD and TC-NAV require update:** These sections still reference the old navigation structure and the pre-list-view product UI. TC-PLN, TC-CAL, and TC-SHP have been updated to match the current prototype.
 
 ## Results summary
 
@@ -20,6 +16,9 @@
 |---|---|---|---|---|
 | Initial test | 40 | 10 | 18 | 4 |
 | After fixes | 68 | 0 | 0 | 4 |
+| After calendar redesign | 13 | 0 | 0 | 57 |
+
+> TC-PLN-001–039 and TC-CAL-001–030 are new or rewritten test cases that have not yet been manually verified against the updated prototype.
 
 ---
 
@@ -98,59 +97,84 @@
 
 ## TC-PLN — Planner view
 
-### Date range
+### Week navigation
 
 | ID | Description | Steps | Expected | Status |
 |----|-------------|-------|----------|--------|
-| TC-PLN-001 | Default date range is current week (Mon–Sun) | Open Planner | Start = Monday of current week, End = Sunday | ✅ fixed ISSUE-002 |
-| TC-PLN-002 | Seven day cards rendered by default | Open Planner | One card per day, 7 total | ✅ |
-| TC-PLN-003 | Change start date | Move start date forward by 2 days | Day cards update to reflect new range | ✅ |
-| TC-PLN-004 | Change end date | Move end date back | Day cards reduce | ✅ |
-| TC-PLN-005 | End date before start date | Set end to a date before start | End date clamped to start date; range stays valid | ✅ fixed ISSUE-004 |
-| TC-PLN-006 | Very large range | Set a 30-day range | 30 day cards render (performance may degrade) | ❓ |
+| TC-PLN-001 | Default week is current week | Open Planner | Week label shows Monday–Sunday of current week | ❓ |
+| TC-PLN-002 | "Prev" navigates to previous week | Click Prev | Week shifts back 7 days; label and content update | ❓ |
+| TC-PLN-003 | "Next" navigates to next week | Click Next | Week shifts forward 7 days | ❓ |
+| TC-PLN-004 | "This week" returns to current week | Navigate away, click "This week" | Returns to current calendar week | ❓ |
 
-### Meal-prep summary panel
+### Weekly summary tab
 
 | ID | Description | Steps | Expected | Status |
 |----|-------------|-------|----------|--------|
-| TC-PLN-010 | Weekly items auto-populate summary on load | Open Planner | Items with `weekly: true` appear in summary | ✅ — Berry overnight oats, Lentil tomato soup, Chicken quinoa bowl, Greek yogurt, Atlantic salmon |
-| TC-PLN-011 | Summary is organised into sections | Open Planner | Breakfasts, Lunches, Dinners, Snacks sections visible | ✅ |
-| TC-PLN-012 | Add a new summary section | Click + on summary panel > enter name | New section appears | ✅ |
-| TC-PLN-013 | Add section with empty name | Click + > submit blank or cancel | Section not added | ✅ |
-| TC-PLN-014 | Rename a summary section | Click pencil on section > enter new name | Section renamed; items in that section move with it | ✅ |
-| TC-PLN-015 | Delete a summary section | Click trash on section | Section removed; items moved to first section | ✅ |
-| TC-PLN-016 | Delete last summary section | Delete all sections one by one | Unclear behaviour — items have nowhere to go | ❓ |
-| TC-PLN-017 | Move item between summary sections | Use "Move to" dropdown on a card | Item moves to selected section | ✅ |
-| TC-PLN-018 | Remove item from summary | Click trash on summary card | Item removed from summary; all its day-card assignments also removed | ✅ |
+| TC-PLN-010 | Summary tab is default view | Open Planner | "Weekly summary" tab is active; grid is visible | ❓ |
+| TC-PLN-011 | Grid has four meal-slot sections | Open summary tab | Breakfast, Lunch, Dinner, Snacks sections each have their own tbody | ❓ |
+| TC-PLN-012 | Seeded items appear in correct slots | Open Planner | Berry overnight oats in Breakfast row; Chicken quinoa bowl in Lunch row; Lentil tomato soup in Dinner row | ❓ |
+| TC-PLN-013 | Servings cell shows assignment | Open Planner | Monday cell for Berry overnight oats shows 1 | ❓ |
+| TC-PLN-014 | Editing a servings cell updates assignments | Type 2 in a Mon cell | Day card and calendar reflect 2 servings for that item | ❓ |
+| TC-PLN-015 | Zeroing a cell removes assignment | Type 0 in a cell that had a value | Assignment removed; calendar cell clears | ❓ |
+| TC-PLN-016 | Servings / grams toggle | Click "g" toggle on a row with servingG defined | Values convert to grams; secondary label shows equivalent servings | ❓ |
+| TC-PLN-017 | Grams toggle hidden for items without servingG | View a recipe row without servingG | "g" toggle not shown or is disabled | ❓ |
+| TC-PLN-018 | Add row to a meal slot | Click "Add breakfast item" | Blank row appended to Breakfast section | ❓ |
+| TC-PLN-019 | Remove row from summary | Click × on a row | Row removed; assignments for that item+slot removed; other slots unaffected | ❓ |
+| TC-PLN-020 | Mark item "This week" adds to Lunch slot | Toggle "This week" on a product | Product appears in Lunch section of summary | ❓ |
 
-### Day cards
+### Day cards tab
 
 | ID | Description | Steps | Expected | Status |
 |----|-------------|-------|----------|--------|
-| TC-PLN-020 | Each day card has default sections | Open Planner | Breakfast, Lunch, Dinner, Snacks in each card | ✅ |
-| TC-PLN-021 | Day card shows macro strip | Open Planner on seeded day | Macro strip shows calories/protein/fat/carbs totals for that day | ✅ |
-| TC-PLN-022 | Place item from summary onto a day card | In summary card, select day + section, click + | Item appears in that day/section | ✅ |
-| TC-PLN-023 | Place same item twice | Place the same item twice on the same day/section | Second click is a no-op; only one assignment created | ✅ fixed ISSUE-009 |
-| TC-PLN-024 | Item remains in summary after placement | After placing an item | Item still visible in summary panel | ✅ |
-| TC-PLN-025 | Move placed item to different day via dropdown | Change day dropdown on a placed item | Item moves to chosen day | ✅ |
-| TC-PLN-026 | Move placed item to different section via dropdown | Change section dropdown on a placed item | Item moves to chosen section | ✅ |
-| TC-PLN-027 | Increase servings | Click + on servings counter | Servings increase by 0.5; kcal updates | ✅ — confirmed 1 → 1.5 |
-| TC-PLN-028 | Decrease servings | Click - on servings counter | Servings decrease by 0.5; minimum 0.5 | ✅ |
-| TC-PLN-029 | Decrease servings below 0.5 | Hold - past 0.5 | Stays at 0.5 (Math.max guard in code) | ✅ (code-verified) |
-| TC-PLN-030 | Remove placed item from day card | Click trash on placed item | Item removed from that day; if no other placements, also removed from summary | ✅ — confirmed for Lentil tomato soup |
-| TC-PLN-031 | Remove placed item that exists on another day | Place item on two days; remove from one | Item stays in summary | ✅ (code-verified) |
-| TC-PLN-032 | Add section to a day card | Click + on day card > enter name | New section added to that card only | ✅ |
-| TC-PLN-033 | Rename section on a day card | Click pencil on section > enter new name | Section renamed; assignments updated | ✅ |
-| TC-PLN-034 | Delete section on a day card | Click trash on day section | Assignments removed; orphaned summary items cleaned up | ✅ fixed ISSUE-003 |
-| TC-PLN-035 | Seeded assignments appear on load | Open Planner | Seeded items visible: Berry overnight oats (Breakfast), Chicken quinoa bowl (Dinner), Lentil tomato soup (Lunch) | ✅ |
-| TC-PLN-036 | Day macro total reflects actual servings | Set Chicken quinoa bowl to 2 servings | Day macro total includes 2× item macros | ✅ |
+| TC-PLN-030 | Day cards tab shows seven cards | Click "Day cards" | Seven cards visible, horizontally scrollable | ❓ |
+| TC-PLN-031 | Each card has four meal sections | Open Day cards | Breakfast, Lunch, Dinner, Snacks sections on each card | ❓ |
+| TC-PLN-032 | Seeded items appear on correct day and slot | Open Day cards | Berry overnight oats in Monday Breakfast; Chicken quinoa bowl in Monday Lunch; Lentil tomato soup in Tuesday Dinner | ❓ |
+| TC-PLN-033 | Day macro strip shows correct totals | View Monday with seeded items | kcal strip reflects summed macros for all Monday items | ❓ |
+| TC-PLN-034 | Add item to a slot | Click "+ Add" in a slot, type item name, confirm | Item appears in that slot; also appears in Weekly summary | ❓ |
+| TC-PLN-035 | Remove item from slot | Click × on an item | Assignment deleted; item removed from that cell; summary clears if no other assignments | ❓ |
+| TC-PLN-036 | Increase servings | Click + on a placed item | Servings increase by 0.5; slot kcal and day strip update | ❓ |
+| TC-PLN-037 | Decrease servings | Click − on a placed item | Servings decrease by 0.5; minimum 0.5 | ❓ |
+| TC-PLN-038 | Drag item to different slot same day | Drag item from Breakfast to Lunch on the same card | Item moves to Lunch; Breakfast slot clears | ❓ |
+| TC-PLN-039 | Drag item to different day | Drag item to the same meal slot on a different day card | Item moves; source clears; target shows item | ❓ |
+
+### Calendar tab — week sub-view
+
+| ID | Description | Steps | Expected | Status |
+|----|-------------|-------|----------|--------|
+| TC-CAL-001 | Calendar tab is accessible | Click "Calendar" in planner tabs | Calendar view renders with Week/Month toggle | ❓ |
+| TC-CAL-002 | Week sub-view is default | Open Calendar tab | "Week" button is active; 7-column grid visible | ❓ |
+| TC-CAL-003 | Today is highlighted | Open Calendar tab on any day | Today's date cell has a teal circled day number | ❓ |
+| TC-CAL-004 | Seeded items appear in correct day cells | Open Calendar week view | Berry overnight oats in Monday cell; Chicken quinoa bowl in Monday; Lentil tomato soup in Tuesday | ❓ |
+| TC-CAL-005 | Item shows meal slot label and servings | View a calendar item | Shows thumbnail, name, slot label (e.g. "Breakfast"), and "1×" | ❓ |
+| TC-CAL-006 | Add item via calendar cell | Click "+ Add" in a day cell, type name, select slot, click Add | Item appears in cell and in Weekly summary | ❓ |
+| TC-CAL-007 | Add with no item selected | Click Add with search field empty or unmatched | Nothing added | ❓ |
+| TC-CAL-008 | Remove item via × button | Hover item, click × | Assignment removed; cell updates | ❓ |
+| TC-CAL-009 | Drag item to another day | Drag item from Mon cell, drop on Wed cell | Item moves to Wed; original slot preserved | ❓ |
+| TC-CAL-010 | Drag reflects in Day cards | After calendar drag, switch to Day cards | Item appears on new day in the same meal slot | ❓ |
+| TC-CAL-011 | Calendar reflects summary changes | Add servings in Weekly summary, switch to Calendar | Calendar cell shows the item | ❓ |
+
+### Calendar tab — month sub-view
+
+| ID | Description | Steps | Expected | Status |
+|----|-------------|-------|----------|--------|
+| TC-CAL-020 | Switch to month view | Click "Month" toggle | 42-cell grid appears; day-of-week header visible (Mon–Sun) | ❓ |
+| TC-CAL-021 | Correct month displayed | Open month view | Month label matches the month containing the selected week | ❓ |
+| TC-CAL-022 | Other-month days are de-emphasised | View month grid | Cells outside the current month appear grayed | ❓ |
+| TC-CAL-023 | Today highlighted in month view | Open month view | Today's cell has teal-circled day number | ❓ |
+| TC-CAL-024 | Prev month navigation | Click ‹ in calendar header | Grid shifts to previous month | ❓ |
+| TC-CAL-025 | Next month navigation | Click › in calendar header | Grid shifts to next month | ❓ |
+| TC-CAL-026 | Week nav does not appear in month sub-view | View month | Prev/Next week buttons still present in week nav above tabs; month nav is separate inside calendar | ❓ |
+| TC-CAL-027 | Add item in month view | Click "+ Add" in a month cell, fill search + slot, confirm | Item appears in cell; reflects in Weekly summary and Day cards | ❓ |
+| TC-CAL-028 | Remove item in month view | Hover item in month cell, click × | Assignment removed | ❓ |
+| TC-CAL-029 | Drag between cells in month view | Drag item from one month cell to another | Assignment updates to new day; slot preserved | ❓ |
+| TC-CAL-030 | Switching back to week view preserves state | Toggle back to Week after using Month | All items and assignments intact | ❓ |
 
 ### Shopping list
 
 | ID | Description | Steps | Expected | Status |
 |----|-------------|-------|----------|--------|
 | TC-PLN-040 | Shopping list empty on load | Open Planner | "No list yet" shown; "Generate list" button visible | ✅ |
-| TC-PLN-041 | Generate shopping list | Click "Generate list" | Ingredients aggregated by name+unit, sorted alphabetically | ✅ — Blueberries, Chicken breast, Cooked quinoa, Greek yogurt, Mixed greens, Red lentils, Rolled oats, Tomatoes, Vegetable broth |
+| TC-PLN-041 | Generate shopping list | Click "Generate list" | Ingredients aggregated by name+unit, sorted alphabetically | ✅ |
 | TC-PLN-042 | Ingredients multiplied by servings | Set oats to 2 servings, generate list | Rolled oats shows 140 g | ✅ (code-verified, 2 × 70) |
 | TC-PLN-043 | Same ingredient from multiple items combined | Multiple items share an ingredient | Amounts summed under one line | ✅ |
 | TC-PLN-044 | Shopping list shows "List stale" after plan change | Generate list, then add a placement | Status badge becomes "List stale" | ✅ |

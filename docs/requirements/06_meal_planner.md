@@ -49,9 +49,24 @@ Displays one scrollable card per day of the selected week.
 
 ### Tab 3 — Calendar
 
-- A compact 7-column grid (Mon–Sun) showing all planned items per day at a glance.
-- Each day column shows item thumbnails, names, and servings counts.
-- Intended as a read-only overview; editing is done in the Day cards tab.
+The calendar offers two sub-views toggled by a **Week / Month** button pair.
+
+#### Week sub-view
+
+- A 7-column grid (Mon–Sun) for the selected week.
+- Each day cell shows all planned items across all meal slots, with thumbnails, names, meal slot label, and serving count.
+- Today's date is highlighted with a teal circle.
+- **Add:** each day cell has an inline "+ Add" panel — the user types to search for an item and selects a meal slot (Breakfast / Lunch / Dinner / Snacks), then confirms. The item is also added to the Weekly summary in the chosen slot if not already present.
+- **Remove:** hovering an item reveals an × button that removes that assignment.
+- **Drag and drop:** items are draggable between day cells; dropping preserves the original meal slot and updates only the day.
+
+#### Month sub-view
+
+- A 6-week × 7-column grid (Mon–Sun columns, 42 cells total) for the month containing the selected week.
+- A **Prev / Next month** navigation pair appears in the calendar header (separate from the week navigation).
+- Days outside the current calendar month are visually de-emphasised.
+- Each cell has the same add, remove, and drag-and-drop capabilities as the week sub-view.
+- Cells are compact (no kcal strip) to fit the larger grid.
 
 ---
 
@@ -59,3 +74,4 @@ Displays one scrollable card per day of the selected week.
 
 - Assignments made in the Weekly summary are immediately reflected in Day cards and Calendar, and vice versa.
 - The weekly summary and day cards share the same underlying assignment data keyed by (item, day, meal slot).
+- Adding an item in the calendar automatically registers it in the weekly summary in the selected meal slot.
