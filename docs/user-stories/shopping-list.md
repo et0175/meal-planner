@@ -47,12 +47,29 @@ Requirements: [07_shopping_list.md](../requirements/07_shopping_list.md)
 ## US-SL-004 View a categorised grocery list
 
 **As a** user  
-**I want** the ingredients of all planned recipes aggregated and grouped by category  
+**I want** all planned items — recipe ingredients and standalone products — aggregated and grouped by category  
 **So that** I can shop efficiently by section of the supermarket.
 
 **Acceptance criteria**
 
-- [ ] Grocery list is derived from ingredients of all planned items in the date range.
+- [ ] Planned recipes are expanded into their ingredients; each ingredient becomes a grocery line.
+- [ ] Standalone products added directly to the planner appear as single-line entries under their product category (no ingredient decomposition).
+- [ ] Quantities for the same ingredient or product across multiple entries are aggregated into one line.
 - [ ] Lines are grouped by category: Produce, Dairy, Meat, Fish, Grains, Legumes, Nuts & Seeds, Beverages, Condiments, Other.
-- [ ] Each line shows ingredient name, quantity, and unit.
-- [ ] Quantities for the same ingredient across multiple recipes are aggregated.
+- [ ] Each line shows: name, total quantity, and unit.
+
+---
+
+## US-SL-005 Know when the grocery list is out of date and regenerate it
+
+**As a** user who has made changes to their meal plan after generating a grocery list  
+**I want** to see that the list is stale and refresh it with one action  
+**So that** I do not shop from an outdated list.
+
+**Acceptance criteria**
+
+- [ ] After the grocery list is generated, any change to the meal plan within the selected date range marks the list as stale (a visible indicator is shown).
+- [ ] The stale indicator is visible without leaving the Shopping list view.
+- [ ] A "Refresh" action regenerates the list from the current plan state; the stale indicator clears.
+- [ ] Changing the date range also clears the previous list and triggers regeneration.
+- [ ] An invalid date range (end date before start date) shows a validation error and does not generate a list.

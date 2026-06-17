@@ -1,0 +1,1076 @@
+{
+  "version": "1.0",
+  "description": "Meal Forge MVP — UI Prototype Test Data",
+  "metadata": {
+    "generatedDate": "2026-06-17",
+    "scope": "UI prototype only — no persistence",
+    "notes": "All data is in-memory seed data. Passwords shown in plain text for test purposes only."
+  },
+
+  "users": [
+    {
+      "id": "u-001",
+      "email": "test.user@mealforge.com",
+      "password": "Password123!",
+      "role": "User",
+      "profile": {
+        "language": "en",
+        "unitSystem": "metric",
+        "gender": "female",
+        "age": 32,
+        "weightKg": 65,
+        "bodyComposition": null
+      },
+      "dietPreferences": {
+        "activeDiet": "mediterranean",
+        "calorieTarget": 2000,
+        "macros": { "proteinPct": 30, "fatPct": 35, "carbsPct": 35 },
+        "calorieCorridorNote": "1850–2150 kcal"
+      },
+      "_testRole": "primary_tester"
+    },
+    {
+      "id": "u-002",
+      "email": "keto.user@mealforge.com",
+      "password": "Password123!",
+      "role": "User",
+      "profile": {
+        "language": "en",
+        "unitSystem": "metric",
+        "gender": "male",
+        "age": 40,
+        "weightKg": 88,
+        "bodyComposition": null
+      },
+      "dietPreferences": {
+        "activeDiet": "ketogenic",
+        "calorieTarget": 1800,
+        "macros": { "proteinPct": 25, "fatPct": 70, "carbsPct": 5 },
+        "calorieCorridorNote": "1650–1950 kcal"
+      },
+      "_testRole": "alternate_diet_tester"
+    },
+    {
+      "id": "u-003",
+      "email": "newuser@mealforge.com",
+      "password": "NewUser99#",
+      "role": "User",
+      "profile": {
+        "language": "en",
+        "unitSystem": "metric",
+        "gender": null,
+        "age": null,
+        "weightKg": null,
+        "bodyComposition": null
+      },
+      "dietPreferences": {
+        "activeDiet": null,
+        "calorieTarget": null,
+        "macros": { "proteinPct": null, "fatPct": null, "carbsPct": null }
+      },
+      "_testRole": "onboarding_tester"
+    }
+  ],
+
+  "products": [
+    {
+      "id": "p-001",
+      "name": "Greek yogurt",
+      "category": "Dairy",
+      "unit": "g",
+      "servingAmount": 150,
+      "servingLabel": "150 g",
+      "kcal": 88,
+      "protein": 15.0,
+      "fat": 0.6,
+      "carbs": 5.4,
+      "dietTags": ["mediterranean", "plant-based", "keto", "protein-focused"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "_notes": "Seeded. No ingredient usage → deletion should be allowed."
+    },
+    {
+      "id": "p-002",
+      "name": "Whole milk",
+      "category": "Dairy",
+      "unit": "ml",
+      "servingAmount": 200,
+      "servingLabel": "200 ml",
+      "kcal": 122,
+      "protein": 6.4,
+      "fat": 6.6,
+      "carbs": 9.4,
+      "dietTags": ["mediterranean"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-003",
+      "name": "Cheddar cheese",
+      "category": "Dairy",
+      "unit": "g",
+      "servingAmount": 30,
+      "servingLabel": "30 g",
+      "kcal": 121,
+      "protein": 7.5,
+      "fat": 10.0,
+      "carbs": 0.4,
+      "dietTags": ["keto", "protein-focused"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-004",
+      "name": "Butter",
+      "category": "Dairy",
+      "unit": "tbsp",
+      "servingAmount": 14,
+      "servingLabel": "1 tbsp (14 g)",
+      "kcal": 102,
+      "protein": 0.1,
+      "fat": 11.5,
+      "carbs": 0.0,
+      "dietTags": ["keto", "healthy-fats"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-005",
+      "name": "Atlantic salmon",
+      "category": "Fish",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g",
+      "kcal": 208,
+      "protein": 20.0,
+      "fat": 13.0,
+      "carbs": 0.0,
+      "dietTags": ["mediterranean", "paleo", "keto", "healthy-fats", "protein-focused"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-006",
+      "name": "Tuna in water",
+      "category": "Fish",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g",
+      "kcal": 116,
+      "protein": 26.0,
+      "fat": 1.0,
+      "carbs": 0.0,
+      "dietTags": ["mediterranean", "paleo", "keto", "protein-focused"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-007",
+      "name": "Sardines",
+      "category": "Fish",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g",
+      "kcal": 208,
+      "protein": 25.0,
+      "fat": 11.0,
+      "carbs": 0.0,
+      "dietTags": ["mediterranean", "keto", "healthy-fats"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-008",
+      "name": "Rolled oats",
+      "category": "Grains",
+      "unit": "g",
+      "servingAmount": 40,
+      "servingLabel": "40 g (dry)",
+      "kcal": 150,
+      "protein": 5.0,
+      "fat": 3.0,
+      "carbs": 27.0,
+      "dietTags": ["mediterranean", "plant-based", "volumetrics"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": true, "nextWeek": false },
+      "_notes": "Pre-seeded with thisWeek=true so planner tests can start with an item in the summary."
+    },
+    {
+      "id": "p-009",
+      "name": "Brown rice",
+      "category": "Grains",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g (cooked)",
+      "kcal": 112,
+      "protein": 2.6,
+      "fat": 0.9,
+      "carbs": 24.0,
+      "dietTags": ["mediterranean", "plant-based", "volumetrics"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-010",
+      "name": "Quinoa",
+      "category": "Grains",
+      "unit": "g",
+      "servingAmount": 85,
+      "servingLabel": "85 g (cooked)",
+      "kcal": 111,
+      "protein": 4.0,
+      "fat": 2.0,
+      "carbs": 20.0,
+      "dietTags": ["mediterranean", "plant-based", "protein-focused"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-011",
+      "name": "Whole wheat bread",
+      "category": "Grains",
+      "unit": "pc",
+      "servingAmount": 1,
+      "servingLabel": "1 slice (30 g)",
+      "servingG": 30,
+      "kcal": 79,
+      "protein": 4.0,
+      "fat": 1.0,
+      "carbs": 15.0,
+      "dietTags": ["mediterranean"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-012",
+      "name": "Baby spinach",
+      "category": "Produce",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g",
+      "kcal": 23,
+      "protein": 2.9,
+      "fat": 0.4,
+      "carbs": 3.6,
+      "dietTags": ["mediterranean", "plant-based", "keto", "mind", "dash", "volumetrics"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-013",
+      "name": "Broccoli",
+      "category": "Produce",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g",
+      "kcal": 34,
+      "protein": 2.8,
+      "fat": 0.4,
+      "carbs": 7.0,
+      "dietTags": ["mediterranean", "plant-based", "keto", "mind", "dash", "volumetrics"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-014",
+      "name": "Cherry tomatoes",
+      "category": "Produce",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g",
+      "kcal": 18,
+      "protein": 0.9,
+      "fat": 0.2,
+      "carbs": 3.9,
+      "dietTags": ["mediterranean", "plant-based", "volumetrics"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-015",
+      "name": "Avocado",
+      "category": "Produce",
+      "unit": "pc",
+      "servingAmount": 0.5,
+      "servingLabel": "0.5 avocado (≈75 g)",
+      "servingG": 75,
+      "kcal": 120,
+      "protein": 1.5,
+      "fat": 11.0,
+      "carbs": 6.0,
+      "dietTags": ["keto", "healthy-fats", "mediterranean"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-016",
+      "name": "Banana",
+      "category": "Produce",
+      "unit": "pc",
+      "servingAmount": 1,
+      "servingLabel": "1 medium (118 g)",
+      "servingG": 118,
+      "kcal": 105,
+      "protein": 1.3,
+      "fat": 0.4,
+      "carbs": 27.0,
+      "dietTags": ["plant-based", "volumetrics"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-017",
+      "name": "Chicken breast",
+      "category": "Meat",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g (cooked)",
+      "kcal": 165,
+      "protein": 31.0,
+      "fat": 3.6,
+      "carbs": 0.0,
+      "dietTags": ["paleo", "keto", "protein-focused", "mediterranean", "dash"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-018",
+      "name": "Ground turkey",
+      "category": "Meat",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g (raw)",
+      "kcal": 149,
+      "protein": 17.0,
+      "fat": 8.0,
+      "carbs": 0.0,
+      "dietTags": ["paleo", "keto", "protein-focused"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-019",
+      "name": "Beef sirloin",
+      "category": "Meat",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g (cooked)",
+      "kcal": 207,
+      "protein": 26.0,
+      "fat": 11.0,
+      "carbs": 0.0,
+      "dietTags": ["paleo", "keto", "protein-focused"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-020",
+      "name": "Red lentils",
+      "category": "Legumes",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g (dry)",
+      "kcal": 353,
+      "protein": 24.0,
+      "fat": 1.0,
+      "carbs": 63.0,
+      "dietTags": ["plant-based", "mediterranean", "dash", "mind"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-021",
+      "name": "Black beans",
+      "category": "Legumes",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g (cooked)",
+      "kcal": 132,
+      "protein": 9.0,
+      "fat": 0.5,
+      "carbs": 24.0,
+      "dietTags": ["plant-based", "mediterranean"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-022",
+      "name": "Chickpeas",
+      "category": "Legumes",
+      "unit": "g",
+      "servingAmount": 100,
+      "servingLabel": "100 g (cooked)",
+      "kcal": 164,
+      "protein": 9.0,
+      "fat": 2.6,
+      "carbs": 27.0,
+      "dietTags": ["plant-based", "mediterranean", "dash"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-023",
+      "name": "Almonds",
+      "category": "Nuts & Seeds",
+      "unit": "g",
+      "servingAmount": 30,
+      "servingLabel": "30 g (≈23 almonds)",
+      "kcal": 173,
+      "protein": 6.0,
+      "fat": 15.0,
+      "carbs": 6.0,
+      "dietTags": ["keto", "healthy-fats", "mediterranean", "mind", "dash"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-024",
+      "name": "Chia seeds",
+      "category": "Nuts & Seeds",
+      "unit": "g",
+      "servingAmount": 28,
+      "servingLabel": "28 g (2 tbsp)",
+      "kcal": 138,
+      "protein": 4.7,
+      "fat": 8.7,
+      "carbs": 12.0,
+      "dietTags": ["plant-based", "healthy-fats", "mediterranean"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-025",
+      "name": "Olive oil",
+      "category": "Condiments",
+      "unit": "tbsp",
+      "servingAmount": 1,
+      "servingLabel": "1 tbsp (14 ml)",
+      "servingG": 14,
+      "kcal": 119,
+      "protein": 0.0,
+      "fat": 14.0,
+      "carbs": 0.0,
+      "dietTags": ["mediterranean", "keto", "healthy-fats", "paleo"],
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false }
+    },
+    {
+      "id": "p-026",
+      "name": "Hemp seeds (user-added)",
+      "category": "Nuts & Seeds",
+      "unit": "g",
+      "servingAmount": 30,
+      "servingLabel": "30 g (3 tbsp)",
+      "kcal": 166,
+      "protein": 9.5,
+      "fat": 14.6,
+      "carbs": 2.6,
+      "dietTags": ["plant-based", "protein-focused"],
+      "isUserAdded": true,
+      "userId": "u-001",
+      "_notes": "User-added product. Only u-001 can edit/delete. Used in no recipes — deletion should succeed."
+    },
+    {
+      "id": "p-027",
+      "name": "Whole eggs",
+      "category": "Dairy",
+      "unit": "pc",
+      "servingAmount": 2,
+      "servingLabel": "2 large eggs",
+      "servingG": 100,
+      "kcal": 143,
+      "protein": 12.5,
+      "fat": 10.0,
+      "carbs": 0.7,
+      "dietTags": ["keto", "paleo", "protein-focused", "mediterranean"],
+      "isUserAdded": false,
+      "userId": null,
+      "_notes": "Used as ingredient in Spinach omelette — deletion should be BLOCKED."
+    }
+  ],
+
+  "recipes": [
+    {
+      "id": "r-001",
+      "name": "Berry overnight oats",
+      "category": "Breakfasts",
+      "servings": 1,
+      "kcalPerServing": 385,
+      "protein": 15.0,
+      "fat": 8.0,
+      "carbs": 65.0,
+      "dietTags": ["plant-based", "mediterranean", "mind"],
+      "favorite": true,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": true, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-008", "productName": "Rolled oats", "amount": 70, "unit": "g" },
+        { "productId": "p-001", "productName": "Greek yogurt", "amount": 150, "unit": "g" },
+        { "productId": "p-024", "productName": "Chia seeds", "amount": 15, "unit": "g" },
+        { "productId": "p-016", "productName": "Banana", "amount": 0.5, "unit": "pc" }
+      ],
+      "_notes": "Has thisWeek=true and a Monday Breakfast assignment in plannerSeeds."
+    },
+    {
+      "id": "r-002",
+      "name": "Avocado toast",
+      "category": "Breakfasts",
+      "servings": 1,
+      "kcalPerServing": 310,
+      "protein": 11.0,
+      "fat": 16.0,
+      "carbs": 30.0,
+      "dietTags": ["mediterranean", "healthy-fats"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-011", "productName": "Whole wheat bread", "amount": 2, "unit": "pc" },
+        { "productId": "p-015", "productName": "Avocado", "amount": 0.5, "unit": "pc" },
+        { "productId": "p-027", "productName": "Whole eggs", "amount": 2, "unit": "pc" },
+        { "productId": "p-025", "productName": "Olive oil", "amount": 0.5, "unit": "tbsp" }
+      ]
+    },
+    {
+      "id": "r-003",
+      "name": "Spinach omelette",
+      "category": "Breakfasts",
+      "servings": 1,
+      "kcalPerServing": 225,
+      "protein": 16.0,
+      "fat": 15.5,
+      "carbs": 4.0,
+      "dietTags": ["keto", "protein-focused", "mediterranean"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-027", "productName": "Whole eggs", "amount": 2, "unit": "pc" },
+        { "productId": "p-012", "productName": "Baby spinach", "amount": 50, "unit": "g" },
+        { "productId": "p-004", "productName": "Butter", "amount": 0.5, "unit": "tbsp" }
+      ]
+    },
+    {
+      "id": "r-004",
+      "name": "Chicken quinoa bowl",
+      "category": "Main courses",
+      "servings": 1,
+      "kcalPerServing": 450,
+      "protein": 38.0,
+      "fat": 12.0,
+      "carbs": 42.0,
+      "dietTags": ["mediterranean", "paleo", "protein-focused", "dash"],
+      "favorite": true,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": true, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-017", "productName": "Chicken breast", "amount": 150, "unit": "g" },
+        { "productId": "p-010", "productName": "Quinoa", "amount": 85, "unit": "g" },
+        { "productId": "p-012", "productName": "Baby spinach", "amount": 30, "unit": "g" },
+        { "productId": "p-014", "productName": "Cherry tomatoes", "amount": 50, "unit": "g" },
+        { "productId": "p-025", "productName": "Olive oil", "amount": 0.5, "unit": "tbsp" }
+      ]
+    },
+    {
+      "id": "r-005",
+      "name": "Greek salad",
+      "category": "Salads",
+      "servings": 1,
+      "kcalPerServing": 265,
+      "protein": 9.0,
+      "fat": 20.0,
+      "carbs": 14.0,
+      "dietTags": ["mediterranean", "keto"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-014", "productName": "Cherry tomatoes", "amount": 100, "unit": "g" },
+        { "productId": "p-012", "productName": "Baby spinach", "amount": 50, "unit": "g" },
+        { "productId": "p-003", "productName": "Cheddar cheese", "amount": 30, "unit": "g" },
+        { "productId": "p-025", "productName": "Olive oil", "amount": 1, "unit": "tbsp" }
+      ]
+    },
+    {
+      "id": "r-006",
+      "name": "Lentil tomato soup",
+      "category": "Soups",
+      "servings": 2,
+      "kcalPerServing": 280,
+      "protein": 14.0,
+      "fat": 3.0,
+      "carbs": 45.0,
+      "dietTags": ["plant-based", "mediterranean", "dash", "mind", "volumetrics"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-020", "productName": "Red lentils", "amount": 100, "unit": "g" },
+        { "productId": "p-014", "productName": "Cherry tomatoes", "amount": 150, "unit": "g" },
+        { "productId": "p-025", "productName": "Olive oil", "amount": 0.5, "unit": "tbsp" }
+      ],
+      "_notes": "Has Tuesday Dinner assignment in plannerSeeds."
+    },
+    {
+      "id": "r-007",
+      "name": "Broccoli cheddar soup",
+      "category": "Soups",
+      "servings": 2,
+      "kcalPerServing": 220,
+      "protein": 12.0,
+      "fat": 12.0,
+      "carbs": 18.0,
+      "dietTags": ["protein-focused", "dash"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-013", "productName": "Broccoli", "amount": 300, "unit": "g" },
+        { "productId": "p-003", "productName": "Cheddar cheese", "amount": 60, "unit": "g" },
+        { "productId": "p-002", "productName": "Whole milk", "amount": 200, "unit": "ml" }
+      ]
+    },
+    {
+      "id": "r-008",
+      "name": "Salmon with brown rice",
+      "category": "Main courses",
+      "servings": 1,
+      "kcalPerServing": 520,
+      "protein": 38.0,
+      "fat": 18.0,
+      "carbs": 45.0,
+      "dietTags": ["mediterranean", "paleo", "healthy-fats"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-005", "productName": "Atlantic salmon", "amount": 150, "unit": "g" },
+        { "productId": "p-009", "productName": "Brown rice", "amount": 100, "unit": "g" },
+        { "productId": "p-013", "productName": "Broccoli", "amount": 150, "unit": "g" },
+        { "productId": "p-025", "productName": "Olive oil", "amount": 0.5, "unit": "tbsp" }
+      ]
+    },
+    {
+      "id": "r-009",
+      "name": "Turkey meatballs",
+      "category": "Main courses",
+      "servings": 2,
+      "kcalPerServing": 290,
+      "protein": 28.0,
+      "fat": 12.0,
+      "carbs": 14.0,
+      "dietTags": ["paleo", "protein-focused"],
+      "favorite": false,
+      "isUserAdded": true,
+      "userId": "u-001",
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-018", "productName": "Ground turkey", "amount": 200, "unit": "g" },
+        { "productId": "p-011", "productName": "Whole wheat bread", "amount": 30, "unit": "g" },
+        { "productId": "p-014", "productName": "Cherry tomatoes", "amount": 100, "unit": "g" }
+      ],
+      "_notes": "User-added recipe. Tests edit/delete ownership. Has Sunday Dinner assignment (future or current week) → deletion should be BLOCKED."
+    },
+    {
+      "id": "r-010",
+      "name": "Chickpea curry",
+      "category": "Main courses",
+      "servings": 2,
+      "kcalPerServing": 310,
+      "protein": 12.0,
+      "fat": 8.0,
+      "carbs": 50.0,
+      "dietTags": ["plant-based", "mediterranean", "dash", "volumetrics"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-022", "productName": "Chickpeas", "amount": 200, "unit": "g" },
+        { "productId": "p-014", "productName": "Cherry tomatoes", "amount": 150, "unit": "g" },
+        { "productId": "p-025", "productName": "Olive oil", "amount": 1, "unit": "tbsp" }
+      ]
+    },
+    {
+      "id": "r-011",
+      "name": "Almond energy snack",
+      "category": "Snacks",
+      "servings": 1,
+      "kcalPerServing": 195,
+      "protein": 7.0,
+      "fat": 16.0,
+      "carbs": 8.0,
+      "dietTags": ["keto", "healthy-fats", "mediterranean"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-023", "productName": "Almonds", "amount": 30, "unit": "g" },
+        { "productId": "p-024", "productName": "Chia seeds", "amount": 10, "unit": "g" }
+      ]
+    },
+    {
+      "id": "r-012",
+      "name": "Chia pudding",
+      "category": "Snacks",
+      "servings": 1,
+      "kcalPerServing": 210,
+      "protein": 9.0,
+      "fat": 11.0,
+      "carbs": 22.0,
+      "dietTags": ["plant-based", "healthy-fats"],
+      "favorite": false,
+      "isUserAdded": false,
+      "userId": null,
+      "weekFlags": { "thisWeek": false, "nextWeek": false },
+      "ingredients": [
+        { "productId": "p-024", "productName": "Chia seeds", "amount": 28, "unit": "g" },
+        { "productId": "p-002", "productName": "Whole milk", "amount": 200, "unit": "ml" },
+        { "productId": "p-016", "productName": "Banana", "amount": 0.5, "unit": "pc" }
+      ]
+    }
+  ],
+
+  "diets": [
+    {
+      "id": "mediterranean",
+      "name": "Mediterranean",
+      "description": "Emphasises vegetables, fruits, whole grains, legumes, nuts, and olive oil; moderate fish and poultry; limited red meat and sweets.",
+      "macroGuidance": { "proteinPct": 15, "fatPct": 35, "carbsPct": 50 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "plant-based",
+      "name": "Plant-based / Flexitarian",
+      "description": "Primarily plant-derived foods — vegetables, fruits, grains, legumes, nuts — with occasional or reduced animal products.",
+      "macroGuidance": { "proteinPct": 15, "fatPct": 25, "carbsPct": 60 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "mind",
+      "name": "MIND diet",
+      "description": "Hybrid of Mediterranean and DASH focused on brain-protective foods: leafy greens, berries, nuts, olive oil, fish, beans, whole grains.",
+      "macroGuidance": { "proteinPct": 18, "fatPct": 35, "carbsPct": 47 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "dash",
+      "name": "DASH diet",
+      "description": "Dietary Approaches to Stop Hypertension. Low sodium, high potassium, calcium, and magnesium through vegetables, fruits, low-fat dairy, and whole grains.",
+      "macroGuidance": { "proteinPct": 18, "fatPct": 27, "carbsPct": 55 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "paleo",
+      "name": "Paleo",
+      "description": "Whole foods resembling pre-agricultural diet: meat, fish, eggs, vegetables, fruits, nuts, seeds. Excludes grains, legumes, dairy, and processed foods.",
+      "macroGuidance": { "proteinPct": 30, "fatPct": 40, "carbsPct": 30 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "weightwatchers",
+      "name": "WeightWatchers (WW)",
+      "description": "Points-based system that encourages low-calorie-density foods; no foods are off-limits but portion control and food quality are tracked via a points budget.",
+      "macroGuidance": null,
+      "applicableMacroGuidance": false,
+      "guidanceNote": "Points-based rather than macro-based. No fixed percentage split."
+    },
+    {
+      "id": "intermittent-fasting",
+      "name": "Intermittent fasting",
+      "description": "Cycling between eating and fasting windows (e.g. 16:8, 5:2). Food quality is not prescribed; focus is on when to eat rather than what to eat.",
+      "macroGuidance": null,
+      "applicableMacroGuidance": false,
+      "guidanceNote": "Timing-based pattern. Macro split depends on user preference."
+    },
+    {
+      "id": "ketogenic",
+      "name": "Ketogenic (Keto)",
+      "description": "Very low carbohydrate, high fat intake designed to shift the body into ketosis. Strictly limits carbs to ~5% of calories.",
+      "macroGuidance": { "proteinPct": 25, "fatPct": 70, "carbsPct": 5 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "volumetrics",
+      "name": "Volumetrics",
+      "description": "Prioritises high-volume, low-calorie-density foods (vegetables, fruits, broth-based soups) to promote satiety while managing calorie intake.",
+      "macroGuidance": { "proteinPct": 20, "fatPct": 20, "carbsPct": 60 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "protein-focused",
+      "name": "Protein-focused",
+      "description": "Higher protein intake to support muscle retention or growth. Often used alongside strength training. Protein typically ≥30% of calories.",
+      "macroGuidance": { "proteinPct": 35, "fatPct": 30, "carbsPct": 35 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "healthy-fats",
+      "name": "Healthy fats emphasis",
+      "description": "Prioritises monounsaturated and polyunsaturated fats (olive oil, avocado, nuts, fatty fish) while limiting saturated and trans fats.",
+      "macroGuidance": { "proteinPct": 20, "fatPct": 40, "carbsPct": 40 },
+      "applicableMacroGuidance": true
+    },
+    {
+      "id": "hydration",
+      "name": "Hydration guidance",
+      "description": "Focuses on adequate daily fluid intake and water-rich foods (cucumbers, watermelon, celery) to support hydration goals.",
+      "macroGuidance": null,
+      "applicableMacroGuidance": false,
+      "guidanceNote": "Hydration-based. No fixed macro split."
+    }
+  ],
+
+  "plannerSeeds": {
+    "_description": "Initial assignments for the current calendar week. Keyed by (itemId, day, slot, servings).",
+    "weekOffset": 0,
+    "assignments": [
+      { "id": "a-001", "itemId": "r-001", "itemName": "Berry overnight oats", "day": "Mon", "slot": "Breakfast", "servings": 1 },
+      { "id": "a-002", "itemId": "r-004", "itemName": "Chicken quinoa bowl", "day": "Mon", "slot": "Lunch", "servings": 1 },
+      { "id": "a-003", "itemId": "r-006", "itemName": "Lentil tomato soup", "day": "Tue", "slot": "Dinner", "servings": 1 },
+      { "id": "a-004", "itemId": "r-003", "itemName": "Spinach omelette", "day": "Wed", "slot": "Breakfast", "servings": 1 },
+      { "id": "a-005", "itemId": "r-010", "itemName": "Chickpea curry", "day": "Wed", "slot": "Lunch", "servings": 2 },
+      { "id": "a-006", "itemId": "r-002", "itemName": "Avocado toast", "day": "Fri", "slot": "Breakfast", "servings": 1 },
+      { "id": "a-007", "itemId": "r-005", "itemName": "Greek salad", "day": "Fri", "slot": "Lunch", "servings": 1 },
+      { "id": "a-008", "itemId": "r-009", "itemName": "Turkey meatballs", "day": "Sun", "slot": "Dinner", "servings": 2 }
+    ],
+    "_derivedShoppingList": {
+      "_notes": "Expected aggregated grocery list from the seeds above",
+      "lines": [
+        { "ingredient": "Rolled oats", "totalAmount": 70, "unit": "g", "category": "Grains" },
+        { "ingredient": "Greek yogurt", "totalAmount": 150, "unit": "g", "category": "Dairy" },
+        { "ingredient": "Chia seeds", "totalAmount": 53, "unit": "g", "category": "Nuts & Seeds" },
+        { "ingredient": "Banana", "totalAmount": 1.0, "unit": "pc", "category": "Produce" },
+        { "ingredient": "Chicken breast", "totalAmount": 150, "unit": "g", "category": "Meat" },
+        { "ingredient": "Quinoa", "totalAmount": 85, "unit": "g", "category": "Grains" },
+        { "ingredient": "Baby spinach", "totalAmount": 80, "unit": "g", "category": "Produce" },
+        { "ingredient": "Cherry tomatoes", "totalAmount": 550, "unit": "g", "category": "Produce" },
+        { "ingredient": "Olive oil", "totalAmount": 3.0, "unit": "tbsp", "category": "Condiments" },
+        { "ingredient": "Red lentils", "totalAmount": 100, "unit": "g", "category": "Legumes" },
+        { "ingredient": "Whole eggs", "totalAmount": 2, "unit": "pc", "category": "Dairy" },
+        { "ingredient": "Whole wheat bread", "totalAmount": 2, "unit": "pc", "category": "Grains" },
+        { "ingredient": "Avocado", "totalAmount": 0.5, "unit": "pc", "category": "Produce" },
+        { "ingredient": "Chickpeas", "totalAmount": 400, "unit": "g", "category": "Legumes" },
+        { "ingredient": "Ground turkey", "totalAmount": 400, "unit": "g", "category": "Meat" }
+      ]
+    }
+  },
+
+  "formInputs": {
+    "productForm": {
+      "valid": [
+        {
+          "_case": "VALID-PRD-001",
+          "name": "Hemp seeds",
+          "category": "Nuts & Seeds",
+          "unit": "g",
+          "servingAmount": 30,
+          "kcal": 166,
+          "protein": 9.5,
+          "fat": 14.6,
+          "carbs": 2.6,
+          "dietTags": ["plant-based", "protein-focused"],
+          "expectedResult": "Product saved; appears in All products and Mine filter"
+        },
+        {
+          "_case": "VALID-PRD-002",
+          "name": "Coconut oil",
+          "category": "Condiments",
+          "unit": "tbsp",
+          "servingAmount": 1,
+          "kcal": 121,
+          "protein": 0,
+          "fat": 13.5,
+          "carbs": 0,
+          "dietTags": ["keto", "paleo"],
+          "expectedResult": "Product saved with zero protein/carbs — should be accepted"
+        }
+      ],
+      "edgeCases": [
+        {
+          "_case": "EDGE-PRD-001",
+          "name": "A",
+          "category": "Produce",
+          "unit": "g",
+          "servingAmount": 1,
+          "kcal": 0,
+          "protein": 0,
+          "fat": 0,
+          "carbs": 0,
+          "expectedResult": "All-zero nutrition: accepted (raw water-like product); 1-char name: depends on validation rule"
+        },
+        {
+          "_case": "EDGE-PRD-002",
+          "name": "Aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "category": "Dairy",
+          "unit": "g",
+          "servingAmount": 9999,
+          "kcal": 9999,
+          "protein": 999,
+          "fat": 999,
+          "carbs": 999,
+          "expectedResult": "100-char name and very large values: should either be accepted or show a clear max-limit message"
+        },
+        {
+          "_case": "EDGE-PRD-003",
+          "name": "Special chars: café & naïve 🥑",
+          "category": "Produce",
+          "unit": "g",
+          "servingAmount": 100,
+          "kcal": 80,
+          "protein": 1,
+          "fat": 0,
+          "carbs": 20,
+          "expectedResult": "Unicode and emoji in product name: should render correctly on card"
+        }
+      ],
+      "invalid": [
+        {
+          "_case": "INVALID-PRD-001",
+          "name": "",
+          "category": "Dairy",
+          "unit": "g",
+          "servingAmount": 100,
+          "kcal": 50,
+          "protein": 5,
+          "fat": 2,
+          "carbs": 3,
+          "expectedResult": "Empty name: form should not submit; name field shows validation error"
+        },
+        {
+          "_case": "INVALID-PRD-002",
+          "name": "Bad macros",
+          "category": "Grains",
+          "unit": "g",
+          "servingAmount": -1,
+          "kcal": -10,
+          "protein": -5,
+          "fat": -1,
+          "carbs": -2,
+          "expectedResult": "Negative numbers: form should reject with validation errors on numeric fields"
+        },
+        {
+          "_case": "INVALID-PRD-003",
+          "name": "Text in numbers",
+          "category": "Grains",
+          "unit": "g",
+          "servingAmount": "abc",
+          "kcal": "lots",
+          "protein": "much",
+          "fat": "fat",
+          "carbs": "many",
+          "expectedResult": "Non-numeric in numeric fields: browser/form validation blocks submission"
+        }
+      ]
+    },
+
+    "recipeForm": {
+      "valid": [
+        {
+          "_case": "VALID-RCP-001",
+          "name": "Simple tuna salad",
+          "category": "Salads",
+          "servings": 1,
+          "ingredients": [
+            { "productName": "Tuna in water", "amount": 100, "unit": "g" },
+            { "productName": "Cherry tomatoes", "amount": 80, "unit": "g" }
+          ],
+          "dietTags": ["keto", "mediterranean"],
+          "expectedResult": "Recipe saved; appears in All recipes and Mine filter; nutrition auto-calculated"
+        },
+        {
+          "_case": "VALID-RCP-002",
+          "name": "Empty recipe (no ingredients)",
+          "category": "Snacks",
+          "servings": 1,
+          "ingredients": [],
+          "dietTags": [],
+          "expectedResult": "Recipe with no ingredients saves successfully; nutrition shows 0/0/0/0; contributes nothing to shopping list"
+        }
+      ],
+      "invalid": [
+        {
+          "_case": "INVALID-RCP-001",
+          "name": "",
+          "category": "Salads",
+          "servings": 1,
+          "ingredients": [],
+          "expectedResult": "Empty recipe name: form should not submit"
+        },
+        {
+          "_case": "INVALID-RCP-002",
+          "name": "Bad servings",
+          "category": "Salads",
+          "servings": 0,
+          "ingredients": [],
+          "expectedResult": "Zero servings: should be rejected or show warning (division by zero risk)"
+        }
+      ]
+    },
+
+    "profileForm": {
+      "validMacros": [
+        { "_case": "VALID-MAC-001", "proteinPct": 30, "fatPct": 35, "carbsPct": 35, "sum": 100, "expectedResult": "Summing to 100%: no warning shown" },
+        { "_case": "VALID-MAC-002", "proteinPct": 25, "fatPct": 70, "carbsPct": 5, "sum": 100, "expectedResult": "Keto split: summing to 100%, no warning" }
+      ],
+      "invalidMacros": [
+        { "_case": "INVALID-MAC-001", "proteinPct": 50, "fatPct": 50, "carbsPct": 50, "sum": 150, "expectedResult": "Over 100%: warning 'Macros must sum to 100%' shown; profile not saved or save is blocked" },
+        { "_case": "INVALID-MAC-002", "proteinPct": 10, "fatPct": 10, "carbsPct": 10, "sum": 30, "expectedResult": "Under 100%: same warning shown" }
+      ],
+      "calorieTarget": [
+        { "_case": "VALID-CAL-001", "target": 2000, "expectedCorridor": "1850–2150 kcal" },
+        { "_case": "VALID-CAL-002", "target": 1500, "expectedCorridor": "1350–1650 kcal" },
+        { "_case": "EDGE-CAL-001", "target": 500, "expectedCorridor": "350–650 kcal", "note": "Very low calorie — UI should accept but may show a health warning" },
+        { "_case": "EDGE-CAL-002", "target": 5000, "expectedCorridor": "4850–5150 kcal", "note": "Very high calorie — UI should accept" }
+      ]
+    },
+
+    "authForm": {
+      "validCredentials": [
+        { "_case": "VALID-AUTH-001", "email": "test.user@mealforge.com", "password": "Password123!", "expectedResult": "Sign-in succeeds; lands on Planner" },
+        { "_case": "VALID-AUTH-002", "email": "newreg@mealforge.com", "password": "Register99!", "expectedResult": "Registration succeeds; user signed in; lands on Planner" }
+      ],
+      "invalidCredentials": [
+        { "_case": "INVALID-AUTH-001", "email": "test.user@mealforge.com", "password": "wrongpass", "expectedResult": "Generic error: 'Email or password is incorrect'; does not indicate which field" },
+        { "_case": "INVALID-AUTH-002", "email": "nobody@mealforge.com", "password": "Password123!", "expectedResult": "Same generic error as above; no email-existence leak" },
+        { "_case": "INVALID-AUTH-003", "email": "notanemail", "password": "Password123!", "expectedResult": "Email format validation error before submission" },
+        { "_case": "INVALID-AUTH-004", "email": "weak@mealforge.com", "password": "abc", "expectedResult": "Registration: weak password error; minimum 8 characters" },
+        { "_case": "INVALID-AUTH-005", "email": "test.user@mealforge.com", "password": "Password123!", "repeatPassword": "Different1!", "expectedResult": "Registration: passwords do not match error" }
+      ]
+    }
+  }
+}

@@ -1,14 +1,14 @@
 # User stories: recipe analyser
 
-Requirements: [03_recipe_analyser.md](../requirements/03_recipe_analyser.md)
+Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 
 ---
 
 ## US-RA-001 Browse recipes with nutrition and ingredients
 
-**As a** cook or planner  
+**As a** user or nutritionist  
 **I want** a recipe database where each recipe shows nutrition and ingredient lines linked to products  
-**So that** totals stay consistent with the product catalog.
+**So that** totals stay consistent with All products.
 
 **Acceptance criteria**
 
@@ -17,15 +17,17 @@ Requirements: [03_recipe_analyser.md](../requirements/03_recipe_analyser.md)
 
 ---
 
-## US-RA-002 Recipe list layout reference
+## US-RA-002 Recipe list is scannable without opening each item
 
 **As a** user  
-**I want** the recipe list layout to follow the agreed reference  
-**So that** the experience stays consistent with design (see requirements for screenshot path).
+**I want** each recipe in the list to show enough information to make a choice  
+**So that** I do not have to open every card to decide what to cook or plan.
 
 **Acceptance criteria**
 
-- [ ] List view matches the structure and primary elements of the reference image in requirements, within intentional product updates.
+- [ ] Each item in the recipe list shows at minimum: title, category, and a macro or calorie summary.
+- [ ] Filter and search controls are visible alongside the list on the same screen (no separate page required).
+- [ ] The list renders in a consistent grid or row layout with no broken or mixed item sizes.
 
 ---
 
@@ -94,16 +96,20 @@ Requirements: [03_recipe_analyser.md](../requirements/03_recipe_analyser.md)
 
 ---
 
-## US-RA-008 Mark recipe for the current week
+## US-RA-008 Mark recipe for the current week or next week
 
 **As a** user planning the week  
-**I want** to mark a recipe as selected for the current week  
-**So that** it appears in meal-prep summary and planner flows.
+**I want** to mark a recipe as selected for the current week or the next week (independently)  
+**So that** it appears in the appropriate planner flow, matching the same flags available on products.
 
 **Acceptance criteria**
 
-- [ ] User can set or clear “selected for current week” on a recipe.
-- [ ] Meal planner can consume this flag per integration requirements.
+- [ ] User can toggle “This week” and “Next week” flags on a recipe independently.
+- [ ] Both flags are visible on recipe cards.
+- [ ] Marking “This week” adds the recipe to the Meal planner Weekly summary (Lunch slot by default, same as products).
+- [ ] Removing “This week” when the recipe has no day-card assignments removes it from the Weekly summary automatically.
+- [ ] Removing “This week” when the recipe already has day-card assignments shows a confirmation prompt before any assignments are removed.
+- [ ] On week rollover (each Monday), “Next week” flags auto-promote to “This week” and the recipe appears in the current week's planner summary (Lunch slot by default).
 
 ---
 
@@ -116,6 +122,7 @@ Requirements: [03_recipe_analyser.md](../requirements/03_recipe_analyser.md)
 **Acceptance criteria**
 
 - [ ] Manual creation form captures ingredients (with product linkage where required), steps, servings, and metadata needed for nutrition calculation.
+- [ ] A recipe with no ingredients can be saved; nutrition shows all zeros and the recipe contributes no lines to the grocery list until ingredients are added.
 - [ ] Saved recipe appears in “my recipes” and in search/browse as appropriate.
 
 ---
@@ -128,8 +135,9 @@ Requirements: [03_recipe_analyser.md](../requirements/03_recipe_analyser.md)
 
 **Acceptance criteria**
 
-- [ ] User can start an import flow per supported source type (PDF, URL, YouTube per requirements).
+- [ ] User can start an import flow for website URL and PDF (MVP sources).
 - [ ] Imported content becomes an editable draft or saved recipe with ingredients and nutrition populated as accurately as the pipeline allows.
+- [ ] YouTube import is not available in MVP1.
 
 ---
 
@@ -154,7 +162,8 @@ Requirements: [03_recipe_analyser.md](../requirements/03_recipe_analyser.md)
 **Acceptance criteria**
 
 - [ ] Edit and delete are only offered for user-owned recipes (unless admin).
-- [ ] Deletion removes or archives per product rules without breaking references unexpectedly.
+- [ ] Attempting to delete a recipe that has planner assignments in the current or any future week is blocked; the user sees which days and meal slots the recipe is assigned to.
+- [ ] Deleting a recipe that has assignments only in past weeks succeeds; past-week assignments are removed silently.
 
 ---
 

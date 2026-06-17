@@ -18,15 +18,15 @@ The planner offers three tab-switchable views that share the same selected week.
 
 Displays the week's meal plan as a spreadsheet grid, grouped by meal slot.
 
-- The grid is divided into four sections: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
-- Within each section, each row represents one product or recipe.
+- The grid is divided into four meal slots: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
+- Within each meal slot, each row represents one product or recipe.
 - **Column 1 — Item:** free-text search input that narrows the list as the user types; selecting a match pins the item to that row.
 - **Columns 2–8 — Mon–Sun:** numeric input for the number of servings on each day; empty cells mean that item is not planned for that day.
 - The user can toggle each row between **servings** mode and **grams** mode (grams mode is available only when the item has a gram weight per serving defined).
 - When grams mode is active, the secondary label shows the equivalent servings count, and vice versa.
-- The user can add rows to any meal slot via an "Add item" button at the bottom of each section.
+- The user can add rows to any meal slot via an "Add item" button at the bottom of each meal slot.
 - The user can remove individual rows; doing so also removes the corresponding assignments for that item and meal slot only (other meal slots for the same item are unaffected).
-- Items marked "This week" in the All products or Recipes catalog are automatically added to the Lunch slot of the summary.
+- Items marked "This week" in All products or Recipes are automatically added to the Lunch slot of the summary.
 
 ---
 
@@ -35,15 +35,15 @@ Displays the week's meal plan as a spreadsheet grid, grouped by meal slot.
 Displays one scrollable card per day of the selected week.
 
 - Each card shows the day name and date.
-- Each card is divided into four meal sections: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
-- Each section shows the items assigned to that meal slot on that day, with their serving count and kcal contribution.
-- The user can add an item to a section via an inline search input (the item is also added to the weekly summary in the corresponding meal slot if not already present).
-- The user can remove an item from a section.
+- Each card is divided into four meal slots: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
+- Each meal slot shows the items assigned on that day, with their serving count and kcal contribution.
+- The user can add an item to a meal slot via an inline search input (the item is also added to the weekly summary in the corresponding meal slot if not already present).
+- The user can remove an item from a meal slot.
 - The user can adjust servings per item with +/− controls.
 - **Drag and drop:** items are draggable within and across cards:
-  - Drag to a different section on the same card to change the meal slot.
-  - Drag to a section on a different day card to reassign the day (and optionally the meal slot).
-- Each day card shows a total nutrition summary (kcal, protein, fat, carbs) for all items across all sections that day.
+  - Drag to a different meal slot on the same card.
+  - Drag to a meal slot on a different day card to reassign the day (and optionally the meal slot).
+- Each day card shows a total nutrition summary (kcal, protein, fat, carbs) for all items across all meal slots that day.
 
 ---
 
@@ -75,3 +75,8 @@ The calendar offers two sub-views toggled by a **Week / Month** button pair.
 - Assignments made in the Weekly summary are immediately reflected in Day cards and Calendar, and vice versa.
 - The weekly summary and day cards share the same underlying assignment data keyed by (item, day, meal slot).
 - Adding an item in the calendar automatically registers it in the weekly summary in the selected meal slot.
+
+## Profile integration
+
+- The planner header displays the user's currently active diet (as set in Personal cabinet) so they can see their dietary context while planning.
+- The planner does not enforce diet rules automatically; the active diet label is informational only.

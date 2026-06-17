@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Brand palette */
+  --color-teal:       #2D9B9F;
+  --color-teal-dark:  #1A6B6E;
+  --color-teal-mid:   #248e92;
+  --color-teal-light: #D6F0F1;
+  --color-teal-muted: #e8f7f7;
+  --color-sage:       #6BAE8C;
+  --color-sage-light: #E4F5EC;
+  --color-amber:      #F59E0B;
+  --color-amber-light:#FEF3C7;
+  --color-app-bg:     #F1F5F4;
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: #F1F5F4;
+  color: #0f172a;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Thin scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid #2D9B9F;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Smooth micro-transitions */
+button, a, input, select, textarea {
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    opacity 150ms ease;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

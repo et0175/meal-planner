@@ -1,0 +1,16 @@
+# Open question: Nutritionist post-MVP1 permissions — see open-questions.md#oq-005
+actors:
+  - id: ACT-001
+    name: User
+    type: human
+    description: An authenticated individual who browses products and recipes, plans weekly meals, logs food intake, and manages personal catalog entries.
+
+  - id: ACT-002
+    name: Nutritionist
+    type: human
+    description: A professional user who curates products and recipes and annotates dietary compatibility. In MVP1, shares the same system permissions as a regular User. Post-MVP1 differentiations planned — annotate diet compatibility on any user's products/recipes; create and edit meal plans on behalf of other users.
+
+  - id: ACT-003
+    name: System
+    type: system
+    description: Internal automated actor that performs derived computations such as nutrition aggregation, calorie corridor calculation, and shopping list refresh triggered by plan changes.

@@ -1,19 +1,22 @@
 # User stories: personal cabinet
 
-Requirements: [04_personal_cabinet.md](../requirements/04_personal_cabinet.md)
+Requirements: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md)
 
 ---
 
-## US-PC-001 Sign in and manage email and password
+## US-PC-001 Update email and password
 
-**As a** user  
-**I want** to sign in with email and password and change my credentials when needed  
-**So that** my account stays secure and reachable.
+**As a** signed-in user  
+**I want** to change my email address or password from my profile  
+**So that** my account stays secure and reachable if my details change.
+
+> Registration and sign-in flows are covered in [authentication.md](authentication.md).
 
 **Acceptance criteria**
 
-- [ ] User can register or sign in with email and password (per auth design).
-- [ ] User can update email and/or password where the product allows, with validation and confirmation as required.
+- [ ] User can change their email address; the new address must be unique and the change requires password confirmation.
+- [ ] User can change their password; the form requires the current password and a new password meeting the minimum strength policy.
+- [ ] After a password change, the current session is invalidated and the user is redirected to sign-in.
 
 ---
 
@@ -38,8 +41,10 @@ Requirements: [04_personal_cabinet.md](../requirements/04_personal_cabinet.md)
 
 **Acceptance criteria**
 
-- [ ] Unit system preference is stored on the user profile.
-- [ ] Displayed quantities in relevant modules respect this preference.
+- [ ] Unit system preference is stored on the user profile; options are metric and US customary.
+- [ ] In metric mode, weights show in g/kg and volumes in ml/l.
+- [ ] In US customary mode, weights show in oz/lb and volumes in fl oz/cups/tbsp/tsp.
+- [ ] Displayed quantities in all modules (products, recipes, planner, shopping list) respect the selected preference.
 
 ---
 
@@ -64,9 +69,9 @@ Requirements: [04_personal_cabinet.md](../requirements/04_personal_cabinet.md)
 
 **Acceptance criteria**
 
-- [ ] User can select from diets or preferences offered (aligned with dietary analyser).
-- [ ] System shows a recommended calorie corridor based on the chosen rules or formulas.
-- [ ] User can set or adjust macro proportions within allowed bounds (per UX and validation rules).
+- [ ] User can select one diet at a time from the diets offered by the dietary analyser (single-select).
+- [ ] System displays a calorie corridor as `target − 150` to `target + 150` kcal (e.g. a 2000 kcal target yields 1850–2150 kcal).
+- [ ] User can set macro proportions (protein %, fat %, carbs %); the UI shows a visible warning when the three values do not sum to exactly 100%.
 
 ---
 
@@ -75,6 +80,8 @@ Requirements: [04_personal_cabinet.md](../requirements/04_personal_cabinet.md)
 **As a** user  
 **I want** to log products and recipes I ate and see a daily nutrition total  
 **So that** I know whether I stayed on target.
+
+> **Design note:** Meal tracking (what was eaten) and the Meal planner (what is intended) are independent by design — planning is aspirational, logging is factual. Logging a meal does not create a planner assignment, and planning a meal does not create a tracking entry. A "log from plan" shortcut is a planned post-MVP feature.
 
 **Acceptance criteria**
 

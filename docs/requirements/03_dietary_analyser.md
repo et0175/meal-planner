@@ -1,5 +1,7 @@
 # Business requirements: dietary analyser
 
+> **Decision (OQ-002):** The diet list is static in MVP1. The 12 patterns below are hardcoded; adding or changing a diet requires a code change and release.
+
 - The module lists multiple nutrition systems or diet patterns, for example:
 
   - Mediterranean diet  

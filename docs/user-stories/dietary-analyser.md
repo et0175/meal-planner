@@ -1,6 +1,6 @@
 # User stories: dietary analyser
 
-Requirements: [02_dietary_analyser.md](../requirements/02_dietary_analyser.md)
+Requirements: [03_dietary_analyser.md](../requirements/03_dietary_analyser.md)
 
 ---
 
@@ -12,8 +12,9 @@ Requirements: [02_dietary_analyser.md](../requirements/02_dietary_analyser.md)
 
 **Acceptance criteria**
 
-- [ ] The module presents multiple named diets (covering at least the examples in requirements: Mediterranean, plant-based/flexitarian, MIND, DASH, paleo, WW, intermittent fasting, keto, volumetrics, protein-focused, healthy fats, hydration, and similar).
+- [ ] The module presents exactly the 12 named diets defined in requirements: Mediterranean, plant-based/flexitarian, MIND, DASH, paleo, WW, intermittent fasting, keto, volumetrics, protein-focused, healthy fats, hydration.
 - [ ] Each entry is selectable or openable for more detail.
+- [ ] No UI is provided for adding or editing diets in MVP1 (the list is static).
 
 ---
 

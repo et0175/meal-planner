@@ -62,13 +62,13 @@ function inputDate(date: Date) {
 
 ---
 
-## 🔴 ISSUE-003 — Deleting a day card section leaves orphaned items in the summary
+## 🔴 ISSUE-003 — Deleting a day card meal slot leaves orphaned items in the summary
 
 **Severity:** Bug  
 **Affected view:** Planner  
 **Reproduction:**
 1. Place an item that is not on any other day card (e.g., "Berry overnight oats" on Monday Breakfast only).
-2. Delete the Monday Breakfast section via the trash icon in the section header.
+2. Delete the Monday Breakfast meal slot via the trash icon in the meal slot header.
 3. The assignment is removed from the day card, but "Berry overnight oats" remains in the summary panel with no day card placements.
 
 **Root cause:** `deleteDaySection` filters out assignments but does not run the orphan-check that `removeAssignment` does:
@@ -199,7 +199,7 @@ Corridor still shows: 1950 - 2250 kcal   // no error
 
 **Severity:** UX defect  
 **Affected view:** Planner  
-**Description:** Clicking the Place (+) button on a summary card multiple times creates separate assignment records on the same day/section. Each counts separately toward the macro total and shopping list. There is no deduplication or warning.
+**Description:** Clicking the Place (+) button on a summary card multiple times creates separate assignment records on the same day/meal slot. Each counts separately toward the macro total and shopping list. There is no deduplication or warning.
 
 **Evidence:**
 ```
@@ -212,7 +212,7 @@ Day card items after placement: ["Berry overnight oats","Berry overnight oats",.
 
 **Severity:** Prototype gap  
 **Affected view:** Diets  
-**Requirements:** `docs/requirements/02_dietary_analyser.md`
+**Requirements:** `docs/requirements/03_dietary_analyser.md`
 
 Implemented: Mediterranean, DASH, Keto, Protein-focused  
 Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers (WW), Intermittent fasting, Volumetrics, Healthy fats, Hydration guidance
@@ -230,8 +230,8 @@ Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers 
 ## 🟡 ISSUE-012 — No diet-type filter on Products or Recipes
 
 **Severity:** Prototype gap  
-**Requirements:** US-RA-005, US-DA-003, US-DA-004  
-**Description:** Items carry a `diets` array and diet tags are visible on cards, but no filter allows restricting the list to a specific diet.
+**Requirements:** US-RA-005 (recipe filter by diet); `docs/requirements/01_products-database.md` (product filter by diet)  
+**Description:** Items carry a `diets` array and diet tags are visible on cards, but no filter allows restricting the list to a specific diet. (US-DA-003/004 cover marking compatibility, not filtering.)
 
 ---
 
@@ -246,7 +246,7 @@ Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers 
 ## 🟡 ISSUE-014 — No add / edit / delete for products or recipes
 
 **Severity:** Prototype gap  
-**Requirements:** US-RA-009, US-RA-012, US-RA-013; `docs/requirements/01_products-analyser.md`  
+**Requirements:** US-RA-009, US-RA-012, US-RA-013; `docs/requirements/02_products-analyser.md`  
 **Description:** The catalog is read-only seed data. No form or flow to create, edit, or delete items.
 
 ---
@@ -283,13 +283,21 @@ Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers 
 
 ---
 
+## 🟡 ISSUE-019 — Shopping list embedded in Planner instead of standalone nav item
+
+**Severity:** Prototype gap  
+**Requirements:** `docs/requirements/07_shopping_list.md`; US-SL-001  
+**Description:** Requirements specify Shopping List as a dedicated navigation item separate from the Meal Planner. In the prototype, shopping list controls and generation live inside the Planner view (TC-PLN-040–046). The sidebar (TC-NAV-001) lists only 5 items; Shopping List is missing. Additionally, the spec-based date range selector (US-SL-002) and plan summary (US-SL-003) are not implemented; the prototype generates the list from the current plan state without a date range.
+
+---
+
 ## Summary
 
 | Severity | Count | IDs |
 |---|---|---|
 | 🔴 Bug | 4 | 001, 002, 003, 004 |
 | 🟠 UX defect | 5 | 005, 006, 007, 008, 009 |
-| 🟡 Prototype gap | 9 | 010–018 |
-| **Total** | **18** | |
+| 🟡 Prototype gap | 10 | 010–019 |
+| **Total** | **19** | |
 
 **Priority fixes before next user test session:** ISSUE-001 (search bleed), ISSUE-002 (timezone), ISSUE-006 (favorite toggle), ISSUE-010 (more diets).

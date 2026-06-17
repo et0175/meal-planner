@@ -41,7 +41,7 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 **Acceptance criteria**
 
-- [ ] The grid is grouped into four sections: Breakfast, Lunch, Dinner, Snacks.
+- [ ] The grid is grouped into four meal slots: Breakfast, Lunch, Dinner, Snacks.
 - [ ] Each row has a product/recipe search input and seven day columns (Mon–Sun).
 - [ ] Entering a number in a day cell creates or updates that assignment.
 - [ ] Clearing or zeroing a cell removes the assignment.
@@ -56,7 +56,7 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 **Acceptance criteria**
 
-- [ ] Each meal slot section has an "Add item" button that appends a blank row to that section.
+- [ ] Each meal slot has an "Add item" button that appends a blank row.
 - [ ] Removing a row removes all assignments for that item+meal-slot combination; other slots for the same item are unaffected.
 
 ---
@@ -98,8 +98,8 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 **Acceptance criteria**
 
 - [ ] Day cards view shows seven cards, one per day, in horizontal scroll.
-- [ ] Each card has four sections: Breakfast, Lunch, Dinner, Snacks.
-- [ ] Each section lists the items assigned to that slot on that day, with kcal and servings.
+- [ ] Each card has four meal slots: Breakfast, Lunch, Dinner, Snacks.
+- [ ] Each meal slot lists the items assigned on that day, with kcal and servings.
 - [ ] The day card shows an aggregated nutrition strip (kcal, protein, fat, carbs) when there is at least one item.
 
 ---
@@ -112,7 +112,7 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 **Acceptance criteria**
 
-- [ ] Each section has an "+ Add" button that opens an inline search input.
+- [ ] Each meal slot has an "+ Add" button that opens an inline search input.
 - [ ] Selecting an item creates an assignment for that day+meal and adds the item to the weekly summary if absent.
 - [ ] Each item has a remove button; clicking it deletes the assignment.
 
@@ -127,8 +127,9 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 **Acceptance criteria**
 
 - [ ] Each item has + and − controls.
-- [ ] Reducing servings to zero or below removes the item from the section.
-- [ ] The day's kcal total updates immediately.
+- [ ] The − button decreases servings by 0.5 per tap, with a minimum of 0.5 (the item is never auto-removed by the − button alone).
+- [ ] To remove an item entirely, the user uses the × remove button (see US-MP-008).
+- [ ] The day's kcal total updates immediately after each change.
 
 ---
 
@@ -141,8 +142,8 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 **Acceptance criteria**
 
 - [ ] Items are draggable; a visual cue (opacity change) indicates the dragged item.
-- [ ] Dropping on a different section of the same card changes the meal slot.
-- [ ] Dropping on a section of a different day card changes both the day and the meal slot.
+- [ ] Dropping on a different meal slot of the same card reassigns the item to that meal slot.
+- [ ] Dropping on a meal slot of a different day card changes both the day and the meal slot.
 - [ ] The source card updates (item removed from old slot) and the target updates (item added to new slot).
 
 ---
@@ -203,3 +204,17 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 - [ ] Items in calendar cells are draggable.
 - [ ] Dropping on a different day cell moves the assignment to that day while keeping the original meal slot.
 - [ ] The source and target cells update immediately.
+
+---
+
+## US-MP-015 See active diet label in the planner header
+
+**As a** user who has set a diet preference in their profile  
+**I want** to see my active diet displayed in the planner header  
+**So that** I can plan meals with my dietary context in view without switching to the Profile.
+
+**Acceptance criteria**
+
+- [ ] When a diet is selected in Personal cabinet, its name appears as a label in the Meal planner header.
+- [ ] The label is informational only — the planner does not filter or enforce diet rules automatically.
+- [ ] If no diet is selected in the profile, no label is shown.
