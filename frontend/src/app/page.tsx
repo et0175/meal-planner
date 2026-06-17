@@ -32,7 +32,7 @@ import { useMemo, useState } from "react";
 // ── Types ──────────────────────────────────────────────────────────────────────
 type View = "planner" | "products" | "analyser" | "recipes" | "diets" | "profile" | "shopping";
 type ItemKind = "product" | "recipe";
-type Macro = { calories: number; protein: number; fat: number; carbs: number };
+type Macro = { calories: number; protein: number; fat: number; carbs: number; fiber: number };
 type Ingredient = { name: string; amount: number; unit: string };
 
 type CatalogItem = {
@@ -42,6 +42,8 @@ type CatalogItem = {
   category: string;
   serving: string;
   servingG?: number; // grams per serving, used by Products Analyser for g/ml scaling
+  prepTime?: number; // minutes, recipes only
+  steps?: string[];  // instructions, recipes only
   image: string;
   diets: string[];
   macros: Macro;
@@ -66,11 +68,14 @@ type FormDraft = {
   kind: ItemKind;
   category: string;
   serving: string;
+  prepTime: string;
+  steps: string;
   image: string;
   calories: string;
   protein: string;
   fat: string;
   carbs: string;
+  fiber: string;
   diets: string[];
   ingredients: { name: string; amount: string; unit: string }[];
 };
@@ -181,7 +186,7 @@ const seedItems: CatalogItem[] = [
     servingG: 200,
     image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?auto=format&fit=crop&w=480&q=80",
     diets: ["Mediterranean", "Protein-focused", "DASH"],
-    macros: { calories: 146, protein: 20, fat: 4, carbs: 8 },
+    macros: { calories: 146, protein: 20, fat: 4, carbs: 8, fiber: 0 },
     thisWeek: true,
     ingredients: [{ name: "Greek yogurt", amount: 200, unit: "g" }]
   },
@@ -194,7 +199,7 @@ const seedItems: CatalogItem[] = [
     servingG: 150,
     image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=480&q=80",
     diets: ["Mediterranean", "Keto", "Healthy fats"],
-    macros: { calories: 312, protein: 34, fat: 18, carbs: 0 },
+    macros: { calories: 312, protein: 34, fat: 18, carbs: 0, fiber: 0 },
     thisWeek: true,
     ingredients: [{ name: "Atlantic salmon", amount: 150, unit: "g" }]
   },
@@ -207,7 +212,7 @@ const seedItems: CatalogItem[] = [
     servingG: 180,
     image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=480&q=80",
     diets: ["Plant-based", "Mediterranean", "DASH"],
-    macros: { calories: 222, protein: 8, fat: 4, carbs: 39 },
+    macros: { calories: 222, protein: 8, fat: 4, carbs: 39, fiber: 5 },
     ingredients: [{ name: "Cooked quinoa", amount: 180, unit: "g" }]
   },
   {
@@ -219,7 +224,7 @@ const seedItems: CatalogItem[] = [
     servingG: 150,
     image: "https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=480&q=80",
     diets: ["Plant-based", "Keto", "Healthy fats"],
-    macros: { calories: 240, protein: 3, fat: 22, carbs: 13 },
+    macros: { calories: 240, protein: 3, fat: 22, carbs: 13, fiber: 10 },
     ingredients: [{ name: "Avocado", amount: 1, unit: "pc" }]
   },
   {
@@ -231,7 +236,7 @@ const seedItems: CatalogItem[] = [
     servingG: 60,
     image: "https://images.unsplash.com/photo-1571748982800-fa51082c2224?auto=format&fit=crop&w=480&q=80",
     diets: ["Plant-based", "Volumetrics"],
-    macros: { calories: 268, protein: 7, fat: 11, carbs: 36 },
+    macros: { calories: 268, protein: 7, fat: 11, carbs: 36, fiber: 3 },
     mine: true,
     ingredients: [{ name: "Homemade granola", amount: 60, unit: "g" }]
   },
@@ -241,15 +246,22 @@ const seedItems: CatalogItem[] = [
     name: "Berry overnight oats",
     category: "Breakfasts",
     serving: "1 jar",
+    prepTime: 10,
     image: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=480&q=80",
     diets: ["Plant-based", "DASH", "Volumetrics"],
-    macros: { calories: 384, protein: 18, fat: 11, carbs: 56 },
+    macros: { calories: 384, protein: 18, fat: 11, carbs: 56, fiber: 6 },
     thisWeek: true,
     favorite: true,
     ingredients: [
       { name: "Rolled oats", amount: 70, unit: "g" },
       { name: "Greek yogurt", amount: 120, unit: "g" },
       { name: "Blueberries", amount: 90, unit: "g" }
+    ],
+    steps: [
+      "Combine rolled oats, Greek yogurt, and a splash of milk in a jar.",
+      "Fold in half the blueberries.",
+      "Cover and refrigerate overnight (at least 6 hours).",
+      "Stir before serving, top with remaining blueberries and a drizzle of honey."
     ]
   },
   {
@@ -258,15 +270,25 @@ const seedItems: CatalogItem[] = [
     name: "Lentil tomato soup",
     category: "Soups",
     serving: "1 bowl",
+    prepTime: 25,
     image: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=480&q=80",
     diets: ["Plant-based", "Mediterranean", "Volumetrics"],
-    macros: { calories: 338, protein: 20, fat: 7, carbs: 49 },
+    macros: { calories: 338, protein: 20, fat: 7, carbs: 49, fiber: 12 },
     thisWeek: true,
     favorite: false,
     ingredients: [
       { name: "Red lentils", amount: 85, unit: "g" },
       { name: "Tomatoes", amount: 240, unit: "g" },
-      { name: "Vegetable broth", amount: 320, unit: "ml" }
+      { name: "Vegetable broth", amount: 320, unit: "ml" },
+      { name: "Onion", amount: 80, unit: "g" },
+      { name: "Olive oil", amount: 10, unit: "ml" }
+    ],
+    steps: [
+      "Sauté diced onion in olive oil over medium heat for 3–4 min until soft.",
+      "Rinse red lentils, add to pot with chopped tomatoes. Stir to combine.",
+      "Pour in vegetable broth, bring to a boil, then reduce heat.",
+      "Simmer uncovered for 18–20 min until lentils are completely tender.",
+      "Season with salt, pepper, and a squeeze of lemon juice. Serve hot."
     ]
   },
   {
@@ -275,15 +297,32 @@ const seedItems: CatalogItem[] = [
     name: "Chicken quinoa bowl",
     category: "Main courses",
     serving: "1 bowl",
+    prepTime: 30,
     image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=480&q=80",
     diets: ["Protein-focused", "Mediterranean", "DASH"],
-    macros: { calories: 528, protein: 42, fat: 17, carbs: 52 },
+    macros: { calories: 619, protein: 56, fat: 25, carbs: 47, fiber: 8 },
     thisWeek: true,
     favorite: true,
     ingredients: [
-      { name: "Chicken breast", amount: 140, unit: "g" },
-      { name: "Cooked quinoa", amount: 160, unit: "g" },
-      { name: "Mixed greens", amount: 80, unit: "g" }
+      { name: "Chicken fillet", amount: 180, unit: "g" },
+      { name: "Greek yogurt 10%", amount: 60, unit: "g" },
+      { name: "Quinoa (dry)", amount: 40, unit: "g" },
+      { name: "Broccoli", amount: 200, unit: "g" },
+      { name: "Sunflower oil", amount: 10, unit: "ml" },
+      { name: "Garlic", amount: 5, unit: "g" },
+      { name: "Lemon juice", amount: 15, unit: "ml" },
+      { name: "Parsley", amount: 8, unit: "g" },
+      { name: "Dill", amount: 5, unit: "g" },
+      { name: "Dijon mustard", amount: 5, unit: "g" }
+    ],
+    steps: [
+      "Rinse quinoa 2–3 times. Cook covered in 1:2 water, lightly salted, for 12–15 min until water absorbs.",
+      "Remove from heat, cover for 5 more min. Fluff with a fork — the grains should be light.",
+      "Pat chicken dry, season with salt, pepper, and paprika. Pan-fry in 5 ml oil for 4–5 min per side until golden.",
+      "Cover the fillet and let it rest 3–4 min, then slice.",
+      "Steam broccoli for 4–6 min or blanch in boiling water for 3 min. It should stay bright green and slightly crisp.",
+      "Sauce: whisk yogurt, lemon juice, minced garlic, and Dijon. Stir in remaining oil and chopped parsley.",
+      "Serve quinoa and broccoli in a bowl, lay chicken on top, drizzle with sauce, and sprinkle with dill."
     ]
   },
   {
@@ -292,14 +331,21 @@ const seedItems: CatalogItem[] = [
     name: "Citrus avocado salad",
     category: "Salads",
     serving: "1 plate",
+    prepTime: 10,
     image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=480&q=80",
     diets: ["Plant-based", "Mediterranean", "Healthy fats"],
-    macros: { calories: 286, protein: 7, fat: 19, carbs: 27 },
+    macros: { calories: 286, protein: 7, fat: 19, carbs: 27, fiber: 9 },
     favorite: false,
     ingredients: [
       { name: "Avocado", amount: 0.5, unit: "pc" },
       { name: "Orange", amount: 1, unit: "pc" },
       { name: "Spinach", amount: 90, unit: "g" }
+    ],
+    steps: [
+      "Peel and segment the orange; slice the avocado.",
+      "Arrange spinach as a base on a plate.",
+      "Layer avocado and orange segments on top.",
+      "Drizzle with olive oil and fresh lemon juice, season with salt and pepper."
     ]
   },
   {
@@ -308,15 +354,22 @@ const seedItems: CatalogItem[] = [
     name: "My pesto pasta",
     category: "Main courses",
     serving: "1 plate",
+    prepTime: 15,
     image: "https://images.unsplash.com/photo-1555949258-eb67b1ef0ceb?auto=format&fit=crop&w=480&q=80",
     diets: ["Mediterranean", "Healthy fats"],
-    macros: { calories: 520, protein: 18, fat: 22, carbs: 64 },
+    macros: { calories: 520, protein: 18, fat: 22, carbs: 64, fiber: 4 },
     favorite: false,
     mine: true,
     ingredients: [
       { name: "Pasta", amount: 90, unit: "g" },
       { name: "Pesto", amount: 40, unit: "g" },
       { name: "Cherry tomatoes", amount: 120, unit: "g" }
+    ],
+    steps: [
+      "Cook pasta in well-salted boiling water per package instructions until al dente. Reserve ½ cup pasta water.",
+      "Drain pasta, toss immediately with pesto while still hot.",
+      "Add halved cherry tomatoes and a splash of pasta water to loosen if needed.",
+      "Season with salt and pepper. Serve immediately with grated parmesan if desired."
     ]
   }
 ];
@@ -329,7 +382,7 @@ const MOCK_IMPORTS = [
     serving: "1 pan",
     image: "https://images.unsplash.com/photo-1590412200988-a436970781fa?auto=format&fit=crop&w=480&q=80",
     diets: ["Mediterranean", "Plant-based"],
-    macros: { calories: 310, protein: 18, fat: 14, carbs: 28 },
+    macros: { calories: 310, protein: 18, fat: 14, carbs: 28, fiber: 4 },
     ingredients: [
       { name: "Eggs", amount: 2, unit: "pc" },
       { name: "Tomato sauce", amount: 200, unit: "ml" },
@@ -342,7 +395,7 @@ const MOCK_IMPORTS = [
     serving: "1 plate",
     image: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=480&q=80",
     diets: ["Mediterranean", "Healthy fats", "Protein-focused"],
-    macros: { calories: 390, protein: 30, fat: 18, carbs: 22 },
+    macros: { calories: 390, protein: 30, fat: 18, carbs: 22, fiber: 5 },
     ingredients: [
       { name: "Canned tuna", amount: 140, unit: "g" },
       { name: "Green beans", amount: 100, unit: "g" },
@@ -355,7 +408,7 @@ const MOCK_IMPORTS = [
     serving: "2 tacos",
     image: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=480&q=80",
     diets: ["Plant-based", "Mediterranean"],
-    macros: { calories: 445, protein: 16, fat: 12, carbs: 68 },
+    macros: { calories: 445, protein: 16, fat: 12, carbs: 68, fiber: 14 },
     ingredients: [
       { name: "Black beans", amount: 150, unit: "g" },
       { name: "Corn tortillas", amount: 2, unit: "pc" },
@@ -409,12 +462,21 @@ function addMacro(a: Macro, b: Macro, mult = 1): Macro {
     calories: a.calories + b.calories * mult,
     protein: a.protein + b.protein * mult,
     fat: a.fat + b.fat * mult,
-    carbs: a.carbs + b.carbs * mult
+    carbs: a.carbs + b.carbs * mult,
+    fiber: a.fiber + b.fiber * mult
   };
 }
 
 function zeroMacro(): Macro {
-  return { calories: 0, protein: 0, fat: 0, carbs: 0 };
+  return { calories: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 };
+}
+
+function recipeWeightG(item: CatalogItem): number | null {
+  if (!item.ingredients?.length) return null;
+  const total = item.ingredients
+    .filter((i) => i.unit === "g" || i.unit === "ml")
+    .reduce((s, i) => s + i.amount, 0);
+  return total > 0 ? total : null;
 }
 
 function fmt(v: number, s = "g") {
@@ -427,8 +489,8 @@ function newId() {
 
 function emptyForm(kind: ItemKind = "recipe"): FormDraft {
   return {
-    name: "", kind, category: "", serving: "", image: "",
-    calories: "", protein: "", fat: "", carbs: "",
+    name: "", kind, category: "", serving: "", prepTime: "", steps: "", image: "",
+    calories: "", protein: "", fat: "", carbs: "", fiber: "",
     diets: [], ingredients: [{ name: "", amount: "", unit: "g" }]
   };
 }
@@ -436,9 +498,12 @@ function emptyForm(kind: ItemKind = "recipe"): FormDraft {
 function formFromItem(item: CatalogItem): FormDraft {
   return {
     name: item.name, kind: item.kind, category: item.category,
-    serving: item.serving, image: item.image,
+    serving: item.serving, prepTime: String(item.prepTime ?? ""),
+    steps: (item.steps ?? []).join("\n"),
+    image: item.image,
     calories: String(item.macros.calories), protein: String(item.macros.protein),
     fat: String(item.macros.fat), carbs: String(item.macros.carbs),
+    fiber: String(item.macros.fiber),
     diets: [...item.diets],
     ingredients: (item.ingredients ?? []).map((i) => ({
       name: i.name, amount: String(i.amount), unit: i.unit
@@ -463,6 +528,7 @@ export default function Home() {
   const [showThisWeek, setShowThisWeek] = useState(false);
   const [showNextWeek, setShowNextWeek] = useState(false);
   const [productsViewMode, setProductsViewMode] = useState<"cards" | "list">("cards");
+  const [recipesViewMode, setRecipesViewMode] = useState<"cards" | "list">("list");
 
   // Products Analyser
   const [analyserRows, setAnalyserRows] = useState<AnalyserRow[]>([]);
@@ -499,6 +565,10 @@ export default function Home() {
   const [dragUid, setDragUid] = useState<string | null>(null);
   const [addingMeal, setAddingMeal] = useState<{ day: string; meal: MealSlot } | null>(null);
   const [addingMealSearch, setAddingMealSearch] = useState("");
+  const [calendarSubView, setCalendarSubView] = useState<"week" | "month">("week");
+  const [calendarAddDay, setCalendarAddDay] = useState<string | null>(null);
+  const [calendarAddSearch, setCalendarAddSearch] = useState("");
+  const [calendarAddMeal, setCalendarAddMeal] = useState<MealSlot>("lunch");
 
   // Shopping list
   const [shopFrom, setShopFrom] = useState(inputDate(weekStart));
@@ -586,6 +656,22 @@ export default function Home() {
   function prevWeek() { setSelectedWeekMonday((d) => addDays(d, -7)); }
   function nextWeek() { setSelectedWeekMonday((d) => addDays(d, 7)); }
   function goToThisWeek() { setSelectedWeekMonday(startOfWeek(new Date())); }
+  function prevMonth() {
+    setSelectedWeekMonday((d) => {
+      const m = new Date(d.getFullYear(), d.getMonth() - 1, 1);
+      return startOfWeek(m);
+    });
+  }
+  function nextMonth() {
+    setSelectedWeekMonday((d) => {
+      const m = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+      return startOfWeek(m);
+    });
+  }
+  function handleDropToCalendarDay(targetDay: string, uid: string) {
+    setAssignments((cur) => cur.map((a) => a.uid === uid ? { ...a, day: targetDay } : a));
+    setDragUid(null);
+  }
 
   function getMealServings(itemId: string, day: string, meal: MealSlot): number {
     return assignments.find((a) => a.itemId === itemId && a.day === day && a.meal === meal)?.servings ?? 0;
@@ -704,17 +790,20 @@ export default function Home() {
       calories: Number(formDraft.calories) || 0,
       protein: Number(formDraft.protein) || 0,
       fat: Number(formDraft.fat) || 0,
-      carbs: Number(formDraft.carbs) || 0
+      carbs: Number(formDraft.carbs) || 0,
+      fiber: Number(formDraft.fiber) || 0
     };
     const ingredients = formDraft.ingredients
       .filter((i) => i.name.trim())
       .map((i) => ({ name: i.name, amount: Number(i.amount) || 0, unit: i.unit }));
+    const prepTime = Number(formDraft.prepTime) || undefined;
+    const steps = formDraft.steps.split("\n").map((s) => s.trim()).filter(Boolean);
 
     if (editingItem) {
       setItems((cur) =>
         cur.map((i) =>
           i.id === editingItem.id
-            ? { ...i, name: formDraft.name, category: formDraft.category, serving: formDraft.serving, image: formDraft.image, macros, diets: formDraft.diets, ingredients }
+            ? { ...i, name: formDraft.name, category: formDraft.category, serving: formDraft.serving, image: formDraft.image, macros, diets: formDraft.diets, ingredients, prepTime, steps: steps.length ? steps : undefined }
             : i
         )
       );
@@ -729,7 +818,9 @@ export default function Home() {
         diets: formDraft.diets,
         macros,
         mine: true,
-        ingredients
+        ingredients,
+        prepTime,
+        steps: steps.length ? steps : undefined
       };
       setItems((cur) => [...cur, newItem]);
     }
@@ -773,6 +864,7 @@ export default function Home() {
         <span>{fmt(macros.protein)} protein</span>
         <span>{fmt(macros.fat)} fat</span>
         <span>{fmt(macros.carbs)} carbs</span>
+        <span>{fmt(macros.fiber)} fiber</span>
       </div>
     );
   }
@@ -840,20 +932,47 @@ export default function Home() {
           <img className="detail-image" src={item.image} alt="" />
           <div className="detail-meta">
             <div><p className="eyebrow">Serving</p><strong>{item.serving}</strong></div>
-            <div><p className="eyebrow">Calories</p><strong>{item.macros.calories} kcal</strong></div>
+            {item.kind === "recipe" && item.prepTime && (
+              <div><p className="eyebrow">Prep time</p><strong>{item.prepTime} min</strong></div>
+            )}
+            <div><p className="eyebrow">kcal / serving</p><strong>{item.macros.calories} kcal</strong></div>
+            {item.kind === "recipe" && (() => { const wg = recipeWeightG(item); return wg ? <div><p className="eyebrow">kcal / 100 g</p><strong>{Math.round((item.macros.calories / wg) * 100)} kcal</strong></div> : null; })()}
           </div>
           {renderMacroStrip(item.macros)}
           {item.ingredients && item.ingredients.length > 0 && (
             <>
               <p className="eyebrow" style={{ marginTop: 16, marginBottom: 8 }}>Ingredients</p>
-              <div className="ingredient-list">
-                {item.ingredients.map((ing, i) => (
-                  <div className="ingredient-row" key={i}>
-                    <span>{ing.name}</span>
-                    <strong>{ing.amount} {ing.unit}</strong>
-                  </div>
+              {item.kind === "recipe" ? (
+                <table className="ingredient-table">
+                  <tbody>
+                    {item.ingredients.map((ing, i) => (
+                      <tr key={i}>
+                        <td>{ing.name}</td>
+                        <td className="num-cell"><strong>{ing.amount} {ing.unit}</strong></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="ingredient-list">
+                  {item.ingredients.map((ing, i) => (
+                    <div className="ingredient-row" key={i}>
+                      <span>{ing.name}</span>
+                      <strong>{ing.amount} {ing.unit}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+          {item.kind === "recipe" && item.steps && item.steps.length > 0 && (
+            <>
+              <p className="eyebrow" style={{ marginTop: 16, marginBottom: 8 }}>Instructions</p>
+              <ol className="recipe-steps">
+                {item.steps.map((step, i) => (
+                  <li key={i}>{step}</li>
                 ))}
-              </div>
+              </ol>
             </>
           )}
           <p className="eyebrow" style={{ marginTop: 16, marginBottom: 8 }}>Diet compatibility — click to toggle</p>
@@ -925,15 +1044,21 @@ export default function Home() {
               </select>
             </label>
             <label>
-              Serving (e.g. "200 g")
+              Serving (e.g. "1 bowl")
               <input value={formDraft.serving} onChange={(e) => setFormDraft((d) => ({ ...d, serving: e.target.value }))} />
             </label>
+            {(formDraft.kind === "recipe") && (
+              <label>
+                Prep time (min)
+                <input type="number" min="0" value={formDraft.prepTime} onChange={(e) => setFormDraft((d) => ({ ...d, prepTime: e.target.value }))} />
+              </label>
+            )}
             <label>
               Image URL
               <input value={formDraft.image} placeholder="https://..." onChange={(e) => setFormDraft((d) => ({ ...d, image: e.target.value }))} />
             </label>
             <div className="macros-row">
-              {(["calories", "protein", "fat", "carbs"] as const).map((k) => (
+              {(["calories", "protein", "fat", "carbs", "fiber"] as const).map((k) => (
                 <label key={k}>
                   {k.charAt(0).toUpperCase() + k.slice(1)}
                   <input
@@ -1006,6 +1131,19 @@ export default function Home() {
                 </div>
               ))}
             </div>
+            {formDraft.kind === "recipe" && (
+              <label>
+                Instructions
+                <small className="muted" style={{ fontWeight: 400, fontSize: "0.75rem" }}>One step per line</small>
+                <textarea
+                  rows={5}
+                  value={formDraft.steps}
+                  placeholder={"Step 1\nStep 2\nStep 3"}
+                  onChange={(e) => setFormDraft((d) => ({ ...d, steps: e.target.value }))}
+                  style={{ resize: "vertical", fontFamily: "inherit", fontSize: "0.88rem", padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 8, minHeight: 100 }}
+                />
+              </label>
+            )}
           </div>
           <div className="modal-actions">
             <button className="soft-button" onClick={() => setShowForm(false)}>Cancel</button>
@@ -1064,6 +1202,7 @@ export default function Home() {
         <td className="num-cell">{fmt(item.macros.protein)}</td>
         <td className="num-cell">{fmt(item.macros.fat)}</td>
         <td className="num-cell">{fmt(item.macros.carbs)}</td>
+        <td className="num-cell">{fmt(item.macros.fiber)}</td>
         <td className="num-cell">{item.macros.calories} kcal</td>
         <td>
           <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", flexWrap: "wrap" }}>
@@ -1092,6 +1231,67 @@ export default function Home() {
               <>
                 <button className="icon-button" title="Edit" onClick={() => openEditForm(item)}><Edit2 size={15} /></button>
                 <button className="icon-button" title="Delete" onClick={() => deleteItem(item.id)}><Trash2 size={15} /></button>
+              </>
+            )}
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  // ── Recipe table row (list view) ─────────────────────────────────────────────
+  function renderRecipeTableRow(item: CatalogItem) {
+    return (
+      <tr key={item.id} className="catalog-table-row">
+        <td>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img
+              src={item.image}
+              alt=""
+              style={{ width: 44, height: 44, objectFit: "cover", borderRadius: 6, cursor: "pointer", flexShrink: 0 }}
+              onClick={() => setDetailItem(item)}
+            />
+            <div>
+              <span style={{ cursor: "pointer", fontWeight: 600, display: "block" }} onClick={() => setDetailItem(item)}>
+                {item.name}
+              </span>
+              <span className="muted" style={{ fontSize: "0.78rem" }}>{item.serving}</span>
+            </div>
+          </div>
+        </td>
+        <td><span className="muted">{item.category}</span></td>
+        <td className="center-cell">
+          {item.prepTime ? <span className="prep-time-badge">{item.prepTime} min</span> : <span className="muted">—</span>}
+        </td>
+        <td className="num-cell">{fmt(item.macros.protein)}</td>
+        <td className="num-cell">{fmt(item.macros.fat)}</td>
+        <td className="num-cell">{fmt(item.macros.carbs)}</td>
+        <td className="num-cell">{fmt(item.macros.fiber)}</td>
+        <td className="num-cell">{item.macros.calories} kcal</td>
+        <td className="num-cell">
+          {(() => { const wg = recipeWeightG(item); return wg ? <span className="muted">{Math.round((item.macros.calories / wg) * 100)} kcal</span> : <span className="muted">—</span>; })()}
+        </td>
+        <td>
+          <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+            <button
+              className={item.favorite ? "icon-button active" : "icon-button"}
+              title={item.favorite ? "Unfavorite" : "Favorite"}
+              style={{ minHeight: 30, width: 30 }}
+              onClick={() => toggleFavorite(item.id)}
+            >
+              <Heart size={14} fill={item.favorite ? "currentColor" : "none"} />
+            </button>
+            <button
+              className="dark-button"
+              style={{ minHeight: 30, padding: "0 10px", fontSize: "0.8rem" }}
+              onClick={() => addToSummary(item.id, "lunch")}
+            >
+              <Plus size={14} /> Plan
+            </button>
+            {item.mine && (
+              <>
+                <button className="icon-button" style={{ minHeight: 30, width: 30 }} title="Edit" onClick={() => openEditForm(item)}><Edit2 size={14} /></button>
+                <button className="icon-button" style={{ minHeight: 30, width: 30 }} title="Delete" onClick={() => deleteItem(item.id)}><Trash2 size={14} /></button>
               </>
             )}
           </div>
@@ -1136,7 +1336,8 @@ export default function Home() {
         calories: item.macros.calories * s,
         protein: item.macros.protein * s,
         fat: item.macros.fat * s,
-        carbs: item.macros.carbs * s
+        carbs: item.macros.carbs * s,
+        fiber: item.macros.fiber * s
       };
     }
 
@@ -1156,7 +1357,8 @@ export default function Home() {
             calories: (totals.calories / totalGrams) * 100,
             protein: (totals.protein / totalGrams) * 100,
             fat: (totals.fat / totalGrams) * 100,
-            carbs: (totals.carbs / totalGrams) * 100
+            carbs: (totals.carbs / totalGrams) * 100,
+            fiber: (totals.fiber / totalGrams) * 100
           }
         : null;
 
@@ -1193,6 +1395,7 @@ export default function Home() {
                   <th>Protein</th>
                   <th>Fat</th>
                   <th>Carbs</th>
+                  <th>Fiber</th>
                   <th>kcal</th>
                   <th className="center-cell">This week</th>
                   <th className="center-cell">Next week</th>
@@ -1242,6 +1445,7 @@ export default function Home() {
                     <td className="num-cell">{row.itemId ? fmt(macros.protein) : "—"}</td>
                     <td className="num-cell">{row.itemId ? fmt(macros.fat) : "—"}</td>
                     <td className="num-cell">{row.itemId ? fmt(macros.carbs) : "—"}</td>
+                    <td className="num-cell">{row.itemId ? fmt(macros.fiber) : "—"}</td>
                     <td className="num-cell">{row.itemId ? Math.round(macros.calories) : "—"}</td>
                     <td className="center-cell">
                       <span
@@ -1275,6 +1479,7 @@ export default function Home() {
                   <td className="num-cell"><strong>{fmt(totals.protein)}</strong></td>
                   <td className="num-cell"><strong>{fmt(totals.fat)}</strong></td>
                   <td className="num-cell"><strong>{fmt(totals.carbs)}</strong></td>
+                  <td className="num-cell"><strong>{fmt(totals.fiber)}</strong></td>
                   <td className="num-cell"><strong>{Math.round(totals.calories)} kcal</strong></td>
                   <td colSpan={3}></td>
                 </tr>
@@ -1284,6 +1489,7 @@ export default function Home() {
                     <td className="num-cell"><span className="muted">{fmt(per100g.protein)}</span></td>
                     <td className="num-cell"><span className="muted">{fmt(per100g.fat)}</span></td>
                     <td className="num-cell"><span className="muted">{fmt(per100g.carbs)}</span></td>
+                    <td className="num-cell"><span className="muted">{fmt(per100g.fiber)}</span></td>
                     <td className="num-cell"><span className="muted">{Math.round(per100g.calories)} kcal</span></td>
                     <td colSpan={3}></td>
                   </tr>
@@ -1395,37 +1601,145 @@ export default function Home() {
   }
 
   function renderCalendarGrid() {
+    const isMonth = calendarSubView === "month";
+    const refDate = selectedWeekMonday;
+    const monthStart = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
+    const monthEnd = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0);
+    const gridStart = isMonth ? startOfWeek(monthStart) : selectedWeekMonday;
+    const gridDays = isMonth
+      ? Array.from({ length: 42 }, (_, i) => inputDate(addDays(gridStart, i)))
+      : days;
+    const monthLabel = new Intl.DateTimeFormat("en", { month: "long", year: "numeric" }).format(monthStart);
+    const todayStr = today;
+    const currentMonthStr = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, "0")}`;
+
+    function renderCalendarDay(day: string) {
+      const dayDate = new Date(`${day}T00:00:00`);
+      const dayAssignments = assignments.filter((a) => a.day === day);
+      const macros = dayMacro(day);
+      const isToday = day === todayStr;
+      const isOtherMonth = isMonth && !day.startsWith(currentMonthStr);
+      const isAdding = calendarAddDay === day;
+
+      return (
+        <div
+          key={day}
+          className={`calendar-day${isMonth ? " cal-month-cell" : ""}${isToday ? " cal-today" : ""}${isOtherMonth ? " cal-other-month" : ""}`}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => { e.preventDefault(); if (dragUid) handleDropToCalendarDay(day, dragUid); }}
+        >
+          <div className="calendar-day-head">
+            {!isMonth && (
+              <strong>{new Intl.DateTimeFormat("en", { weekday: "short" }).format(dayDate)}</strong>
+            )}
+            <span className={isToday ? "cal-day-num cal-today-num" : "cal-day-num"}>
+              {new Intl.DateTimeFormat("en", { day: "numeric" }).format(dayDate)}
+            </span>
+            {macros.calories > 0 && !isMonth && (
+              <span className="muted" style={{ fontSize: "0.75rem" }}>{Math.round(macros.calories)} kcal</span>
+            )}
+          </div>
+          <div className="calendar-day-items">
+            {dayAssignments.map((a) => {
+              const item = itemById.get(a.itemId);
+              if (!item) return null;
+              return (
+                <div
+                  key={a.uid}
+                  className={`calendar-item${dragUid === a.uid ? " dragging" : ""}`}
+                  draggable
+                  onDragStart={() => setDragUid(a.uid)}
+                  onDragEnd={() => setDragUid(null)}
+                >
+                  <img src={item.image} alt="" />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <span>{item.name}</span>
+                    <small>{MEAL_SLOTS.find((s) => s.id === a.meal)?.label} · {a.servings}×</small>
+                  </div>
+                  <button
+                    className="cal-item-remove"
+                    onClick={() => removeAssignment(a.uid)}
+                    title="Remove"
+                  >×</button>
+                </div>
+              );
+            })}
+            {isAdding ? (
+              <div className="cal-add-panel">
+                <input
+                  autoFocus
+                  list="cal-items-list"
+                  placeholder="Search…"
+                  value={calendarAddSearch}
+                  onChange={(e) => setCalendarAddSearch(e.target.value)}
+                />
+                <select value={calendarAddMeal} onChange={(e) => setCalendarAddMeal(e.target.value as MealSlot)}>
+                  {MEAL_SLOTS.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                </select>
+                <div style={{ display: "flex", gap: 4 }}>
+                  <button className="dark-button" style={{ flex: 1, minHeight: 28, fontSize: "0.8rem" }}
+                    onClick={() => {
+                      const found = items.find((i) => i.name === calendarAddSearch);
+                      if (found) { addMealToSlot(found.id, day, calendarAddMeal); }
+                      setCalendarAddDay(null);
+                      setCalendarAddSearch("");
+                    }}
+                  >Add</button>
+                  <button className="soft-button" style={{ minHeight: 28, fontSize: "0.8rem" }}
+                    onClick={() => { setCalendarAddDay(null); setCalendarAddSearch(""); }}
+                  >✕</button>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="cal-add-btn"
+                onClick={() => { setCalendarAddDay(day); setCalendarAddSearch(""); }}
+              >+ Add</button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="calendar-grid">
-        {days.map((day) => {
-          const dayAssignments = assignments.filter((a) => a.day === day);
-          const macros = dayMacro(day);
-          return (
-            <div className="calendar-day" key={day}>
-              <div className="calendar-day-head">
-                <strong>{new Intl.DateTimeFormat("en", { weekday: "short" }).format(new Date(`${day}T00:00:00`))}</strong>
-                <small>{new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(`${day}T00:00:00`))}</small>
-                {macros.calories > 0 && <span className="muted" style={{ fontSize: "0.75rem" }}>{Math.round(macros.calories)} kcal</span>}
-              </div>
-              <div className="calendar-day-items">
-                {dayAssignments.map((a) => {
-                  const item = itemById.get(a.itemId);
-                  if (!item) return null;
-                  return (
-                    <div className="calendar-item" key={a.uid}>
-                      <img src={item.image} alt="" />
-                      <div>
-                        <span>{item.name}</span>
-                        <small>{a.servings}×</small>
-                      </div>
-                    </div>
-                  );
-                })}
-                {dayAssignments.length === 0 && <p className="empty" style={{ fontSize: "0.8rem", padding: "8px 0" }}>—</p>}
-              </div>
+      <div className="cal-container">
+        {/* Sub-view toggle */}
+        <div className="cal-header">
+          <div className="cal-sub-toggle">
+            <button
+              className={!isMonth ? "soft-button active" : "soft-button"}
+              onClick={() => setCalendarSubView("week")}
+            >Week</button>
+            <button
+              className={isMonth ? "soft-button active" : "soft-button"}
+              onClick={() => setCalendarSubView("month")}
+            >Month</button>
+          </div>
+          {isMonth && (
+            <div className="cal-month-nav">
+              <button className="soft-button" onClick={prevMonth}>‹</button>
+              <strong>{monthLabel}</strong>
+              <button className="soft-button" onClick={nextMonth}>›</button>
             </div>
-          );
-        })}
+          )}
+        </div>
+
+        {/* Day-of-week header row for month view */}
+        {isMonth && (
+          <div className="cal-dow-row">
+            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => (
+              <div key={d} className="cal-dow">{d}</div>
+            ))}
+          </div>
+        )}
+
+        <div className={isMonth ? "calendar-grid cal-month-grid" : "calendar-grid"}>
+          {gridDays.map(renderCalendarDay)}
+        </div>
+
+        <datalist id="cal-items-list">
+          {items.map((i) => <option key={i.id} value={i.name} />)}
+        </datalist>
       </div>
     );
   }
@@ -1577,7 +1891,9 @@ export default function Home() {
   function renderCatalogView() {
     const kind: ItemKind = activeView === "products" ? "product" : "recipe";
     const filtered = visibleItems.filter((i) => i.kind === kind);
-    const isListMode = activeView === "products" && productsViewMode === "list";
+    const viewMode = activeView === "products" ? productsViewMode : recipesViewMode;
+    const setViewMode = activeView === "products" ? setProductsViewMode : setRecipesViewMode;
+    const isListMode = viewMode === "list";
     const viewLabel = activeView === "products" ? "products" : "recipes";
     return (
       <section className="catalog-view">
@@ -1635,16 +1951,14 @@ export default function Home() {
             >
               Mine
             </button>
-            {activeView === "products" && (
-              <button
-                className="soft-button"
-                title={productsViewMode === "cards" ? "Switch to list view" : "Switch to cards view"}
-                onClick={() => setProductsViewMode((m) => (m === "cards" ? "list" : "cards"))}
-              >
-                {productsViewMode === "cards" ? <LayoutList size={16} /> : <LayoutGrid size={16} />}
-                {productsViewMode === "cards" ? "List" : "Cards"}
-              </button>
-            )}
+            <button
+              className="soft-button"
+              title={viewMode === "cards" ? "Switch to list view" : "Switch to cards view"}
+              onClick={() => setViewMode((m) => (m === "cards" ? "list" : "cards"))}
+            >
+              {viewMode === "cards" ? <LayoutList size={16} /> : <LayoutGrid size={16} />}
+              {viewMode === "cards" ? "List" : "Cards"}
+            </button>
           </div>
           <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "flex-end" }}>
             <button className="dark-button" onClick={() => openAddForm(kind)}>
@@ -1663,23 +1977,41 @@ export default function Home() {
             <table className="catalog-table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Serving</th>
-                  <th>Protein</th>
-                  <th>Fat</th>
-                  <th>Carbs</th>
-                  <th>kcal</th>
-                  <th></th>
+                  {kind === "recipe" ? (
+                    <>
+                      <th>Recipe</th>
+                      <th>Category</th>
+                      <th className="center-cell">Prep time</th>
+                      <th className="num-cell">Protein</th>
+                      <th className="num-cell">Fat</th>
+                      <th className="num-cell">Carbs</th>
+                      <th className="num-cell">Fiber</th>
+                      <th className="num-cell">kcal/serving</th>
+                      <th className="num-cell">kcal/100 g</th>
+                      <th></th>
+                    </>
+                  ) : (
+                    <>
+                      <th>Product</th>
+                      <th>Category</th>
+                      <th>Serving</th>
+                      <th className="num-cell">Protein</th>
+                      <th className="num-cell">Fat</th>
+                      <th className="num-cell">Carbs</th>
+                      <th className="num-cell">Fiber</th>
+                      <th className="num-cell">kcal</th>
+                      <th></th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {filtered.length ? (
-                  filtered.map((item) => renderProductTableRow(item))
+                  filtered.map((item) => kind === "recipe" ? renderRecipeTableRow(item) : renderProductTableRow(item))
                 ) : (
                   <tr>
-                    <td colSpan={8} className="empty" style={{ textAlign: "center", padding: 32 }}>
-                      No products match your filters.
+                    <td colSpan={kind === "recipe" ? 10 : 9} className="empty" style={{ textAlign: "center", padding: 32 }}>
+                      No {viewLabel} match your filters.
                     </td>
                   </tr>
                 )}

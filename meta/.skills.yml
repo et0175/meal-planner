@@ -4,6 +4,7 @@ language: en
 
 paths:
   architecture: meta/architecture/
+  existing_adrs: meta/architecture/decisions/adr/
   kanban: meta/kanban/
   backlog: meta/kanban/backlog.md
   backlog_scored: meta/kanban/backlog-scored.yml
@@ -20,6 +21,14 @@ methodology:
     tech-debt: wsjf
     compliance: wsjf
     ops: fifo
+
+ci:
+  enabled: true
+  gates:
+    validator_errors: error
+    blocking_decisions: error
+    stale_artifacts: warn
+    reverse_pending: off
 
 # models:
 #   profile: balanced   # uncomment to pin agent models
