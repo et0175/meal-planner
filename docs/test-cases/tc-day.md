@@ -11,7 +11,7 @@
 ---
 
 **Requirement:** [`06_meal_planner.md`](../requirements/06_meal_planner.md) — Tab 2, Calendar  
-**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-007 – US-MP-010, US-MP-021  
+**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-007 – US-MP-010, US-MP-017, US-MP-021  
 **Test data:** `plannerSeeds` from test-data.json (8 assignments)
 
 ---

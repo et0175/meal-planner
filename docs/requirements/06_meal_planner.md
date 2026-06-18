@@ -77,7 +77,7 @@ The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** 
 
 ### Data consistency
 
-- Assignments made in any view are immediately reflected in all other views.
+- Assignments made in any view are immediately reflected in all other views. An assignment created or modified in the Calendar tab is immediately visible in the Week summary tab and vice versa — no refresh required.
 - The weekly summary and calendar views share the same underlying assignment data keyed by (item, day, meal slot).
 - Adding an item in the calendar automatically registers it in the weekly summary in the selected meal slot.
 
@@ -99,7 +99,7 @@ The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** 
 
 - The planner (Week summary and Calendar sub-views) shows, for each day, the **percentage of the calorie corridor consumed** relative to the user's target corridor (as set in Personal cabinet).
 - A week summary strip shows the average % of target for calories, protein, fat, and carbs across the planned week.
-- A monthly summary shows the same averages aggregated by month.
+- A monthly summary shows the same averages aggregated by month. The monthly summary is accessible by switching the Calendar to the Month sub-view; it aggregates average % of target across all days in the selected month that have at least one assignment.
 - **Calendar sub-views** additionally display a **target-reaching summary** per day column matching the Personal cabinet Meal tracking display: kcal, protein, fat, and carbs planned vs. target corridor, with colour-coded indicators (green for within corridor, amber for approaching, red for above).
 
 ### Profile integration
@@ -113,6 +113,8 @@ The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** 
 
 - The user can download the current week's meal plan (Week summary grid) as a **PDF file**.
 - The file contains the full week grid: item names, days, serving counts, and totals.
+
+> See also [`07_shopping_list.md`](07_shopping_list.md) — PDF download (grocery list PDF is a separate button in the Shopping list view).
 
 ---
 

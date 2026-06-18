@@ -103,6 +103,7 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 - [ ] Marking “This week” adds the product to the Meal planner Weekly summary (Lunch slot by default).
 - [ ] Removing “This week” when the product has no calendar assignments removes it from the Weekly summary automatically.
 - [ ] Removing “This week” when the product already has calendar assignments shows a confirmation prompt before any assignments are removed.
+- [ ] Removing the “Next week” flag from a product that already has next-week calendar assignments shows a confirmation prompt before any assignments are removed. Confirming removes the next-week assignments; cancelling leaves the flag and assignments unchanged.
 - [ ] On week rollover (each Monday), “Next week” flags auto-promote to “This week” and the product appears in the current week's planner summary (Lunch slot by default).
 - [ ] User can filter the product list to show only “This week” or “Next week” items.
 

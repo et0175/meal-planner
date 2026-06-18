@@ -306,3 +306,23 @@
 - Average % of target per macro is displayed alongside the chart
 
 **Status:** ✅
+
+---
+
+### TC-MLT-017: Weekly average excludes days with no entries
+**AC:** US-PC-009 — days with no entries are not counted as 0% when computing weekly averages  
+**Priority:** Medium
+
+**Preconditions:** Log entries exist for exactly 3 days of the current week (e.g. Mon, Wed, Fri). The other 4 days have no entries. User u-001 has a calorie target of 2000 kcal.
+
+**Steps:**
+1. Add log entries on Monday (1000 kcal), Wednesday (2000 kcal), and Friday (1500 kcal). Leave Tuesday, Thursday, Saturday, and Sunday empty.
+2. Open **Personal cabinet > Meal tracking > Week** layout.
+3. Inspect the weekly average % of target summary.
+
+**Expected result:**
+- Average kcal shown: (1000 + 2000 + 1500) / 3 = **1500 kcal average** (75% of 2000)
+- The 4 days with no entries are **not** included in the divisor (average is NOT (4500+0+0+0+0) / 7 = 643 kcal)
+- The weekly summary reflects only the days that have logged entries
+
+**Status:** ✅

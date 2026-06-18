@@ -29,7 +29,7 @@
 
 ### Adding recipes
 
-- Add a recipe manually.
+- Add a recipe manually. The add form fields include: name, category, servings, preparation time *(optional)*, step-by-step cooking instructions *(optional)*, grams per serving, and an ingredient list.
 - Add a recipe from external sources: website URL and PDF (MVP). YouTube is post-MVP.
 
 ### Editing and deleting

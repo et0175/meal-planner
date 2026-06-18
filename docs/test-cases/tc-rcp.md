@@ -385,11 +385,15 @@ ingredients: (none)
 **Steps:**
 1. Inspect the recipe list table header.
 2. Locate **Berry overnight oats** (r-001) row.
+3. Click the **Fiber** column header.
+4. Click it again.
 
 **Expected result:**
 - Column header "Fiber" (or "Fiber (g)") is visible in the list
 - Berry overnight oats row shows fiber value in that column
-- Fiber column is sortable like other nutrition columns
+- After step 3: recipes sort by fiber ascending (lowest first)
+- After step 4: recipes sort by fiber descending (highest first)
+- Sort behaviour matches the other sortable nutrition columns
 
 **Status:** ✅
 

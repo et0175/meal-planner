@@ -267,3 +267,25 @@
 - Categories and ingredient values match what is shown in the UI
 
 **Status:** ✅
+
+---
+
+### TC-SHP-015: Download PDF — empty grocery list produces valid file
+**AC:** US-SL-007 — PDF downloads even when the grocery list is empty  
+**Priority:** Low
+
+**Preconditions:** Set date range to a future period with no planner assignments
+
+**Steps:**
+1. Navigate to **Shopping list**.
+2. Change the **"From"** and **"To"** dates to a future week with no assignments.
+3. Confirm the grocery list shows "No items" or is empty.
+4. Click the **"Download PDF"** button.
+
+**Expected result:**
+- PDF opens without error
+- The file contains the selected date range in the header
+- A "No items planned for this period" message (or equivalent) is present
+- No blank or broken PDF is generated
+
+**Status:** 🚫

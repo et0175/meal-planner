@@ -45,6 +45,8 @@ A dedicated module for generating a grocery list from the meal plan. It is a sep
 - The user can download the current grocery list as a **PDF file**.
 - The file contains the categorised ingredient list (same groups and lines shown in the UI) and the selected date range.
 
+> See also [`06_meal_planner.md`](06_meal_planner.md) — PDF export (meal plan PDF is a separate button in the Planner view).
+
 ---
 
 ## UI / Prototype spec

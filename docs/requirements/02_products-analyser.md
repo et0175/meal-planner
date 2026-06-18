@@ -23,6 +23,6 @@ The products analyser is a dedicated nutrition-calculation tool — separate fro
 - Displayed as a **spreadsheet-like list view**, empty by default.
 - **Column 1 — Item selector:** free-text input that narrows a merged list of All products and All recipes as the user types. Search results are sorted: **recently used items** (recently added to a meal plan or logged in tracking) first, then **items owned by the current user**, then all others alphabetically. Selecting a match pins the item to that row.
   - When the selected item is a recipe, the row's nutrition values are derived from the recipe's total ingredient nutrition (per the recipe's yield).
-- **Column 2 — Unit:** dropdown. **Only units for which the product has a defined gram conversion are shown.** For products with no alternative units, only the product's base unit (e.g. g) and "serving" are available. Units without a conversion factor are not listed.
+- **Column 2 — Unit:** dropdown. **Only units for which the product has a defined gram conversion are shown.** For products with no alternative units, only the product's base unit (e.g. g) and "serving" are available. Units without a conversion factor are not listed. The product's own base unit is always included in the dropdown, regardless of whether any alternative units are defined.
 - **Column 3 — Quantity:** numeric input.
 - **Calculated columns:** protein (g), fat (g), carbs (g), kcal.

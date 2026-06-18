@@ -493,6 +493,7 @@ kcal: 0, protein: 0, fat: 0, carbs: 0
 - A CSS pie chart (conic-gradient circle) shows caloric proportions for protein, fat, and carbs
 - Macro values shown with percentages
 - Units conversion table shows at minimum 100 g row and serving row
+- For a user-added product with alternative units (e.g. from TC-PRD-028), the conversion table also shows a row for each defined altUnit (e.g. 1 tbsp = 10 g) alongside the base and serving rows
 - Close button dismisses the modal
 
 **Status:** ✅

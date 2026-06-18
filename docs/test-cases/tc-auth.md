@@ -7,7 +7,7 @@
 ---
 
 **Requirement:** [`08_authentication.md`](../requirements/08_authentication.md)  
-**User stories:** [`authentication.md`](../user-stories/authentication.md) — US-AUTH-001 – US-AUTH-006  
+**User stories:** [`authentication.md`](../user-stories/authentication.md) — US-AUTH-001 – US-AUTH-007  
 **Test data:** User u-001 (registered); user u-002 (registered, different email); user u-003 (no diet set)  
 **Note:** Authentication is not implemented in the prototype. All cases are 🚫.
 
@@ -205,5 +205,23 @@
 **Expected result:**
 - No re-authentication required within the same browser session
 - All previously visible data remains accessible after reload
+
+**Status:** 🚫
+
+---
+
+### TC-AUTH-012: User role and Nutritionist role have identical feature access in MVP1
+**AC:** US-AUTH-007 — both roles see the same navigation and features in MVP1  
+**Priority:** Low
+
+**Steps:**
+1. Sign in as a User-role account.
+2. Note all visible navigation items and available actions.
+3. Sign in as a Nutritionist-role account.
+4. Note all visible navigation items and available actions.
+
+**Expected result:**
+- Navigation items are identical for both roles (no role-specific menu items hidden or shown)
+- All functional views (Products, Analyser, Recipes, Diets, Planner, Shopping list, Personal cabinet) are accessible to both roles
 
 **Status:** 🚫

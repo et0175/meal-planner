@@ -6,8 +6,8 @@
 
 ---
 
-**Requirement:** [`06_meal_planner.md`](../requirements/06_meal_planner.md) — Tab 3  
-**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-011 – US-MP-018, US-MP-021  
+**Requirement:** [`06_meal_planner.md`](../requirements/06_meal_planner.md) — Tab 2 — Calendar  
+**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-011 – US-MP-021  
 **Test data:** `plannerSeeds` from test-data.json (8 assignments)
 
 ---

@@ -1,8 +1,10 @@
 # Prototype Issue Log — Meal Forge MVP
 
 **Tested:** 2026-06-12  
-**App:** `http://localhost:3000` — Next.js client-rendered prototype, single page, dummy data  
-**Source:** `frontend/src/app/page.tsx`  
+> **All issues in this log are resolved.** See individual `tc-*.md` files for current test status.
+
+**App:** `http://localhost:3001` — Next.js client-rendered prototype, single page, dummy data  
+**Source:** `prototype/frontend/app/page.tsx`  
 
 Severity: 🔴 Bug · 🟠 UX defect · 🟡 Prototype gap (expected limitation)
 
@@ -38,7 +40,7 @@ Recipe cards shown with carried search: ["Lentil tomato soup"]   // 3 recipes hi
 **Root cause:** `inputDate` converts a `Date` to a string via `toISOString().slice(0, 10)`, which returns the **UTC date**. For UTC+ users, Monday at 00:00 local time is Sunday in UTC, so the planner week starts on Sunday rather than Monday.
 
 ```ts
-// frontend/src/app/page.tsx:241
+// prototype/frontend/app/page.tsx:241
 function inputDate(date: Date) {
   return date.toISOString().slice(0, 10);  // Bug: returns UTC date, not local
 }
@@ -74,7 +76,7 @@ function inputDate(date: Date) {
 **Root cause:** `deleteDaySection` filters out assignments but does not run the orphan-check that `removeAssignment` does:
 
 ```ts
-// frontend/src/app/page.tsx:484 — deleteDaySection
+// prototype/frontend/app/page.tsx:484 — deleteDaySection
 function deleteDaySection(day: string, section: string) {
   const nextAssignments = assignments.filter(
     (assignment) => !(assignment.day === day && assignment.section === section)
@@ -83,7 +85,7 @@ function deleteDaySection(day: string, section: string) {
   markPlanChanged(nextAssignments);   // ← no summary cleanup
 }
 
-// frontend/src/app/page.tsx:445 — removeAssignment (has the cleanup)
+// prototype/frontend/app/page.tsx:445 — removeAssignment (has the cleanup)
 function removeAssignment(uid: string) {
   ...
   if (removed && !next.some((a) => a.itemId === removed.itemId)) {
@@ -105,7 +107,7 @@ function removeAssignment(uid: string) {
 
 **Root cause:**
 ```ts
-// frontend/src/app/page.tsx:257
+// prototype/frontend/app/page.tsx:257
 function dateRange(start: string, end: string) {
   const total = Math.max(0, Math.round((last - first) / 86400000));
   return Array.from({ length: total + 1 }, ...);  // length=1 when end < start
@@ -138,7 +140,7 @@ Category options: ["All","product","recipe","Dairy","Fish","Grains","Produce","B
 **Root cause:** `categories` is derived from all items regardless of kind, and `Array.from(new Set(items.map(i => i.category)))` is prefixed with the hard-coded strings "product" and "recipe":
 
 ```ts
-// frontend/src/app/page.tsx:345
+// prototype/frontend/app/page.tsx:345
 const categories = useMemo(
   () => ["All", "product", "recipe", ...Array.from(new Set(items.map(i => i.category)))],
   [items]
@@ -163,7 +165,7 @@ Favorite icons after clicking heart: 2   // unchanged after click
 
 **Root cause:** The icon pill renders conditionally but has no interaction:
 ```tsx
-// frontend/src/app/page.tsx:545
+// prototype/frontend/app/page.tsx:545
 {item.favorite ? (
   <span className="icon-pill" title="Favorite">
     <Heart size={15} fill="currentColor" />

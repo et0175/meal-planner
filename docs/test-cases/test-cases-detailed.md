@@ -1573,7 +1573,7 @@ ingredients: (none)
 
 ## TC-CAL — Meal planner: calendar
 
-**Requirement:** [`06_meal_planner.md`](../requirements/06_meal_planner.md) — Tab 3  
+**Requirement:** [`06_meal_planner.md`](../requirements/06_meal_planner.md) — Tab 2 — Calendar  
 **User stories:** US-MP-011 – US-MP-014
 
 ---
@@ -2704,7 +2704,7 @@ All sections present:
 ## TC-AUTH — Authentication
 
 **Requirement:** [`08_authentication.md`](../requirements/08_authentication.md)  
-**User stories:** [`authentication.md`](../user-stories/authentication.md) — US-AUTH-001 – US-AUTH-006  
+**User stories:** [`authentication.md`](../user-stories/authentication.md) — US-AUTH-001 – US-AUTH-007  
 **Test data:** User u-001 (registered); user u-002 (registered, different email); user u-003 (no diet set)
 
 ---

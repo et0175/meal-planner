@@ -291,3 +291,23 @@
 - Seeded items (Berry overnight oats Mon Breakfast, Chicken quinoa bowl Mon Lunch, etc.) appear in the correct slots
 
 **Status:** ✅
+
+---
+
+### TC-PLN-016: Download PDF — empty week produces valid file
+**AC:** US-MP-022 — PDF downloads even when the week has no assignments  
+**Priority:** Low
+
+**Preconditions:** Navigate to a future week that has no assignments
+
+**Steps:**
+1. Open Planner and navigate to a week with no assignments using the **Next** button.
+2. Confirm the Week summary shows no items.
+3. Click the **"Download PDF"** button.
+
+**Expected result:**
+- PDF opens without error
+- The file contains the selected week date range in the header
+- Meal-slot sections are present but empty (not a blank page or error)
+
+**Status:** 🚫

@@ -17,14 +17,14 @@
 | 3 | Products analyser | [tc-pan.md](tc-pan.md) | 12 | 10 | 2 | 0 |
 | 4 | Recipe analyser | [tc-rcp.md](tc-rcp.md) | 22 | 21 | 1 | 0 |
 | 5 | Dietary analyser | [tc-dit.md](tc-dit.md) | 6 | 6 | 0 | 0 |
-| 6 | Meal planner — week summary | [tc-pln.md](tc-pln.md) | 15 | 14 | 1 | 0 |
+| 6 | Meal planner — week summary | [tc-pln.md](tc-pln.md) | 16 | 14 | 2 | 0 |
 | 7 | Meal planner — calendar: per-day editing | [tc-day.md](tc-day.md) | 10 | 8 | 2 | 0 |
 | 8 | Meal planner — calendar | [tc-cal.md](tc-cal.md) | 24 | 23 | 1 | 0 |
-| 9 | Shopping list | [tc-shp.md](tc-shp.md) | 14 | 14 | 0 | 0 |
-| 10 | Personal cabinet / profile | [tc-prf.md](tc-prf.md) | 13 | 11 | 2 | 0 |
-| 11 | Meal tracking | [tc-mlt.md](tc-mlt.md) | 16 | 16 | 0 | 0 |
-| 12 | Authentication | [tc-auth.md](tc-auth.md) | 11 | 0 | 11 | 0 |
-| | **Total** | | **181** | **160** | **21** | **0** |
+| 9 | Shopping list | [tc-shp.md](tc-shp.md) | 15 | 14 | 1 | 0 |
+| 10 | Personal cabinet / profile | [tc-prf.md](tc-prf.md) | 14 | 12 | 2 | 0 |
+| 11 | Meal tracking | [tc-mlt.md](tc-mlt.md) | 17 | 17 | 0 | 0 |
+| 12 | Authentication | [tc-auth.md](tc-auth.md) | 12 | 0 | 12 | 0 |
+| | **Total** | | **186** | **162** | **24** | **0** |
 
 ---
 

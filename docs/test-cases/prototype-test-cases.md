@@ -1,5 +1,7 @@
 # Prototype Test Cases — Meal Forge MVP
 
+> **⚠️ Deprecated:** This file records results from early prototype testing rounds (before the `tc-*.md` split). It is retained as a historical log only. The authoritative test cases are the individual `tc-*.md` files in this directory. Do not add new test cases here.
+
 **App:** `http://localhost:3001`  
 **Source:** `prototype/frontend/app/page.tsx` (single-page prototype, all client-rendered, dummy data)  
 **Scope:** Manual exploratory + specification-based tests against the prototype only.  
@@ -53,7 +55,7 @@
 
 | ID | Description | Steps | Expected | Status |
 |----|-------------|-------|----------|--------|
-| TC-NAV-001 | Sidebar shows all seven views | Open app | Sidebar contains exactly 7 items in this order: **Planner, Products, Products analyser, Recipes, Diets, Shopping list, Profile**. Shopping list and Products analyser are top-level nav items. | ❓ |
+| TC-NAV-001 | Sidebar shows all seven views | Open app | Sidebar contains exactly 7 items in this order: **Planner, Products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet**. Shopping list and Products analyser are top-level nav items. | ❓ |
 | TC-NAV-002 | Active nav item is highlighted | Click each nav button | Clicked item receives `active` CSS class; content area changes | ✅ |
 | TC-NAV-003 | Default view is Planner | Open app fresh | Planner view is shown and `active` on Planner nav item | ✅ |
 | TC-NAV-004 | Topbar reflects current view name | Switch between views | `<h1>` in topbar matches the view label | ✅ |
@@ -297,7 +299,7 @@
 | TC-SHP-004 | Plan summary shows planned items | Open Shopping list with items in range (use planner seeds from test-data.json) | Item name, total servings, and kcal contribution listed per item | ❓ |
 | TC-SHP-005 | Grocery list grouped by category | Generate list with recipes in range | Lines grouped under Produce, Dairy, Meat, Fish, Grains, Legumes, Nuts & Seeds, Beverages, Condiments, Other | ❓ |
 | TC-SHP-006 | Each grocery line shows name, quantity, unit | View grocery list | Each line: ingredient name, aggregated quantity, unit | ❓ |
-| TC-SHP-007 | Same ingredient aggregated across recipes | Use planner seed: Cherry tomatoes appear in Chicken quinoa bowl, Lentil tomato soup, Chickpea curry, Greek salad, Turkey meatballs | Cherry tomatoes quantities summed on one line (expected total: 550 g — see test-data.json derivedShoppingList) | ❓ |
+| TC-SHP-007 | Same ingredient aggregated across recipes | Use planner seed: Cherry tomatoes appear in Chicken quinoa bowl, Lentil tomato soup, Chickpea curry, Greek salad, Turkey meatballs | Cherry tomatoes quantities summed on one line (expected total: 475 g — see test-data.json derivedShoppingList) | ❓ |
 | TC-SHP-008 | Standalone products appear under their category | Add a product (not a recipe ingredient) directly to the planner; generate list | Product appears as a single line under its product category | ❓ |
 | TC-SHP-009 | List stale indicator after plan change | Generate list, then add or modify a planner assignment | Stale indicator shown | ❓ |
 | TC-SHP-010 | Refresh updates list | With stale indicator, click refresh | List regenerated from current plan within date range | ❓ |

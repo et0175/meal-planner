@@ -30,6 +30,7 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 - [ ] Two tabs are visible: **Week summary** and **Calendar**.
 - [ ] Selecting a tab shows its content and hides the other.
 - [ ] Both tabs reflect the same selected week and the same underlying assignments.
+- [ ] An assignment created or modified in the Calendar tab is immediately visible in the Week summary tab and vice versa — no page refresh required.
 
 ---
 
@@ -290,7 +291,7 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Nutrition p
 - [ ] In Calendar sub-views, each day column shows the day's planned kcal as a percentage of the user's calorie target corridor.
 - [ ] In Calendar sub-views, each day column additionally shows a **target-reaching summary** (same format as the Personal cabinet Meal tracking display): kcal, protein, fat, and carbs planned vs. target corridor, each with a colour-coded indicator (green = within corridor, amber = approaching limit, red = above).
 - [ ] In Week summary, a summary strip shows average % of target for calories, protein, fat, and carbs across the planned week.
-- [ ] A monthly summary view shows the same averages aggregated across the selected month.
+- [ ] A monthly summary view shows the same averages aggregated across the selected month. The monthly summary is accessible by switching the Calendar to the Month sub-view; it aggregates % of target across all days that have at least one assignment.
 - [ ] Percentage bars or labels use a visual indicator (e.g. green for within corridor, amber for approaching, red for above).
 - [ ] If no diet/calorie target is set in the profile, the percentage strip and target-reaching summary are not shown.
 

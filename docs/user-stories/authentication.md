@@ -105,6 +105,6 @@ Source: [08_authentication.md](../requirements/08_authentication.md) — Roles
 **Acceptance criteria**
 
 - [ ] Users register with the User role by default; the Nutritionist role is not selectable at sign-up.
-- [ ] The Nutritionist role can only be assigned by a system administrator.
+- [ ] The Nutritionist role can only be assigned by a system administrator. For MVP1 there is no admin UI for this; role assignment is a back-end / operations procedure only.
 - [ ] In MVP1, both roles see the same navigation, features, and data — no permission differences are enforced.
 - [ ] The system stores the user's role on the account but does not expose role-specific UI in MVP1.

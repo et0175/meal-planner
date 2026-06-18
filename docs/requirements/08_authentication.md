@@ -37,11 +37,12 @@ All application modules are accessible to authenticated users only. Unauthentica
 
 - After sign-in, the session persists for the browser session by default.
 - A signed-in session is invalidated on sign-out and on password change (see `05_personal_cabinet.md`).
+- For MVP1, "session" means the current browser session only. Multi-device session invalidation (sign out all devices) is deferred to a later iteration.
 
 ### Roles
 
 - All users register as a User (ACT-001). The role is not selectable at sign-up.
-- The Nutritionist role (ACT-002) is assigned by a system administrator and is not self-selectable.
+- The Nutritionist role (ACT-002) is assigned by a system administrator and is not self-selectable. For MVP1, there is no admin UI for role assignment; it is a back-end / operations procedure only.
 - In MVP1, both roles share identical system permissions (see `actors.yml`).
 
 ### Out of scope for MVP1

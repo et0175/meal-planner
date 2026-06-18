@@ -1,4 +1,4 @@
-# Open question: Nutritionist post-MVP1 permissions — see open-questions.md#oq-005
+# Actors — OQ-005 resolved (2026-06-17): Nutritionist post-MVP1 permissions defined in open-questions.md
 actors:
   - id: ACT-001
     name: User

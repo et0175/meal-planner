@@ -76,6 +76,8 @@ The requirement explicitly decouples tracking (what was eaten) from planning (wh
 
 The UI should surface this distinction clearly so users understand that planning and logging are two different actions.
 
+> **Note (2026-06-17):** The "log from plan is post-MVP" decision in AC item 2 above was superseded by **OQ-008** (resolved the same day). Log from plan was promoted to MVP scope. See OQ-008 for the final decision.
+
 ---
 
 ## OQ-007 — What unit systems does the product support beyond metric?

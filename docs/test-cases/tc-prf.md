@@ -267,3 +267,26 @@
 - Session is not invalidated
 
 **Status:** 🚫
+
+---
+
+### TC-PRF-014: Switching tabs preserves Meal tracking week selection
+**AC:** US-PC-010 — switching between Profile and Meal tracking tabs preserves state  
+**Priority:** Medium
+
+**Preconditions:** Personal cabinet open; Meal tracking tab is in Week layout and has been navigated to the previous week
+
+**Steps:**
+1. Open **Personal cabinet > Meal tracking** tab.
+2. Switch to **Week** layout.
+3. Click **Prev week** to navigate one week back.
+4. Note the displayed week label.
+5. Click the **Profile** tab.
+6. Click the **Meal tracking** tab again.
+
+**Expected result:**
+- Meal tracking returns to the Week layout (not reset to Today)
+- The week displayed is still the previous week (not reset to the current week)
+- Log entries for that previous week (if any) are still shown
+
+**Status:** ✅

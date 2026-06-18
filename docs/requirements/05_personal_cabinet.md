@@ -25,7 +25,7 @@ The user can maintain:
 - Gender
 - Age
 - Weight
-- Body composition (as supported by the product)
+- Body composition *(out of scope for MVP1 — specific fields TBD in a later iteration)*
 
 ### Profile tab — Diet preferences
 

@@ -171,6 +171,7 @@ Source: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md) — Recip
 - [ ] Edit and delete are only offered for user-owned recipes (unless admin).
 - [ ] Attempting to delete a recipe that has planner assignments in the current or any future week is blocked; the user sees which days and meal slots the recipe is assigned to.
 - [ ] Deleting a recipe that has assignments only in past weeks succeeds; past-week assignments are removed silently.
+- [ ] If the recipe being deleted was included in a shopping list generated for a date range containing any of its assignments, the shopping list is marked stale after deletion.
 
 ---
 
