@@ -44,8 +44,8 @@
 
 ---
 
-### TC-SHP-003: Plan summary shows seeded items with correct totals
-**AC:** US-SL-003 — item name, total servings, kcal contribution  
+### TC-SHP-003: Plan summary shows seeded items with servings (no kcal column)
+**AC:** US-SL-003 — item name and total servings; kcal is not shown in plan summary  
 **Priority:** High
 
 **Preconditions:** Default date range (current week); seed assignments from test-data.json
@@ -56,16 +56,18 @@
 
 **Expected result** (from test-data.json seeds):
 
-| Item | Total servings | kcal contribution |
-|---|---|---|
-| Berry overnight oats | 1 | 385 |
-| Chicken quinoa bowl | 1 | 450 |
-| Lentil tomato soup | 1 | 280 |
-| Spinach omelette | 1 | 225 |
-| Chickpea curry | 2 | 620 |
-| Avocado toast | 1 | 310 |
-| Greek salad | 1 | 265 |
-| Turkey meatballs | 2 | 580 |
+| Item | Total servings |
+|---|---|
+| Berry overnight oats | 1 |
+| Chicken quinoa bowl | 1 |
+| Lentil tomato soup | 1 |
+| Spinach omelette | 1 |
+| Chickpea curry | 2 |
+| Avocado toast | 1 |
+| Greek salad | 1 |
+| Turkey meatballs | 2 |
+
+- No kcal contribution column is shown in the plan summary
 
 **Status:** ✅
 
@@ -86,7 +88,7 @@
 - **Grains** group contains: Quinoa, Rolled oats, Whole wheat bread
 - **Legumes** group contains: Chickpeas, Red lentils
 - **Condiments** group contains: Olive oil
-- **Nuts & Seeds** group contains: Chia seeds
+- **Nuts & Seeds** group contains: Chia seeds, Flax seeds
 
 **Status:** ✅
 
@@ -96,19 +98,19 @@
 **AC:** US-SL-004 — quantities for same ingredient summed on one line  
 **Priority:** High
 
-**Preconditions:** Current week seeds; Cherry tomatoes appear as ingredient in:
-- Chicken quinoa bowl: 50 g
-- Lentil tomato soup: 150 g
-- Chickpea curry (×2 servings): 150 g × 2 = 300 g
-- Greek salad: 100 g
-- Turkey meatballs (×2 servings): 100 g × 2 = 200 g
+**Preconditions:** Current week seeds; Cherry tomatoes appear as ingredient in (amounts after planner-servings/recipe-servings scaling):
+- Chicken quinoa bowl: 50 g × (1/1 = ×1.00) = **50 g**
+- Lentil tomato soup: 150 g × (1/2 = ×0.50) = **75 g**
+- Chickpea curry: 150 g × (2/2 = ×1.00) = **150 g**
+- Greek salad: 100 g × (1/1 = ×1.00) = **100 g**
+- Turkey meatballs: 100 g × (2/2 = ×1.00) = **100 g**
 
 **Steps:**
 1. Generate grocery list.
 2. Find Cherry tomatoes in the Produce category.
 
 **Expected result:**
-- One line: **Cherry tomatoes — 800 g** (50 + 150 + 300 + 100 + 200)
+- One line: **Cherry tomatoes — 475 g** (50 + 75 + 150 + 100 + 100)
 - Not listed separately per recipe
 
 **Status:** ✅
@@ -124,7 +126,7 @@
 
 **Expected result:**
 - Format: `[Name] — [quantity] [unit]`
-- Example: `Rolled oats — 70 g`, `Chia seeds — 53 g`, `Banana — 1 pc`
+- Example: `Rolled oats — 110 g`, `Chia seeds — 15 g`, `Banana — 0.5 pc`
 
 **Status:** ✅
 
@@ -240,5 +242,28 @@
 **Expected result:**
 - Plan summary and grocery list update immediately without a separate button press
 - Only Mon–Wed assignments shown (same filtering as TC-SHP-007)
+
+**Status:** ✅
+
+---
+
+### TC-SHP-014: Download grocery list as PDF
+**AC:** US-SL-007 — PDF download available; contains categorised grocery list with date range header  
+**Priority:** Medium
+
+**Preconditions:** Shopping list open with default date range (current calendar week); seed data loaded
+
+**Steps:**
+1. Navigate to **Shopping list**.
+2. Verify the grocery list is populated (current week, seed data).
+3. Locate the **"Download PDF"** button in the shopping list header.
+4. Click it.
+
+**Expected result:**
+- A PDF file is downloaded (browser download triggered)
+- The PDF header shows the selected date range (e.g. "Mon 15 Jun – Sun 21 Jun")
+- The PDF contains the categorised grocery list: groups (Produce, Grains, Meat, etc.) with ingredient name, total quantity, and unit per line
+- Empty categories are not shown in the PDF
+- Categories and ingredient values match what is shown in the UI
 
 **Status:** ✅

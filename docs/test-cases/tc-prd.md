@@ -8,7 +8,7 @@
 
 **Requirement:** [`01_products-database.md`](../requirements/01_products-database.md)  
 **User stories:** [`products-database.md`](../user-stories/products-database.md)  
-**Test data:** Products p-001 – p-027 from test-data.json
+**Test data:** Products p-001 – p-028 from test-data.json
 
 ---
 
@@ -22,59 +22,62 @@
 **Expected result:**
 - Only items with `kind = product` are shown
 - No recipe cards are visible (e.g. "Berry overnight oats" must not appear)
-- All 27 products from seed data visible (or a count badge confirms 27)
+- All 28 products from seed data visible (or a count badge confirms 28)
 
 **Status:** ✅
 
 ---
 
-### TC-PRD-002: Cards view shows image, macros, and diet tags
-**AC:** US-PA-001 — cards view fields  
+### TC-PRD-002: Products opens in category cards view by default
+**AC:** US-PA-008 — category cards view is the default; no search or filter controls visible in this view  
 **Priority:** High
 
-**Preconditions:** Products view open, cards view active
-
 **Steps:**
-1. Locate **Greek yogurt** (p-001) in the cards view.
-2. Inspect the card.
+1. Click **Products** in the sidebar (fresh navigation, no previous state).
 
 **Expected result:**
-- Card shows: name "Greek yogurt", category "Dairy", serving "150 g"
-- Macros visible: kcal 88, protein 15 g, fat 0.6 g, carbs 5.4 g
-- Diet tags visible: mediterranean, plant-based, keto, protein-focused
+- Products view opens in **category cards view** (not list view)
+- One card per product category is shown (Dairy, Fish, Grains, Legumes, etc.)
+- No search bar visible
+- No filter controls (category filter, diet filter, Mine toggle) visible
 
 **Status:** ✅
 
 ---
 
-### TC-PRD-003: Switch to list view
-**AC:** US-PA-008 — list view shows name, category, protein, fat, carbs, fiber, kcal, serving size columns  
+### TC-PRD-003: Switch to list view from category cards
+**AC:** US-PA-008 — toggle switches to list view; list shows name, category, protein, fat, carbs, fiber, kcal, serving size columns  
 **Priority:** Medium
 
+**Preconditions:** Products view open in category cards view (default)
+
 **Steps:**
-1. In Products view, click the **list-view toggle** in the control band.
+1. Click the **list-view toggle** in the control band.
 
 **Expected result:**
 - Layout switches to a table
+- Search bar and filter controls appear
 - Columns visible: Name, Category, Protein (g), Fat (g), Carbs (g), Fiber (g), kcal, Serving size
-- **Atlantic salmon** (p-005) row shows: Fish, 20 g, 13 g, 0 g, 0 g, 208, 100 g
+- **Atlantic salmon** (p-005) row shows: Fish, 20 g protein, 13 g fat, 0 g carbs, 0 g fiber, 208 kcal, 100 g serving
 
 **Status:** ✅
 
 ---
 
-### TC-PRD-004: Switch back to cards view preserves filter state
-**AC:** US-PA-008 — toggle is reversible; filters persist  
+### TC-PRD-004: Click a category card — opens list filtered to that category
+**AC:** US-PA-009 — clicking category card navigates to filtered list; category filter pre-set  
 **Priority:** Medium
 
+**Preconditions:** Products view open in category cards view
+
 **Steps:**
-1. Set category filter to **Dairy**.
-2. Switch to list view — confirm only Dairy products show.
-3. Switch back to cards view.
+1. Click the **Dairy** category card.
 
 **Expected result:**
-- Cards view shows only Dairy products (Greek yogurt, Whole milk, Cheddar cheese, Butter, Whole eggs — 5 items)
-- Filter dropdown still shows "Dairy" selected
+- View switches to list view showing only Dairy products
+- Category filter is pre-set to "Dairy"
+- Dairy products shown: Greek yogurt, Whole milk, Cheddar cheese, Butter, Whole eggs (5 items)
+- A "back" or breadcrumb control is visible to return to category cards view
 
 **Status:** ✅
 
@@ -109,8 +112,8 @@
 1. Type `keto` in the search box.
 
 **Expected result:**
-- Products tagged with "keto" shown: Greek yogurt, Cheddar cheese, Butter, Atlantic salmon, Tuna in water, Sardines, Baby spinach, Broccoli, Avocado, Chicken breast, Almonds, Olive oil, Whole eggs (13 items — verify against test-data.json `dietTags` arrays)
-- Products with no keto tag (e.g. Banana, Brown rice) are hidden
+- Products tagged with "keto" shown: Greek yogurt, Cheddar cheese, Butter, Atlantic salmon, Tuna in water, Sardines, Baby spinach, Broccoli, Avocado, Chicken breast, **Ground turkey**, **Beef sirloin**, Almonds, Olive oil, Whole eggs (15 items — verify against test-data.json `dietTags` arrays)
+- Products with no keto tag (e.g. Banana, Brown rice, Red lentils) are hidden
 
 **Status:** ✅
 
@@ -147,7 +150,7 @@
 2. Clear the search box.
 
 **Expected result:**
-- All 27 products shown (or full unfiltered count)
+- All 28 products shown (or full unfiltered count)
 
 **Status:** ✅
 
@@ -191,8 +194,8 @@
 1. Toggle the **Mine** filter button.
 
 **Expected result:**
-- Only **Hemp seeds** (p-026, `isUserAdded: true`) and any other user-owned products visible
-- System products (isUserAdded: false) hidden
+- Only **Hemp seeds** (p-026) and **Flax seeds** (p-028) visible (both `isUserAdded: true, userId: "u-001"`)
+- System products (`isUserAdded: false`) hidden
 
 **Status:** ✅
 
@@ -408,22 +411,18 @@ kcal: 0, protein: 0, fat: 0, carbs: 0
 **AC:** US-PA-006 — deletion blocked when product is an ingredient in one or more recipes  
 **Priority:** High
 
-**Test data:** **Whole eggs** (p-027, `isUserAdded: false`) is used in:
-- Avocado toast (r-002): 2 pc
-- Spinach omelette (r-003): 2 pc
+**Test data:** **Flax seeds** (p-028, `isUserAdded: true, userId: "u-001"`) is used in:
+- Turkey meatballs (r-009): 15 g
 
-> Note: In the prototype, p-027 is a system product (not user-added). To test this, add a new product, then add it as an ingredient to a recipe, then attempt deletion.
-
-**Steps (workaround for prototype):**
-1. Add a new product "Test product X".
-2. Edit recipe **Turkey meatballs** (r-009, owned by u-001), add "Test product X" as an ingredient.
-3. Navigate back to Products.
-4. Delete "Test product X".
+**Steps:**
+1. Toggle the **Mine** filter to show only user-added products.
+2. Locate **Flax seeds** (p-028) in the list.
+3. Click the **delete** (×) button on Flax seeds.
 
 **Expected result:**
-- Deletion blocked
-- Error message lists the recipes that reference the product (at minimum: "Turkey meatballs")
-- Product remains in the list
+- Deletion is blocked — Flax seeds is not removed from the list
+- Error message or blocking prompt lists recipes referencing the product (at minimum: "Turkey meatballs")
+- Flax seeds remains visible in the list
 
 **Status:** ✅
 
@@ -446,38 +445,37 @@ kcal: 0, protein: 0, fat: 0, carbs: 0
 
 ---
 
-### TC-PRD-024: Category cards view shows one card per category
-**AC:** US-PA-009 — category cards view with item counts  
+### TC-PRD-024: Category cards view shows one card per category with item counts
+**AC:** US-PA-009 — category cards shows all categories with item counts  
 **Priority:** High
 
+**Preconditions:** Products view open in category cards view (default)
+
 **Steps:**
-1. In Products view, click the **CAT** (category cards) toggle button.
+1. Observe the category cards grid.
 
 **Expected result:**
-- One card per distinct category (Dairy, Fish, Grains, Produce, Meat, Legumes, Nuts & Seeds, Condiments, Other)
-- Each card shows category name and the count of products in that category
+- One card per distinct category (Dairy, Fish, Grains, Produce, Meat, Legumes, Nuts & Seeds, Condiments) — 8 cards total
+- Each card shows the category name and the count of products in that category (e.g. Dairy: 5, Fish: 3, Grains: 4, Produce: 5, Meat: 3, Legumes: 3, Nuts & Seeds: 4, Condiments: 1)
 - No individual products shown in the grid — only category cards
 
 **Status:** ✅
 
 ---
 
-### TC-PRD-025: Click category card to see its products
-**AC:** US-PA-009 — clicking category card filters to that category  
-**Priority:** High
+### TC-PRD-025: Return to category cards view via toggle from list view
+**AC:** US-PA-008 — toggle is reversible; category cards view is accessible from list view  
+**Priority:** Medium
+
+**Preconditions:** Products in list view (toggle from default category view)
 
 **Steps:**
-1. In category cards view, click the **Dairy** card.
+1. Click the **category-view toggle** to switch back to category cards.
 
 **Expected result:**
-- Transitions to a filtered product list showing only Dairy products (Greek yogurt, Whole milk, Cheddar cheese, Butter, Whole eggs — 5 items)
-- A "← All categories" breadcrumb is visible to return to the category grid
-
-**Steps:**
-2. Click "← All categories".
-
-**Expected result:**
-- Full category cards grid is shown again
+- Category cards grid shown
+- Search bar and filters are hidden again
+- Individual product rows are no longer visible
 
 **Status:** ✅
 
@@ -496,5 +494,160 @@ kcal: 0, protein: 0, fat: 0, carbs: 0
 - Macro values shown with percentages
 - Units conversion table shows at minimum 100 g row and serving row
 - Close button dismisses the modal
+
+**Status:** ✅
+
+---
+
+### TC-PRD-027: Sort product list by column
+**AC:** US-PA-011 — column headers toggle ascending/descending sort  
+**Priority:** Medium
+
+**Preconditions:** Products view in list view
+
+**Steps:**
+1. Click the **kcal** column header once.
+2. Click the **kcal** column header again.
+
+**Expected result:**
+- After step 1: Products sorted by kcal ascending (lowest kcal first; Greek yogurt 88 kcal near the top)
+- After step 2: Products sorted by kcal descending (highest kcal first; Butter ~718 kcal near the top)
+- The active sort column shows an arrow/indicator
+
+**Status:** ✅
+
+---
+
+### TC-PRD-028: Define multiple alternative units with correct label and unit dropdown
+**AC:** US-PA-012 — product form accepts multiple units; unit is selected from dropdown; label = "grams per [unit]"  
+**Priority:** Medium
+
+**Preconditions:** Add product form open
+
+**Steps:**
+1. Click **"Add product"**.
+2. Click the unit selector for the first alternative unit.
+3. Observe the available options.
+4. Select **tbsp** from the dropdown.
+5. Observe the conversion input label.
+6. Add a second alternative unit and select **cup** from the dropdown.
+7. Observe its conversion input label.
+
+**Expected result:**
+- Step 3: Unit type is a **dropdown** with predefined options (g, kg, ml, l, oz, lb, fl oz, cup, tbsp, tsp, pc, serving). Free-text entry is not available.
+- Step 5: Conversion field labelled **"grams per tbsp"**
+- Step 7: Second conversion field labelled **"grams per cup"**
+- Both alternative units can be saved together on the same product
+
+**Status:** ✅
+
+---
+
+### TC-PRD-029: Next-week flag auto-promotes to this-week on week rollover
+**AC:** US-PA-007 — on Monday of a new week, items flagged "Next week" become "This week"  
+**Priority:** Medium
+
+**Preconditions:** **Quinoa** (p-010) has `thisWeek: false`, `nextWeek: true`.  
+*Set up:* First run TC-PRD-015 steps 1–2 to toggle the Next week flag on Quinoa (seed data ships with both flags false).
+
+**Steps:**
+1. Simulate a week rollover: advance the application's reference date to the following Monday (or trigger the rollover mechanism if exposed in the prototype).
+2. Navigate to **All Products** and locate Quinoa.
+
+**Expected result:**
+- Quinoa now shows "This week" flag active
+- "Next week" flag is cleared on Quinoa
+- Quinoa appears in the Planner Lunch slot for the new current week
+
+**Status:** 🚫
+
+---
+
+### TC-PRD-030: Add product — 100-char name and extreme numeric values (EDGE-PRD-002)
+**AC:** US-PA-005 — form handles boundary-length names and large values without crashing  
+**Priority:** Low
+
+**Test data:** `formInputs.productForm.edgeCases[1]` (EDGE-PRD-002)
+```
+name: "Aaaaaaa…" (100 characters)
+category: Dairy, unit: g, servingAmount: 9999
+kcal: 9999, protein: 999, fat: 999, carbs: 999
+```
+
+**Steps:**
+1. Click **"Add product"**.
+2. Fill in EDGE-PRD-002 values.
+3. Submit.
+
+**Expected result:**
+- Product is either saved successfully and appears in the list with the full 100-char name (truncated with ellipsis if UI clips it), **or** a clear max-length validation message is shown
+- Very large numeric values either display correctly or trigger a meaningful validation error
+- No crash or unhandled error
+
+**Status:** ✅
+
+---
+
+### TC-PRD-031: Add product — Unicode and emoji in product name (EDGE-PRD-003)
+**AC:** US-PA-005 — form accepts and renders non-ASCII characters correctly  
+**Priority:** Low
+
+**Test data:** `formInputs.productForm.edgeCases[2]` (EDGE-PRD-003)
+```
+name: "Special chars: café & naïve 🥑"
+category: Produce, unit: g, servingAmount: 100, kcal: 80
+```
+
+**Steps:**
+1. Click **"Add product"**.
+2. Enter EDGE-PRD-003 values.
+3. Submit.
+
+**Expected result:**
+- Product saved; name renders correctly on the product card (accented chars and emoji visible, not garbled)
+- Mine filter shows the new product
+
+**Status:** ✅
+
+---
+
+### TC-PRD-032: Add product — non-numeric text in numeric fields (INVALID-PRD-003)
+**AC:** US-PA-005 — numeric fields reject non-numeric input  
+**Priority:** Medium
+
+**Test data:** `formInputs.productForm.invalid[2]` (INVALID-PRD-003)
+```
+name: "Text in numbers"
+servingAmount: "abc", kcal: "lots", protein: "much", fat: "fat", carbs: "many"
+```
+
+**Steps:**
+1. Click **"Add product"**.
+2. Enter "Text in numbers" as name.
+3. Type `abc` into the serving amount field, `lots` into kcal, etc.
+4. Click submit.
+
+**Expected result:**
+- Browser / form validation prevents submission
+- Affected fields show a validation error (type="number" inputs reject non-numeric input)
+- Product not saved
+
+**Status:** ✅
+
+---
+
+### TC-PRD-033: "Next week" filter narrows list to next-week products only
+**AC:** US-PA-007 — "Next week" filter toggle shows only products with nextWeek flag  
+**Priority:** Medium
+
+**Preconditions:** Quinoa (p-010) has `nextWeek: true` (run TC-PRD-015 step 1 to set this flag first).
+
+**Steps:**
+1. In Products list view, toggle the **"Next week"** filter button.
+
+**Expected result:**
+- Only **Quinoa** (p-010) visible (the only seed product with nextWeek: true after the precondition step)
+- All other products are hidden
+- Toggling the filter off restores the full product list
 
 **Status:** ✅

@@ -107,8 +107,8 @@ Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 - [ ] User can toggle “This week” and “Next week” flags on a recipe independently.
 - [ ] Both flags are visible on recipe cards.
 - [ ] Marking “This week” adds the recipe to the Meal planner Weekly summary (Lunch slot by default, same as products).
-- [ ] Removing “This week” when the recipe has no day-card assignments removes it from the Weekly summary automatically.
-- [ ] Removing “This week” when the recipe already has day-card assignments shows a confirmation prompt before any assignments are removed.
+- [ ] Removing “This week” when the recipe has no calendar assignments removes it from the Week summary automatically.
+- [ ] Removing “This week” when the recipe already has calendar assignments shows a confirmation prompt before any assignments are removed.
 - [ ] On week rollover (each Monday), “Next week” flags auto-promote to “This week” and the recipe appears in the current week's planner summary (Lunch slot by default).
 
 ---
@@ -141,15 +141,22 @@ Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 
 ---
 
-## US-RA-011 Open recipe card with full summary
+## US-RA-011 Open recipe card with full summary, pie chart, and instructions
 
 **As a** user  
-**I want** to open a recipe card that shows image, ingredients summary, nutrition summary, servings, and calories per serving  
-**So that** I can decide whether to cook or plan it.
+**I want** to open a recipe card that shows image, ingredients, a nutrition pie chart, units conversion, prep time, and cooking instructions  
+**So that** I can decide whether to cook or plan it, and have everything I need to actually make the dish.
+
+Source: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md) — Recipe card
 
 **Acceptance criteria**
 
-- [ ] Recipe card shows all fields listed in requirements when data exists; sensible placeholders when optional media is missing.
+- [ ] Recipe card shows: image (or placeholder), ingredients summary, nutrition summary, number of servings, and calories per serving.
+- [ ] The nutrition summary is displayed as a **pie chart** with slices for protein, fat, and carbs proportional to their caloric contribution.
+- [ ] The card shows a **units conversion reference** for the recipe: g per serving weight and servings, with scaled nutrition values.
+- [ ] The card shows **preparation time** when the field is populated.
+- [ ] The card shows **step-by-step cooking instructions** when provided.
+- [ ] All optional fields (image, prep time, instructions) are hidden when not provided; mandatory fields show sensible placeholders.
 
 ---
 
@@ -167,13 +174,50 @@ Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 
 ---
 
-## US-RA-013 Edit recipe ingredients
+## US-RA-013 Edit recipe ingredients with live nutrition preview
 
 **As a** user editing my recipe  
-**I want** to add, remove, or change ingredient amounts  
-**So that** nutrition totals stay correct after changes.
+**I want** to add, remove, or change ingredient amounts and see the nutrition totals update as I work  
+**So that** I can evaluate the impact of each change before saving.
 
 **Acceptance criteria**
 
 - [ ] Ingredient editor supports add, remove, and quantity change with product linkage where applicable.
-- [ ] Nutrition summary updates after save according to the calculation engine.
+- [ ] A **nutrition summary** (kcal, protein, fat, carbs, fiber) is displayed at the **top of the edit form**, above the ingredient list.
+- [ ] The nutrition summary **recalculates live** as ingredients are added, removed, or quantity-changed — without requiring the user to save first.
+- [ ] After saving, the updated nutrition values are reflected on the recipe card immediately.
+
+---
+
+## US-RA-014 Browse recipes by category cards (default view)
+
+**As a** user  
+**I want** the recipe catalog to open as a grid of category cards, and to see only the recipes in a category when I click one  
+**So that** I can navigate by dish type without scrolling through the full catalog.
+
+Source: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md) — Search and filter
+
+**Acceptance criteria**
+
+- [ ] The recipe catalog opens in **category cards view by default** (not a flat cards or list view).
+- [ ] Category cards view shows one card per recipe category (Breakfasts, Soups, Main courses, etc.).
+- [ ] Clicking a category card navigates to the list view filtered to that category only, with the category filter pre-set.
+- [ ] A toggle allows switching between category cards view and list view.
+- [ ] Individual recipe cards view (flat grid of recipe cards) is not available.
+- [ ] A "back" or breadcrumb control returns the user from category list to the category cards view.
+
+---
+
+## US-RA-015 Recipe list includes fiber column
+
+**As a** user comparing recipes in list view  
+**I want** fiber displayed alongside the other macros in the recipe table  
+**So that** I can evaluate dietary fiber content without opening each recipe card.
+
+Source: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md) — Search and filter
+
+**Acceptance criteria**
+
+- [ ] The recipe list view includes a **fiber (g)** column, positioned after carbs and before or after kcal/serving.
+- [ ] Fiber values are taken from the recipe's total ingredient nutrition calculation.
+- [ ] The fiber column is sortable in the same way as other nutrition columns.

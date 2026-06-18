@@ -1,6 +1,6 @@
 # User stories: navigation
 
-Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md) (nav structure implied by all modules)
+Requirements: Navigation structure is implied by all module requirements — no dedicated navigation requirements file.
 
 ---
 
@@ -13,9 +13,9 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md) (nav stru
 **Acceptance criteria**
 
 - [ ] Sidebar is visible on all authenticated screens.
-- [ ] Sidebar contains exactly 7 items in order: Planner, Products, Products analyser, Recipes, Diets, Shopping list, Profile.
+- [ ] Sidebar contains exactly 7 items in order: Planner, All Products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet.
 - [ ] Shopping list appears as a top-level item (not nested inside Planner).
-- [ ] Products analyser appears as a top-level item (not nested inside Products).
+- [ ] Products analyser appears as a top-level item (not nested inside All Products).
 
 ---
 

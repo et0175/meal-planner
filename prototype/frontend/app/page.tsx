@@ -5,7 +5,7 @@ import {
   UtensilsCrossed, ShoppingBasket, Apple, Leaf, CalendarDays,
   User, Search, Heart, Plus, Minus, X, ChevronLeft,
   ChevronRight, LayoutGrid, List, Edit2, Trash2, Check,
-  AlertTriangle, RefreshCw, Table2,
+  AlertTriangle, RefreshCw, Table2, Download,
 } from 'lucide-react'
 import { SEED_PRODUCTS, SEED_RECIPES, SEED_DIETS, SEED_ASSIGNMENTS } from '@/data/seed'
 import type { View, Day, Slot, Item, Assignment, Diet, Profile, MealLogEntry, ShoppingLine } from '@/types'
@@ -40,6 +40,10 @@ function getWeekDates(offset: number): { label: string; dates: Date[] } {
 
 function fmtMacro(v: number) {
   return Number.isInteger(v) ? String(v) : v.toFixed(1)
+}
+
+function isoDate(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 const DIET_LABELS: Record<string, string> = {
@@ -151,7 +155,7 @@ const NAV_ITEMS: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'recipes',  label: 'Recipes',            icon: <UtensilsCrossed size={18} /> },
   { id: 'diets',    label: 'Diets',              icon: <Leaf size={18} /> },
   { id: 'shopping', label: 'Shopping list',      icon: <ShoppingBasket size={18} /> },
-  { id: 'profile',  label: 'Profile',            icon: <User size={18} /> },
+  { id: 'profile',  label: 'Personal cabinet',    icon: <User size={18} /> },
 ]
 
 function Sidebar({ active, setActive }: { active: View; setActive: (v: View) => void }) {
@@ -259,6 +263,7 @@ function ProductDetailModal({ product: p, onClose }: { product: Item; onClose: (
     { label: `100 ${p.unit === 'ml' ? 'ml' : 'g'}`, g: 100 },
     { label: `${p.servingAmount ?? 100} ${p.unit ?? 'g'} (1 serving)`, g: baseG },
     ...(p.servingG && p.unit !== 'g' && p.unit !== 'ml' ? [{ label: `1 ${p.unit}`, g: p.servingG }] : []),
+    ...(p.altUnits ?? []).map(au => ({ label: `1 ${au.unit}`, g: au.gramsPerUnit })),
   ]
 
   return (
@@ -435,6 +440,7 @@ function ProductForm({
   const [fiber, setFiber] = useState(String(item?.fiber ?? ''))
   const [imageUrl, setImageUrl] = useState(item?.imageUrl ?? '')
   const [dietTags, setDietTags] = useState<string[]>(item?.dietTags ?? [])
+  const [altUnits, setAltUnits] = useState<{unit: string; gramsPerUnit: number}[]>(item?.altUnits ?? [])
   const [error, setError] = useState('')
   const needsG = !['g', 'ml'].includes(unit)
 
@@ -455,6 +461,7 @@ function ProductForm({
       fiber: fiber ? Number(fiber) : undefined,
       imageUrl: imageUrl || undefined,
       dietTags,
+      altUnits: altUnits.filter(au => au.unit && au.gramsPerUnit > 0),
     })
   }
 
@@ -484,7 +491,7 @@ function ProductForm({
             <input type="number" min="0" value={servingAmount} onChange={e => setServingAmount(e.target.value)} className={inputCls} />
           </Field>
           {needsG && (
-            <Field label="Grams per unit (e.g. 55 g/egg)">
+            <Field label={`Grams per ${unit}`}>
               <input type="number" min="0" step="0.1" value={servingG} onChange={e => setServingG(e.target.value)} placeholder="e.g. 55" className={inputCls} />
             </Field>
           )}
@@ -495,6 +502,27 @@ function ProductForm({
           <Field label="Fat (g)"><input type="number" min="0" step="0.1" value={fat} onChange={e => setFat(e.target.value)} className={inputCls} /></Field>
           <Field label="Carbs (g)"><input type="number" min="0" step="0.1" value={carbs} onChange={e => setCarbs(e.target.value)} className={inputCls} /></Field>
           <Field label="Fiber (g)"><input type="number" min="0" step="0.1" value={fiber} onChange={e => setFiber(e.target.value)} className={inputCls} /></Field>
+        </div>
+        <div>
+          <label className="text-xs font-medium text-gray-500 mb-2 block">Alternative units</label>
+          <div className="space-y-1.5">
+            {altUnits.map((au, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <select value={au.unit} onChange={e => setAltUnits(prev => prev.map((x, j) => j === i ? { ...x, unit: e.target.value } : x))}
+                  className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-teal-500 cursor-pointer bg-white">
+                  <option value="">— unit —</option>
+                  {['g','kg','ml','l','oz','lb','fl oz','cup','tbsp','tsp','pc','serving'].map(u => <option key={u} value={u}>{u}</option>)}
+                </select>
+                <input type="number" min="0" step="0.1" value={au.gramsPerUnit || ''} onChange={e => setAltUnits(prev => prev.map((x, j) => j === i ? { ...x, gramsPerUnit: Number(e.target.value) } : x))}
+                  placeholder={`grams per ${au.unit || 'unit'}`} className="w-32 text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-teal-500" />
+                <button type="button" onClick={() => setAltUnits(prev => prev.filter((_, j) => j !== i))} className="text-gray-400 hover:text-red-500 cursor-pointer"><X size={14} /></button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setAltUnits(prev => [...prev, { unit: '', gramsPerUnit: 0 }])}
+              className="text-xs text-teal-600 hover:text-teal-800 flex items-center gap-1 cursor-pointer mt-1">
+              <Plus size={11} /> Add unit
+            </button>
+          </div>
         </div>
         <Field label="Image URL (optional)">
           <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://…" className={inputCls} />
@@ -536,9 +564,9 @@ function ProductsView({
   const [dietFilter, setDietFilter] = useState('All')
   const [mineOnly, setMineOnly] = useState(false)
   const [weekFilter, setWeekFilter] = useState<'all' | 'this' | 'next'>('all')
-  const [browseMode, setBrowseMode] = useState<'cards' | 'list' | 'categories'>('cards')
-  const listView = browseMode === 'list'
-  const [catCardsSelected, setCatCardsSelected] = useState<string | null>(null)
+  const [browseMode, setBrowseMode] = useState<'list' | 'categories'>('categories')
+  const [sortBy, setSortBy] = useState('')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
@@ -560,6 +588,22 @@ function ProductsView({
     if (weekFilter === 'next' && !p.weekFlags.nextWeek) return false
     return true
   }), [products, search, catFilter, dietFilter, mineOnly, weekFilter])
+
+  const sortedFiltered = useMemo(() => {
+    if (!sortBy) return filtered
+    const dir = sortDir === 'asc' ? 1 : -1
+    return [...filtered].sort((a, b) => {
+      const va = (a as unknown as Record<string, unknown>)[sortBy]
+      const vb = (b as unknown as Record<string, unknown>)[sortBy]
+      if (typeof va === 'string' && typeof vb === 'string') return va.localeCompare(vb) * dir
+      return (Number(va) - Number(vb)) * dir
+    })
+  }, [filtered, sortBy, sortDir])
+
+  function sortCol(col: string) {
+    if (sortBy === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortBy(col); setSortDir('asc') }
+  }
 
   function toggleWeekFlag(id: string, flag: 'thisWeek' | 'nextWeek') {
     const item = items.find(i => i.id === id)!
@@ -592,44 +636,41 @@ function ProductsView({
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-wrap gap-2 items-center">
-        <div className="relative flex-1 min-w-48">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="search"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search products…"
-            aria-label="Search products"
-            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-teal-500"
-          />
-        </div>
-
-        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} aria-label="Category filter" className="text-sm border border-gray-200 rounded-xl bg-white px-3 py-2 cursor-pointer focus:outline-none focus:border-teal-500">
-          {categories.map(c => <option key={c}>{c}</option>)}
-        </select>
-
-        <select value={dietFilter} onChange={e => setDietFilter(e.target.value)} aria-label="Diet filter" className="text-sm border border-gray-200 rounded-xl bg-white px-3 py-2 cursor-pointer focus:outline-none focus:border-teal-500">
-          {allDiets.map(d => <option key={d} value={d}>{d === 'All' ? 'All diets' : DIET_LABELS[d] ?? d}</option>)}
-        </select>
-
-        <div className="flex rounded-xl overflow-hidden border border-gray-200 text-xs">
-          {(['all', 'this', 'next'] as const).map(f => (
-            <button key={f} onClick={() => setWeekFilter(f)} className={cn('px-3 py-2 font-medium cursor-pointer', weekFilter === f ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50')}>
-              {f === 'all' ? 'All' : f === 'this' ? 'This week' : 'Next week'}
+        {browseMode === 'list' && (
+          <>
+            <div className="relative flex-1 min-w-48">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="search"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search products…"
+                aria-label="Search products"
+                className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl bg-white focus:outline-none focus:border-teal-500"
+              />
+            </div>
+            <select value={catFilter} onChange={e => setCatFilter(e.target.value)} aria-label="Category filter" className="text-sm border border-gray-200 rounded-xl bg-white px-3 py-2 cursor-pointer focus:outline-none focus:border-teal-500">
+              {categories.map(c => <option key={c}>{c}</option>)}
+            </select>
+            <select value={dietFilter} onChange={e => setDietFilter(e.target.value)} aria-label="Diet filter" className="text-sm border border-gray-200 rounded-xl bg-white px-3 py-2 cursor-pointer focus:outline-none focus:border-teal-500">
+              {allDiets.map(d => <option key={d} value={d}>{d === 'All' ? 'All diets' : DIET_LABELS[d] ?? d}</option>)}
+            </select>
+            <div className="flex rounded-xl overflow-hidden border border-gray-200 text-xs">
+              {(['all', 'this', 'next'] as const).map(f => (
+                <button key={f} onClick={() => setWeekFilter(f)} className={cn('px-3 py-2 font-medium cursor-pointer', weekFilter === f ? 'bg-teal-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50')}>
+                  {f === 'all' ? 'All' : f === 'this' ? 'This week' : 'Next week'}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setMineOnly(p => !p)} className={cn('px-3 py-2 text-xs font-medium rounded-xl border cursor-pointer', mineOnly ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')}>
+              Mine
             </button>
-          ))}
-        </div>
-
-        <button onClick={() => setMineOnly(p => !p)} className={cn('px-3 py-2 text-xs font-medium rounded-xl border cursor-pointer', mineOnly ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')}>
-          Mine
-        </button>
-
+          </>
+        )}
         <div className="flex rounded-xl overflow-hidden border border-gray-200">
-          <button onClick={() => setBrowseMode('cards')} aria-label="Cards view" className={cn('px-2.5 py-2 cursor-pointer', browseMode === 'cards' ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><LayoutGrid size={14} /></button>
           <button onClick={() => setBrowseMode('list')} aria-label="List view" className={cn('px-2.5 py-2 cursor-pointer', browseMode === 'list' ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><List size={14} /></button>
-          <button onClick={() => { setBrowseMode('categories'); setCatCardsSelected(null) }} aria-label="Category cards view" title="Browse by category" className={cn('px-2.5 py-2 cursor-pointer text-xs font-bold', browseMode === 'categories' ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}>CAT</button>
+          <button onClick={() => setBrowseMode('categories')} aria-label="Category cards view" title="Browse by category" className={cn('px-2.5 py-2 cursor-pointer text-xs font-bold', browseMode === 'categories' ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}>CAT</button>
         </div>
-
         <button
           onClick={() => { setEditId(null); setShowForm(true) }}
           className="flex items-center gap-1.5 px-3 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 cursor-pointer"
@@ -651,54 +692,37 @@ function ProductsView({
       )}
 
       {browseMode === 'categories' ? (
-        catCardsSelected ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <button onClick={() => setCatCardsSelected(null)} className="text-xs text-teal-600 hover:underline cursor-pointer">← All categories</button>
-              <span className="text-xs text-gray-400">/</span>
-              <span className="text-xs font-medium text-gray-700">{catCardsSelected}</span>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {products.filter(p => p.category === catCardsSelected).map(p => (
-                <ProductCard key={p.id} product={p} onToggleFlag={toggleWeekFlag}
-                  onEdit={() => { setEditId(p.id); setShowForm(true) }}
-                  onDelete={() => deleteProduct(p.id)}
-                  onDetail={() => setDetailProduct(p)} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {Array.from(new Set(products.map(p => p.category))).sort().map(cat => {
-              const count = products.filter(p => p.category === cat).length
-              return (
-                <button key={cat} onClick={() => setCatCardsSelected(cat)}
-                  className={cn('bg-white border border-gray-200 rounded-2xl p-5 text-left hover:shadow-md transition-shadow cursor-pointer', CATEGORY_COLOURS[cat] ? '' : '')}>
-                  <div className={cn('text-2xl mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
-                    {cat === 'Dairy' ? '🥛' : cat === 'Fish' ? '🐟' : cat === 'Grains' ? '🌾' : cat === 'Produce' ? '🥦' : cat === 'Meat' ? '🥩' : cat === 'Legumes' ? '🫘' : cat === 'Nuts & Seeds' ? '🥜' : cat === 'Condiments' ? '🧂' : '📦'}
-                  </div>
-                  <p className="font-semibold text-gray-900 text-sm">{cat}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{count} item{count !== 1 ? 's' : ''}</p>
-                </button>
-              )
-            })}
-          </div>
-        )
-      ) : listView ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {Array.from(new Set(products.map(p => p.category))).sort().map(cat => {
+            const count = products.filter(p => p.category === cat).length
+            return (
+              <button key={cat} onClick={() => { setCatFilter(cat); setBrowseMode('list') }}
+                className="bg-white border border-gray-200 rounded-2xl p-5 text-left hover:shadow-md transition-shadow cursor-pointer">
+                <div className={cn('text-2xl mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
+                  {cat === 'Dairy' ? '🥛' : cat === 'Fish' ? '🐟' : cat === 'Grains' ? '🌾' : cat === 'Produce' ? '🥦' : cat === 'Meat' ? '🥩' : cat === 'Legumes' ? '🫘' : cat === 'Nuts & Seeds' ? '🥜' : cat === 'Condiments' ? '🧂' : '📦'}
+                </div>
+                <p className="font-semibold text-gray-900 text-sm">{cat}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{count} item{count !== 1 ? 's' : ''}</p>
+              </button>
+            )
+          })}
+        </div>
+      ) : (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  {['Name', 'Category', 'kcal', 'Protein', 'Fat', 'Carbs', 'Fiber', 'Serving', ''].map(h => (
-                    <th key={h} className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide', ['kcal','Protein','Fat','Carbs','Fiber'].includes(h) ? 'text-right' : 'text-left')}>
-                      {h}
+                  {[['Name','name'],['Category','category'],['kcal','kcal'],['Protein','protein'],['Fat','fat'],['Carbs','carbs'],['Fiber','fiber'],['Serving',''],['','']].map(([h, key]) => (
+                    <th key={h} onClick={() => key && sortCol(key)}
+                      className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide select-none', ['kcal','Protein','Fat','Carbs','Fiber'].includes(h) ? 'text-right' : 'text-left', key ? 'cursor-pointer hover:text-gray-700' : '')}>
+                      {h}{key && sortBy === key ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ''}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p, idx) => (
+                {sortedFiltered.map((p, idx) => (
                   <tr key={p.id} onClick={() => setDetailProduct(p)}
                     className={cn('border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer', idx % 2 === 0 ? '' : 'bg-gray-50/30')}>
                     <td className="px-4 py-2.5 font-medium text-gray-900">{p.name}</td>
@@ -726,19 +750,6 @@ function ProductsView({
               </tbody>
             </table>
           </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {filtered.map(p => (
-            <ProductCard
-              key={p.id}
-              product={p}
-              onToggleFlag={toggleWeekFlag}
-              onEdit={() => { setEditId(p.id); setShowForm(true) }}
-              onDelete={() => deleteProduct(p.id)}
-              onDetail={() => setDetailProduct(p)}
-            />
-          ))}
         </div>
       )}
 
@@ -792,7 +803,8 @@ function RecipesView({
   const [dietFilter, setDietFilter] = useState('All')
   const [favsOnly, setFavsOnly] = useState(false)
   const [mineOnly, setMineOnly] = useState(false)
-  const [listView, setListView] = useState(false)
+  const [browseMode, setBrowseMode] = useState<'list' | 'categories'>('categories')
+  const listView = browseMode === 'list'
   const [detail, setDetail] = useState<Item | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
@@ -816,23 +828,6 @@ function RecipesView({
 
   function toggleFav(id: string) {
     setItems(prev => prev.map(i => i.id === id ? { ...i, favorite: !i.favorite } : i))
-  }
-
-  function toggleWeekFlag(id: string, flag: 'thisWeek' | 'nextWeek') {
-    const item = items.find(i => i.id === id)!
-    const isRemoving = item.weekFlags[flag]
-    if (isRemoving && flag === 'thisWeek') {
-      const hasManual = assignments.some(a => a.itemId === id && !a.autoAdded)
-      if (hasManual && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
-      setAssignments(prev => prev.filter(a => a.itemId !== id))
-    }
-    if (!isRemoving && flag === 'thisWeek') {
-      setAssignments(prev => {
-        const already = prev.some(a => a.itemId === id && a.slot === 'Lunch')
-        return already ? prev : [...prev, { id: uid(), itemId: id, day: 'Mon', slot: 'Lunch', servings: 1, weekOffset: 0, autoAdded: true }]
-      })
-    }
-    setItems(prev => prev.map(i => i.id === id ? { ...i, weekFlags: { ...i.weekFlags, [flag]: !i.weekFlags[flag] } } : i))
   }
 
   function deleteRecipe(id: string) {
@@ -864,8 +859,8 @@ function RecipesView({
         </button>
         <button onClick={() => setMineOnly(p => !p)} className={cn('px-3 py-2 text-xs font-medium rounded-xl border cursor-pointer', mineOnly ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50')}>Mine</button>
         <div className="flex rounded-xl overflow-hidden border border-gray-200">
-          <button onClick={() => setListView(false)} aria-label="Cards view" className={cn('px-2.5 py-2 cursor-pointer', !listView ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><LayoutGrid size={14} /></button>
-          <button onClick={() => setListView(true)} aria-label="List view" className={cn('px-2.5 py-2 cursor-pointer', listView ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><List size={14} /></button>
+          <button onClick={() => setBrowseMode('list')} aria-label="List view" className={cn('px-2.5 py-2 cursor-pointer', listView ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}><List size={14} /></button>
+          <button onClick={() => setBrowseMode('categories')} aria-label="Category cards view" title="Browse by category" className={cn('px-2.5 py-2 cursor-pointer text-xs font-bold', !listView ? 'bg-teal-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50')}>CAT</button>
         </div>
         <button onClick={() => { setEditId(null); setShowForm(true) }} className="flex items-center gap-1.5 px-3 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 cursor-pointer">
           <Plus size={14} /> Add recipe
@@ -879,16 +874,33 @@ function RecipesView({
         </div>
       )}
 
-      <p className="text-xs text-gray-400">{filtered.length} recipe{filtered.length !== 1 ? 's' : ''}</p>
+      {listView && <p className="text-xs text-gray-400">{filtered.length} recipe{filtered.length !== 1 ? 's' : ''}</p>}
 
-      {listView ? (
+      {browseMode === 'categories' ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {Array.from(new Set(recipes.map(r => r.category))).sort().map(cat => {
+            const count = recipes.filter(r => r.category === cat).length
+            const catEmoji: Record<string, string> = { Breakfasts: '🌅', Salads: '🥗', Soups: '🍜', 'Main courses': '🍽️', Snacks: '🍎', Sandwiches: '🥪', Sauces: '🫙', Desserts: '🍰', Drinks: '🥤' }
+            return (
+              <button key={cat} onClick={() => { setCatFilter(cat); setBrowseMode('list') }}
+                className="bg-white border border-gray-200 rounded-2xl p-5 text-left hover:shadow-md transition-shadow cursor-pointer">
+                <div className={cn('text-2xl mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
+                  {catEmoji[cat] ?? '📖'}
+                </div>
+                <p className="font-semibold text-gray-900 text-sm">{cat}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{count} recipe{count !== 1 ? 's' : ''}</p>
+              </button>
+            )
+          })}
+        </div>
+      ) : listView ? (
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  {['Name', 'Category', 'Servings', 'kcal/srv', 'Protein', 'Fat', 'Carbs', ''].map(h => (
-                    <th key={h} className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide', ['kcal/srv','Protein','Fat','Carbs','Servings'].includes(h) ? 'text-right' : 'text-left')}>
+                  {['Name', 'Category', 'Servings', 'kcal/srv', 'Protein', 'Fat', 'Carbs', 'Fiber', ''].map(h => (
+                    <th key={h} className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide', ['kcal/srv','Protein','Fat','Carbs','Servings','Fiber'].includes(h) ? 'text-right' : 'text-left')}>
                       {h}
                     </th>
                   ))}
@@ -911,6 +923,7 @@ function RecipesView({
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.protein)}g</td>
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.fat)}g</td>
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.carbs)}g</td>
+                    <td className="px-4 py-2.5 text-right font-mono text-gray-700">{r.fiber !== undefined ? `${fmtMacro(r.fiber)}g` : '—'}</td>
                     <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
                         <button onClick={() => toggleFav(r.id)} aria-label={r.favorite ? 'Remove favourite' : 'Add favourite'} className="p-1 rounded hover:bg-gray-100 text-gray-300 hover:text-red-500 cursor-pointer"><Heart size={12} fill={r.favorite ? '#ef4444' : 'none'} className={r.favorite ? 'text-red-500' : ''} /></button>
@@ -928,66 +941,9 @@ function RecipesView({
             </table>
           </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {filtered.map((r, idx) => (
-            <article key={r.id} className="bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col group">
-              <div
-                className={cn('h-28 bg-gradient-to-br flex items-end p-3 cursor-pointer', RECIPE_GRADIENTS[idx % RECIPE_GRADIENTS.length])}
-                onClick={() => setDetail(r)}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium bg-white/80', CATEGORY_COLOURS[r.category] ?? 'text-gray-700')}>
-                    {r.category}
-                  </span>
-                  <button
-                    onClick={e => { e.stopPropagation(); toggleFav(r.id) }}
-                    aria-label={r.favorite ? 'Remove favourite' : 'Add favourite'}
-                    className="p-1.5 bg-white/80 rounded-full hover:bg-white cursor-pointer"
-                  >
-                    <Heart size={13} fill={r.favorite ? '#ef4444' : 'none'} className={r.favorite ? 'text-red-500' : 'text-gray-400'} />
-                  </button>
-                </div>
-              </div>
+      ) : null}
 
-              <div className="p-3 flex flex-col gap-2 flex-1 cursor-pointer" onClick={() => setDetail(r)}>
-                <p className="font-semibold text-gray-900 text-sm leading-tight group-hover:text-teal-700">{r.name}</p>
-                <p className="text-xs text-gray-400">{r.servings} serving{r.servings !== 1 ? 's' : ''} · {r.kcal} kcal</p>
-                <div className="flex gap-1 text-xs">
-                  {[['P', r.protein, 'bg-blue-50 text-blue-700'], ['F', r.fat, 'bg-red-50 text-red-600'], ['C', r.carbs, 'bg-green-50 text-green-700']].map(([l, v, c]) => (
-                    <span key={String(l)} className={cn('px-1.5 py-0.5 rounded font-medium', String(c))}>
-                      {fmtMacro(Number(v))}g {l}
-                    </span>
-                  ))}
-                </div>
-                {r.dietTags.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {r.dietTags.slice(0, 2).map(t => <span key={t} className="text-xs bg-teal-50 text-teal-700 px-1.5 py-0.5 rounded-full">{DIET_LABELS[t] ?? t}</span>)}
-                    {r.dietTags.length > 2 && <span className="text-xs text-gray-400">+{r.dietTags.length - 2}</span>}
-                  </div>
-                )}
-              </div>
-
-              <div className="px-3 pb-3 flex gap-1.5" onClick={e => e.stopPropagation()}>
-                <button onClick={() => toggleWeekFlag(r.id, 'thisWeek')} className={cn('flex-1 text-xs py-1.5 rounded-lg font-medium cursor-pointer', r.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}>
-                  {r.weekFlags.thisWeek ? '✓ This week' : 'This week'}
-                </button>
-                <button onClick={() => toggleWeekFlag(r.id, 'nextWeek')} className={cn('flex-1 text-xs py-1.5 rounded-lg font-medium cursor-pointer', r.weekFlags.nextWeek ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}>
-                  {r.weekFlags.nextWeek ? '✓ Next week' : 'Next week'}
-                </button>
-                {r.isUserAdded && (
-                  <>
-                    <button onClick={() => { setEditId(r.id); setShowForm(true) }} aria-label="Edit recipe" className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-teal-600 cursor-pointer"><Edit2 size={12} /></button>
-                    <button onClick={() => deleteRecipe(r.id)} aria-label="Delete recipe" className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 size={12} /></button>
-                  </>
-                )}
-              </div>
-            </article>
-          ))}
-        </div>
-      )}
-
-      {filtered.length === 0 && (
+      {browseMode !== 'categories' && filtered.length === 0 && (
         <EmptyState
           icon={<UtensilsCrossed size={32} />}
           message="No recipes match your filters."
@@ -996,43 +952,89 @@ function RecipesView({
         />
       )}
 
-      {detail && (
-        <Modal title={detail.name} onClose={() => setDetail(null)} wide>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className={cn('text-sm px-3 py-1 rounded-full font-medium', CATEGORY_COLOURS[detail.category] ?? 'bg-gray-100 text-gray-600')}>{detail.category}</span>
-              <span className="text-sm text-gray-400">{detail.servings} serving{detail.servings !== 1 ? 's' : ''}</span>
-              {detail.isUserAdded && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Your recipe</span>}
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {[['kcal', detail.kcal, 'bg-amber-50 text-amber-700'], ['Protein', `${fmtMacro(detail.protein)}g`, 'bg-blue-50 text-blue-700'], ['Fat', `${fmtMacro(detail.fat)}g`, 'bg-red-50 text-red-600'], ['Carbs', `${fmtMacro(detail.carbs)}g`, 'bg-green-50 text-green-700']].map(([l, v, c]) => (
-                <div key={String(l)} className={cn('rounded-xl px-2 py-3 text-center', String(c))}>
-                  <p className="text-base font-bold leading-tight">{v}</p>
-                  <p className="text-xs opacity-60 mt-0.5">{l}</p>
+      {detail && (() => {
+        const protKcal = detail.protein * 4
+        const fatKcal = detail.fat * 9
+        const carbKcal = detail.carbs * 4
+        const totalMacroKcal = protKcal + fatKcal + carbKcal || 1
+        const pPct = Math.round((protKcal / totalMacroKcal) * 100)
+        const fPct = Math.round((fatKcal / totalMacroKcal) * 100)
+        const cPct = 100 - pPct - fPct
+        const pieGradient = `conic-gradient(#3b82f6 0% ${pPct}%, #ef4444 ${pPct}% ${pPct + fPct}%, #22c55e ${pPct + fPct}% 100%)`
+        return (
+          <Modal title={detail.name} onClose={() => setDetail(null)} wide>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn('text-sm px-3 py-1 rounded-full font-medium', CATEGORY_COLOURS[detail.category] ?? 'bg-gray-100 text-gray-600')}>{detail.category}</span>
+                <span className="text-sm text-gray-400">{detail.servings} serving{detail.servings !== 1 ? 's' : ''}</span>
+                {detail.prepTime && <span className="text-sm text-gray-400">· {detail.prepTime}</span>}
+                {detail.isUserAdded && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Your recipe</span>}
+              </div>
+              <div className="flex items-center gap-5">
+                <div style={{ width: 80, height: 80, borderRadius: '50%', background: pieGradient, flexShrink: 0 }} />
+                <div className="space-y-1 text-sm">
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /><span className="text-gray-600">Protein: {fmtMacro(detail.protein)} g ({pPct}%)</span></div>
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" /><span className="text-gray-600">Fat: {fmtMacro(detail.fat)} g ({fPct}%)</span></div>
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" /><span className="text-gray-600">Carbs: {fmtMacro(detail.carbs)} g ({cPct}%)</span></div>
+                  {detail.fiber !== undefined && <div className="text-xs text-gray-400">Fiber: {fmtMacro(detail.fiber)} g</div>}
+                  <div className="font-semibold text-gray-900">{detail.kcal} kcal / serving</div>
                 </div>
-              ))}
+              </div>
+              {detail.servingG && (
+                <div>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Units conversion</h3>
+                  <table className="w-full text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 text-gray-500">
+                        <th className="text-left px-3 py-2 font-medium">Amount</th>
+                        <th className="text-right px-3 py-2 font-medium">kcal</th>
+                        <th className="text-right px-3 py-2 font-medium">Protein</th>
+                        <th className="text-right px-3 py-2 font-medium">Fat</th>
+                        <th className="text-right px-3 py-2 font-medium">Carbs</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[{ label: '1 serving', factor: 1 }, { label: '100 g', factor: 100 / detail.servingG }].map(({ label, factor }) => (
+                        <tr key={label} className="border-t border-gray-100">
+                          <td className="px-3 py-2 text-gray-700">{label}</td>
+                          <td className="px-3 py-2 text-right text-gray-700">{Math.round(detail.kcal * factor)}</td>
+                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.protein * factor)} g</td>
+                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.fat * factor)} g</td>
+                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.carbs * factor)} g</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              {detail.ingredients && detail.ingredients.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Ingredients</h3>
+                  <ul className="space-y-1">
+                    {detail.ingredients.map(ing => (
+                      <li key={ing.productId} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50">
+                        <span className="text-gray-700">{ing.productName}</span>
+                        <span className="text-gray-400 font-mono text-xs">{ing.amount} {ing.unit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {detail.instructions && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Instructions</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{detail.instructions}</p>
+                </div>
+              )}
+              {detail.dietTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {detail.dietTags.map(t => <span key={t} className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium">{DIET_LABELS[t] ?? t}</span>)}
+                </div>
+              )}
             </div>
-            {detail.ingredients && detail.ingredients.length > 0 && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-700 mb-2">Ingredients</h3>
-                <ul className="space-y-1">
-                  {detail.ingredients.map(ing => (
-                    <li key={ing.productId} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50">
-                      <span className="text-gray-700">{ing.productName}</span>
-                      <span className="text-gray-400 font-mono text-xs">{ing.amount} {ing.unit}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {detail.dietTags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {detail.dietTags.map(t => <span key={t} className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium">{DIET_LABELS[t] ?? t}</span>)}
-              </div>
-            )}
-          </div>
-        </Modal>
-      )}
+          </Modal>
+        )
+      })()}
 
       {showForm && (
         <RecipeForm
@@ -1084,6 +1086,9 @@ function RecipeForm({
   const [name, setName] = useState(item?.name ?? '')
   const [category, setCategory] = useState(item?.category ?? 'Breakfasts')
   const [servings, setServings] = useState(String(item?.servings ?? 1))
+  const [prepTime, setPrepTime] = useState(item?.prepTime ?? '')
+  const [recipeServingG, setRecipeServingG] = useState(String(item?.servingG ?? ''))
+  const [instructions, setInstructions] = useState(item?.instructions ?? '')
   const [ings, setIngs] = useState(item?.ingredients ?? [])
   const [recipeDietTags, setRecipeDietTags] = useState<string[]>(item?.dietTags ?? [])
   const [prodSearch, setProdSearch] = useState('')
@@ -1122,6 +1127,9 @@ function RecipeForm({
       kcal: Math.round(nutrition.kcal), protein: Math.round(nutrition.protein * 10) / 10,
       fat: Math.round(nutrition.fat * 10) / 10, carbs: Math.round(nutrition.carbs * 10) / 10,
       dietTags: recipeDietTags,
+      prepTime: prepTime || undefined,
+      instructions: instructions || undefined,
+      servingG: recipeServingG ? Number(recipeServingG) : undefined,
     })
   }
 
@@ -1181,6 +1189,26 @@ function RecipeForm({
         <Field label="Servings (this recipe makes)">
           <input type="number" min="1" value={servings} onChange={e => setServings(e.target.value)} className={inputCls} />
         </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Prep time (optional)">
+            <input value={prepTime} onChange={e => setPrepTime(e.target.value)} placeholder="e.g. 30 min" className={inputCls} />
+          </Field>
+          <Field label="Grams per serving (optional)">
+            <input type="number" min="0" value={recipeServingG} onChange={e => setRecipeServingG(e.target.value)} placeholder="e.g. 250" className={inputCls} />
+          </Field>
+        </div>
+        <Field label="Instructions (optional)">
+          <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={3} placeholder="Step-by-step instructions…" className={cn(inputCls, 'resize-y')} />
+        </Field>
+
+        <div className="grid grid-cols-4 gap-2 bg-teal-50 border border-teal-100 rounded-xl p-3">
+          {[['kcal', Math.round(nutrition.kcal)], ['Protein', `${fmtMacro(nutrition.protein)}g`], ['Fat', `${fmtMacro(nutrition.fat)}g`], ['Carbs', `${fmtMacro(nutrition.carbs)}g`]].map(([l, v]) => (
+            <div key={String(l)} className="text-center">
+              <p className="text-sm font-bold text-gray-800">{v}</p>
+              <p className="text-xs text-gray-400">{l}</p>
+            </div>
+          ))}
+        </div>
 
         <div>
           <label className="text-xs font-medium text-gray-500 mb-2 block">Ingredients</label>
@@ -1221,15 +1249,6 @@ function RecipeForm({
                 <span className="text-gray-400 font-mono text-xs">{ing.amount} {ing.unit}</span>
                 <button type="button" onClick={() => setIngs(prev => prev.filter(i => i.productId !== ing.productId))} className="text-gray-400 hover:text-red-500 cursor-pointer"><X size={13} /></button>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-4 gap-2 bg-gray-50 rounded-xl p-3">
-          {[['kcal', Math.round(nutrition.kcal)], ['Protein', `${fmtMacro(nutrition.protein)}g`], ['Fat', `${fmtMacro(nutrition.fat)}g`], ['Carbs', `${fmtMacro(nutrition.carbs)}g`]].map(([l, v]) => (
-            <div key={String(l)} className="text-center">
-              <p className="text-sm font-bold text-gray-800">{v}</p>
-              <p className="text-xs text-gray-400">{l}</p>
             </div>
           ))}
         </div>
@@ -1282,12 +1301,19 @@ function calcRowMacros(row: AnalyserRow, allItems: Item[]) {
       grams: row.quantity * (item.servingG ?? 100),
     }
   }
-  const ratio = row.quantity / (item.servingAmount ?? 100)
+  const altUnit = item.altUnits?.find(a => a.unit === row.unit)
+  const ratio = row.unit === 'serving'
+    ? row.quantity
+    : altUnit
+      ? row.quantity * altUnit.gramsPerUnit / (item.servingAmount ?? 100)
+      : row.quantity / (item.servingAmount ?? 100)
   const grams = row.unit === 'serving'
     ? row.quantity * (item.servingG ?? item.servingAmount ?? 100)
     : row.unit === 'g' || row.unit === 'ml'
       ? row.quantity
-      : row.quantity * (item.servingG ? item.servingG / (item.servingAmount ?? 1) : 1)
+      : altUnit
+        ? row.quantity * altUnit.gramsPerUnit
+        : row.quantity * (item.servingG ? item.servingG / (item.servingAmount ?? 1) : 1)
   return {
     kcal: item.kcal * ratio,
     protein: item.protein * ratio,
@@ -1421,11 +1447,17 @@ function ProductsAnalyserView({
                     </td>
                     <td className="px-3 py-2">
                       {isRecipe ? (
-                        <span className="text-xs text-gray-400 px-2">serving</span>
+                        <select value={row.unit} onChange={e => updateRow(row.id, { unit: e.target.value })}
+                          className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none focus:border-teal-400">
+                          {['serving','g'].map(u => <option key={u}>{u}</option>)}
+                        </select>
                       ) : (
                         <select value={row.unit} onChange={e => updateRow(row.id, { unit: e.target.value })}
                           className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 cursor-pointer focus:outline-none focus:border-teal-400">
-                          {['g','ml','pc','tbsp','tsp','serving'].map(u => <option key={u}>{u}</option>)}
+                          {selItem
+                            ? [...new Set([selItem.unit ?? 'g', ...(selItem.altUnits?.map(a => a.unit) ?? []), 'serving'])].map(u => <option key={u}>{u}</option>)
+                            : ['g','ml','pc','tbsp','tsp','serving'].map(u => <option key={u}>{u}</option>)
+                          }
                         </select>
                       )}
                     </td>
@@ -1440,7 +1472,7 @@ function ProductsAnalyserView({
                     <td className={tdCls}>{m ? fmtMacro(m.fiber) : '—'}</td>
                     <td className={tdCls}>{m ? Math.round(m.kcal) : '—'}</td>
                     <td className="px-3 py-2 text-center">
-                      {selItem && !isRecipe && (
+                      {selItem && (
                         <div className="flex gap-1 justify-center">
                           <button onClick={() => toggleWeekFlag(selItem.id, 'thisWeek')}
                             className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', selItem.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>
@@ -1522,14 +1554,63 @@ function ProductsAnalyserView({
 
 // ─── diets view ───────────────────────────────────────────────────────────────
 
-function DietsView({ diets }: { diets: Diet[] }) {
+function DietsView({ diets, items }: { diets: Diet[]; items: Item[] }) {
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [selectedDietId, setSelectedDietId] = useState<string | null>(null)
+
+  if (selectedDietId) {
+    const diet = diets.find(d => d.id === selectedDietId)!
+    const dietProducts = items.filter(i => i.kind === 'product' && i.dietTags.includes(selectedDietId))
+    const dietRecipes = items.filter(i => i.kind === 'recipe' && i.dietTags.includes(selectedDietId))
+    return (
+      <div className="space-y-4">
+        <button onClick={() => setSelectedDietId(null)} className="flex items-center gap-1.5 text-sm text-teal-600 hover:text-teal-800 cursor-pointer font-medium">
+          <ChevronLeft size={14} /> Back to diets
+        </button>
+        <h2 className="text-base font-semibold text-gray-900">{diet.name}</h2>
+        {dietProducts.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Products ({dietProducts.length})</h3>
+            <div className="space-y-1">
+              {dietProducts.map(p => (
+                <div key={p.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                  <span className="text-sm text-gray-800">{p.name}</span>
+                  <span className="text-xs text-gray-400">{p.kcal} kcal / {p.servingLabel ?? '100g'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {dietRecipes.length > 0 && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">Recipes ({dietRecipes.length})</h3>
+            <div className="space-y-1">
+              {dietRecipes.map(r => (
+                <div key={r.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                  <span className="text-sm text-gray-800">{r.name}</span>
+                  <span className="text-xs text-gray-400">{r.kcal} kcal / srv</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {dietProducts.length === 0 && dietRecipes.length === 0 && (
+          <EmptyState icon={<Leaf size={32} />} message={`No products or recipes tagged with ${diet.name}`} />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-500">{diets.length} nutrition patterns are supported.</p>
+      <p className="text-sm text-gray-500">{diets.length} nutrition patterns are supported. Click a card to explore products and recipes.</p>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         {diets.map(diet => (
-          <article key={diet.id} className="bg-white rounded-2xl border border-gray-200 p-4 flex flex-col gap-3 hover:shadow-md transition-shadow">
+          <article
+            key={diet.id}
+            className="bg-white rounded-2xl border border-gray-200 p-4 flex flex-col gap-3 hover:shadow-md transition-shadow cursor-pointer"
+            onClick={() => setSelectedDietId(diet.id)}
+          >
             <div className="flex items-start justify-between gap-2">
               <h2 className="font-semibold text-gray-900 text-sm">{diet.name}</h2>
               {diet.macroGuidance && (
@@ -1539,17 +1620,20 @@ function DietsView({ diets }: { diets: Diet[] }) {
             <p className={cn('text-xs text-gray-500 leading-relaxed', expanded !== diet.id && 'line-clamp-2')}>
               {diet.description}
             </p>
-            <button onClick={() => setExpanded(expanded === diet.id ? null : diet.id)} className="text-xs text-teal-600 hover:text-teal-800 cursor-pointer text-left w-fit">
+            <button onClick={e => { e.stopPropagation(); setExpanded(expanded === diet.id ? null : diet.id) }} className="text-xs text-teal-600 hover:text-teal-800 cursor-pointer text-left w-fit">
               {expanded === diet.id ? 'Show less ↑' : 'Show more ↓'}
             </button>
             {diet.macroGuidance ? (
-              <div className="flex gap-2">
-                {[['Protein', diet.macroGuidance.proteinPct, 'bg-blue-50 text-blue-700'], ['Fat', diet.macroGuidance.fatPct, 'bg-red-50 text-red-600'], ['Carbs', diet.macroGuidance.carbsPct, 'bg-green-50 text-green-700']].map(([l, v, c]) => (
-                  <div key={String(l)} className={cn('flex-1 rounded-xl px-2 py-2 text-center', String(c))}>
-                    <p className="text-sm font-bold">{v}<span className="text-xs">%</span></p>
-                    <p className="text-xs opacity-70">{l}</p>
-                  </div>
-                ))}
+              <div className="space-y-2">
+                <MacroPiePct proteinPct={diet.macroGuidance.proteinPct} fatPct={diet.macroGuidance.fatPct} carbsPct={diet.macroGuidance.carbsPct} />
+                <div className="flex gap-2">
+                  {[['Protein', diet.macroGuidance.proteinPct, 'bg-blue-50 text-blue-700'], ['Fat', diet.macroGuidance.fatPct, 'bg-red-50 text-red-600'], ['Carbs', diet.macroGuidance.carbsPct, 'bg-green-50 text-green-700']].map(([l, v, c]) => (
+                    <div key={String(l)} className={cn('flex-1 rounded-xl px-2 py-2 text-center', String(c))}>
+                      <p className="text-sm font-bold">{v}<span className="text-xs">%</span></p>
+                      <p className="text-xs opacity-70">{l}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <p className="text-xs text-gray-400 italic">{diet.guidanceNote ?? 'No fixed macro split'}</p>
@@ -1564,11 +1648,13 @@ function DietsView({ diets }: { diets: Diet[] }) {
 // ─── planner sub-views ────────────────────────────────────────────────────────
 
 function DaySlot({
-  day, slot, slotAssignments, items, upsertAssignment, removeAssignment,
+  day, slot, slotAssignments, items, upsertAssignment, removeAssignment, onLog, date,
 }: {
   day: Day; slot: Slot; slotAssignments: Assignment[]; items: Item[]
   upsertAssignment: (itemId: string, day: Day, slot: Slot, servings: number) => void
   removeAssignment: (id: string) => void
+  onLog?: (item: Item, servings: number, slot: Slot, date: string) => void
+  date?: string
 }) {
   const [adding, setAdding] = useState(false)
   const [search, setSearch] = useState('')
@@ -1591,6 +1677,9 @@ function DaySlot({
                 <button onClick={() => upsertAssignment(a.itemId, day, slot, Math.max(0.5, a.servings - 0.5))} aria-label="Decrease servings" className="w-5 h-5 rounded flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer"><Minus size={9} /></button>
                 <span className="text-xs font-mono w-5 text-center">{a.servings}</span>
                 <button onClick={() => upsertAssignment(a.itemId, day, slot, a.servings + 0.5)} aria-label="Increase servings" className="w-5 h-5 rounded flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer"><Plus size={9} /></button>
+                {onLog && (() => { const it = items.find(i => i.id === a.itemId); return it ? (
+                  <button onClick={() => onLog(it, a.servings, slot, date ?? '')} className="text-xs text-teal-600 hover:text-teal-800 cursor-pointer ml-1 opacity-0 group-hover:opacity-100" title="Log to tracking">+Log</button>
+                ) : null })()}
                 <button
                   onClick={() => removeAssignment(a.id)}
                   aria-label="Remove"
@@ -1676,6 +1765,7 @@ function WeeklySummary({
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50">
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide min-w-44">Item</th>
+              <th className="text-center px-2 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide w-14">Unit</th>
               {days.map((d, i) => (
                 <th key={d} className="text-center px-2 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide min-w-16">
                   <div>{d}</div>
@@ -1691,7 +1781,7 @@ function WeeklySummary({
               return (
                 <React.Fragment key={slot}>
                   <tr key={`${slot}-h`} className="bg-gray-50/60 border-t border-gray-100">
-                    <td colSpan={9} className="px-4 py-2">
+                    <td colSpan={10} className="px-4 py-2">
                       <span className={cn('text-xs font-semibold px-2.5 py-1 rounded-full border', SLOT_COLOURS[slot])}>{slot}</span>
                     </td>
                   </tr>
@@ -1703,17 +1793,19 @@ function WeeklySummary({
                     <tr key={`${slot}-${item.id}`} className="border-b border-gray-50 hover:bg-gray-50/40">
                       <td className="px-4 py-2.5">
                         <p className="font-medium text-gray-800 text-xs leading-tight">{item.name}</p>
-                        <div className="flex items-center gap-1.5 mt-0.5">
-                          <p className="text-gray-400 text-xs">{item.kcal} kcal/srv</p>
-                          {gps != null && (
-                            <button
-                              onClick={() => setGramsMode(prev => ({ ...prev, [rowKey]: !prev[rowKey] }))}
-                              className={cn('text-xs px-1.5 py-0 rounded border cursor-pointer', inGrams ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-400 border-gray-200 hover:border-teal-400')}
-                            >
-                              {inGrams ? 'g' : 'srv'}
-                            </button>
-                          )}
-                        </div>
+                        <p className="text-gray-400 text-xs mt-0.5">{item.kcal} kcal/srv</p>
+                      </td>
+                      <td className="px-2 py-2.5 text-center">
+                        {gps != null ? (
+                          <button
+                            onClick={() => setGramsMode(prev => ({ ...prev, [rowKey]: !prev[rowKey] }))}
+                            className={cn('text-xs px-1.5 py-0.5 rounded border cursor-pointer', inGrams ? 'bg-teal-600 text-white border-teal-600' : 'bg-white text-gray-400 border-gray-200 hover:border-teal-400')}
+                          >
+                            {inGrams ? 'g' : 'srv'}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-300">srv</span>
+                        )}
                       </td>
                       {days.map(day => {
                         const srv = getServings(item.id, day, slot)
@@ -1743,7 +1835,7 @@ function WeeklySummary({
                     )})
                   }
                   <tr key={`${slot}-add`} className="border-b border-gray-100">
-                    <td colSpan={9} className="px-4 py-1.5">
+                    <td colSpan={10} className="px-4 py-1.5">
                       {addingSlot === slot ? (
                         <div className="relative">
                           <input
@@ -1790,11 +1882,14 @@ function WeeklySummary({
 }
 
 function DayCardsView({
-  items, assignments, days, dates, upsertAssignment, setAssignments,
+  items, assignments, days, dates, upsertAssignment, setAssignments, onLog, calorieTarget, onLogDay,
 }: {
   items: Item[]; assignments: Assignment[]; days: Day[]; dates: Date[]
   upsertAssignment: (itemId: string, day: Day, slot: Slot, servings: number) => void
   setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>
+  onLog?: (item: Item, servings: number, slot: Slot, date: string) => void
+  calorieTarget?: number
+  onLogDay?: (day: Day, date: Date) => void
 }) {
   const today = new Date()
 
@@ -1816,11 +1911,21 @@ function DayCardsView({
                   <p className={cn('text-sm font-bold', isToday ? 'text-teal-800' : 'text-gray-800')}>{day}</p>
                   <p className="text-xs text-gray-400">{dates[i].toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
                 </div>
-                {isToday && <span className="text-xs bg-teal-600 text-white px-2 py-0.5 rounded-full">Today</span>}
+                <div className="flex items-center gap-1.5">
+                  {isToday && <span className="text-xs bg-teal-600 text-white px-2 py-0.5 rounded-full">Today</span>}
+                  {onLogDay && dayA.length > 0 && (
+                    <button onClick={() => onLogDay(day, dates[i])} className="text-xs text-teal-600 hover:text-teal-700 cursor-pointer border border-teal-200 rounded-full px-2 py-0.5 hover:bg-teal-50">
+                      Log day
+                    </button>
+                  )}
+                </div>
               </div>
               {dayA.length > 0 && (
-                <div className="flex gap-2 flex-wrap mt-1.5">
+                <div className="flex gap-2 flex-wrap mt-1.5 items-center">
                   <span className="text-xs text-gray-700 font-semibold">{Math.round(totalKcal)} kcal</span>
+                  {(calorieTarget ?? 0) > 0 && (
+                    <span className="text-xs text-teal-600 font-medium">{Math.round(totalKcal / calorieTarget! * 100)}%</span>
+                  )}
                   <span className="text-xs text-blue-500">{fmtMacro(totalProtein)}g P</span>
                   <span className="text-xs text-orange-400">{fmtMacro(totalFat)}g F</span>
                   <span className="text-xs text-green-500">{fmtMacro(totalCarbs)}g C</span>
@@ -1837,6 +1942,8 @@ function DayCardsView({
                   items={items}
                   upsertAssignment={upsertAssignment}
                   removeAssignment={id => setAssignments(prev => prev.filter(x => x.id !== id))}
+                  onLog={onLog}
+                  date={isoDate(dates[i])}
                 />
               ))}
             </div>
@@ -1848,11 +1955,13 @@ function DayCardsView({
 }
 
 function CalendarView({
-  items, assignments, days, dates, upsertAssignment, setAssignments,
+  items, assignments, days, dates, upsertAssignment, setAssignments, onLog, profile,
 }: {
   items: Item[]; assignments: Assignment[]; days: Day[]; dates: Date[]
   upsertAssignment: (itemId: string, day: Day, slot: Slot, servings: number) => void
   setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>
+  onLog?: (item: Item, servings: number, slot: Slot, date: string) => void
+  profile?: Profile
 }) {
   const [subView, setSubView] = useState<'day' | '4days' | 'week' | 'month'>('week')
   const [monthOffset, setMonthOffset] = useState(0)
@@ -1879,40 +1988,57 @@ function CalendarView({
 
   const calPlanSummary = useMemo(() => {
     const visible = subView === 'month' ? assignments : assignments.filter(a => visibleDays.includes(a.day))
-    return visible.reduce<{ id: string; name: string; servings: number; kcal: number }[]>((acc, a) => {
+    const grouped: Record<Slot, { id: string; name: string; servings: number; kcal: number }[]> = {
+      Breakfast: [], Lunch: [], Dinner: [], Snacks: [],
+    }
+    visible.forEach(a => {
       const item = items.find(i => i.id === a.itemId)
-      if (!item) return acc
-      const ex = acc.find(x => x.id === a.itemId)
+      if (!item) return
+      const slot = a.slot ?? 'Lunch'
+      const ex = grouped[slot].find(x => x.id === a.itemId)
       if (ex) { ex.servings += a.servings; ex.kcal += item.kcal * a.servings }
-      else acc.push({ id: a.itemId, name: item.name, servings: a.servings, kcal: item.kcal * a.servings })
-      return acc
-    }, [])
+      else grouped[slot].push({ id: a.itemId, name: item.name, servings: a.servings, kcal: item.kcal * a.servings })
+    })
+    return grouped
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assignments, items, subView, selectedDayIdx])
 
-  const PlanSummaryBar = () => calPlanSummary.length === 0 ? null : (
-    <div className="bg-white rounded-2xl border border-gray-200 p-3">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Plan summary ({calPlanSummary.length} items)</h3>
-      <p className="text-xs text-gray-400 mb-2">Drag an item onto a day cell to assign it.</p>
-      <div className="flex flex-wrap gap-1.5">
-        {calPlanSummary.map(s => (
-          <span
-            key={s.id}
-            draggable
-            onDragStart={e => {
-              e.dataTransfer.setData('drag-type', 'summary')
-              e.dataTransfer.setData('item-id', s.id)
-              e.dataTransfer.setData('item-name', s.name)
-              e.dataTransfer.effectAllowed = 'copy'
-            }}
-            className="text-xs bg-teal-50 text-teal-700 border border-teal-100 rounded-lg px-2 py-1 cursor-grab active:cursor-grabbing select-none"
-          >
-            {s.name} · {s.servings} srv · {Math.round(s.kcal)} kcal
-          </span>
-        ))}
+  const PlanSummaryBar = () => {
+    const totalItems = SLOTS.reduce((s, slot) => s + calPlanSummary[slot].length, 0)
+    if (totalItems === 0) return null
+    return (
+      <div className="bg-white rounded-2xl border border-gray-200 p-3">
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Plan summary</h3>
+        <div className="grid grid-cols-4 gap-2">
+          {SLOTS.map(slot => (
+            <div key={slot}>
+              <p className={`text-xs font-semibold mb-1.5 ${SLOT_COLOURS[slot].split(' ')[1]}`}>{slot}</p>
+              <div className="space-y-1">
+                {calPlanSummary[slot].length === 0 ? (
+                  <p className="text-xs text-gray-300 italic">—</p>
+                ) : calPlanSummary[slot].map(s => (
+                  <div
+                    key={s.id}
+                    draggable
+                    onDragStart={e => {
+                      e.dataTransfer.setData('drag-type', 'summary')
+                      e.dataTransfer.setData('item-id', s.id)
+                      e.dataTransfer.setData('item-name', s.name)
+                      e.dataTransfer.effectAllowed = 'copy'
+                    }}
+                    className="text-xs bg-teal-50 text-teal-700 border border-teal-100 rounded-lg px-2 py-1.5 cursor-grab active:cursor-grabbing select-none"
+                  >
+                    <p className="font-medium truncate">{s.name}</p>
+                    <p className="text-teal-500 mt-0.5">{s.servings} srv · {Math.round(s.kcal)} kcal</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   if (subView === 'month') {
     const baseMonth = new Date(dates[0].getFullYear(), dates[0].getMonth() + monthOffset, 1)
@@ -2002,7 +2128,10 @@ function CalendarView({
             assignments={dayAssignments} items={items}
             onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
             onAdd={(itemId, slot) => upsertAssignment(itemId, day, slot, 1)}
+            onUpsert={(itemId, slot, servings) => upsertAssignment(itemId, day, slot, servings)}
             onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day } : a))}
+            onLog={onLog}
+            profile={profile}
           />
         </div>
       </div>
@@ -2038,7 +2167,10 @@ function CalendarView({
                 assignments={assignments.filter(a => a.day === d)} items={items}
                 onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
                 onAdd={(itemId, slot) => upsertAssignment(itemId, d, slot, 1)}
+                onUpsert={(itemId, slot, servings) => upsertAssignment(itemId, d, slot, servings)}
                 onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day: d } : a))}
+                onLog={onLog}
+                profile={profile}
               />
             )
           })}
@@ -2062,7 +2194,10 @@ function CalendarView({
             items={items}
             onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
             onAdd={(itemId, slot) => upsertAssignment(itemId, day, slot, 1)}
+            onUpsert={(itemId, slot, servings) => upsertAssignment(itemId, day, slot, servings)}
             onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day } : a))}
+            onLog={onLog}
+            profile={profile}
           />
         ))}
       </div>
@@ -2071,26 +2206,30 @@ function CalendarView({
 }
 
 function CalendarWeekCell({
-  day, date, isToday, assignments, items, onRemove, onAdd, onMove,
+  day, date, isToday, assignments, items, onRemove, onAdd, onUpsert, onMove, onLog, profile,
 }: {
   day: Day; date: Date; isToday: boolean
   assignments: Assignment[]; items: Item[]
   onRemove: (id: string) => void
   onAdd: (itemId: string, slot: Slot) => void
+  onUpsert?: (itemId: string, slot: Slot, servings: number) => void
   onMove?: (assignmentId: string) => void
+  onLog?: (item: Item, servings: number, slot: Slot, date: string) => void
+  profile?: Profile
 }) {
-  const [adding, setAdding] = useState(false)
+  const [addingSlot, setAddingSlot] = useState<Slot | null>(null)
   const [search, setSearch] = useState('')
-  const [slot, setSlot] = useState<Slot>('Lunch')
   const [dragOver, setDragOver] = useState(false)
   const matched = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase())).slice(0, 5)
-  const selected = items.find(i => i.name.toLowerCase() === search.toLowerCase())
 
-  function confirmAdd() {
-    if (!selected) return
-    onAdd(selected.id, slot)
-    setSearch(''); setAdding(false)
-  }
+  const totalKcal = assignments.reduce((s, a) => { const it = items.find(x => x.id === a.itemId); return s + (it ? it.kcal * a.servings : 0) }, 0)
+  const totalProtein = assignments.reduce((s, a) => { const it = items.find(x => x.id === a.itemId); return s + (it ? it.protein * a.servings : 0) }, 0)
+  const totalFat = assignments.reduce((s, a) => { const it = items.find(x => x.id === a.itemId); return s + (it ? it.fat * a.servings : 0) }, 0)
+  const totalCarbs = assignments.reduce((s, a) => { const it = items.find(x => x.id === a.itemId); return s + (it ? it.carbs * a.servings : 0) }, 0)
+  const corridor = profile?.calorieTarget ? { low: profile.calorieTarget - 150, high: profile.calorieTarget + 150 } : null
+  const kcalCls = corridor
+    ? (totalKcal < corridor.low ? 'font-semibold text-amber-600' : totalKcal > corridor.high ? 'font-semibold text-red-600' : 'font-semibold text-green-600')
+    : 'font-semibold text-gray-700'
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
@@ -2098,7 +2237,7 @@ function CalendarWeekCell({
     const type = e.dataTransfer.getData('drag-type')
     if (type === 'summary') {
       const name = e.dataTransfer.getData('item-name')
-      if (name) { setSearch(name); setSlot('Lunch'); setAdding(true) }
+      if (name) { setSearch(name); setAddingSlot('Lunch') }
     } else if (type === 'cell') {
       const aid = e.dataTransfer.getData('assignment-id')
       if (aid && onMove) onMove(aid)
@@ -2107,83 +2246,100 @@ function CalendarWeekCell({
 
   return (
     <div
-      className={cn('bg-white rounded-xl border p-2 min-h-36 transition-colors', isToday ? 'border-teal-400' : 'border-gray-200', dragOver && 'bg-teal-50 border-teal-500')}
+      className={cn('bg-white rounded-xl border overflow-hidden transition-colors', isToday ? 'border-teal-400' : 'border-gray-200', dragOver && 'bg-teal-50 border-teal-500')}
       onDragOver={e => { e.preventDefault(); setDragOver(true) }}
       onDragLeave={() => setDragOver(false)}
       onDrop={handleDrop}
     >
-      <div className="flex items-center justify-between mb-2">
-        <span className={cn('inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold', isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700')}>
+      {/* Day header */}
+      <div className={cn('flex items-center justify-between px-2 py-1.5 border-b', isToday ? 'bg-teal-50 border-teal-100' : 'bg-gray-50 border-gray-100')}>
+        <span className={cn('inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold', isToday ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-700')}>
           {date.getDate()}
         </span>
         <span className="text-xs text-gray-400 font-medium">{day}</span>
       </div>
-      {assignments.map(a => {
-        const item = items.find(x => x.id === a.itemId)
-        return item ? (
-          <div
-            key={a.id}
-            draggable
-            onDragStart={e => {
-              e.dataTransfer.setData('drag-type', 'cell')
-              e.dataTransfer.setData('assignment-id', a.id)
-              e.dataTransfer.effectAllowed = 'move'
-              e.stopPropagation()
-            }}
-            className="flex items-start gap-1 mb-1 group cursor-grab active:cursor-grabbing"
-          >
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-gray-700 truncate leading-tight">{item.name}</p>
-              <p className="text-xs text-gray-400">{a.slot} · {a.servings}×</p>
+      {/* Nutrition strip */}
+      {assignments.length > 0 && (
+        <div className="px-2 py-1 bg-gray-50/50 border-b border-gray-100 text-xs space-y-0.5">
+          <div className="flex flex-wrap gap-x-1.5 gap-y-0.5">
+            <span className={kcalCls}>{Math.round(totalKcal)} kcal{corridor ? ` (${Math.round(totalKcal / profile!.calorieTarget * 100)}%)` : ''}</span>
+            <span className="text-blue-500">{fmtMacro(totalProtein)}P</span>
+            <span className="text-orange-400">{fmtMacro(totalFat)}F</span>
+            <span className="text-green-500">{fmtMacro(totalCarbs)}C</span>
+          </div>
+          {corridor && (
+            <div className="w-full bg-gray-200 rounded-full h-1">
+              <div className={cn('h-1 rounded-full', totalKcal > corridor.high ? 'bg-red-500' : totalKcal >= corridor.low ? 'bg-green-500' : 'bg-amber-400')}
+                style={{ width: `${Math.min(100, Math.round(totalKcal / profile!.calorieTarget * 100))}%` }} />
             </div>
-            <button onClick={() => onRemove(a.id)} className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 cursor-pointer flex-shrink-0 mt-0.5">
-              <X size={9} />
-            </button>
-          </div>
-        ) : null
-      })}
-      {!adding && (
-        <button onClick={() => setAdding(true)} className="mt-1 w-full text-xs text-gray-300 hover:text-teal-500 cursor-pointer text-left">
-          <Plus size={10} className="inline mr-0.5" />Add
-        </button>
-      )}
-      {adding && (
-        <div className="mt-1 space-y-1">
-          <div className="relative">
-            <input
-              autoFocus
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search…"
-              className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-teal-500"
-            />
-            {search && matched.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-20 mt-0.5">
-                {matched.map(i => (
-                  <button key={i.id} type="button" onClick={() => setSearch(i.name)}
-                    className="w-full text-left px-2 py-1 text-xs hover:bg-gray-50 cursor-pointer first:rounded-t-lg last:rounded-b-lg truncate">
-                    {i.name}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-          <select value={slot} onChange={e => setSlot(e.target.value as Slot)}
-            className="w-full text-xs border border-gray-200 rounded-lg px-2 py-1 cursor-pointer focus:outline-none focus:border-teal-500">
-            {(['Breakfast','Lunch','Dinner','Snacks'] as Slot[]).map(s => <option key={s}>{s}</option>)}
-          </select>
-          <div className="flex gap-1">
-            <button onClick={confirmAdd} disabled={!selected}
-              className="flex-1 text-xs py-1 bg-teal-600 text-white rounded-lg hover:bg-teal-700 cursor-pointer disabled:opacity-40">
-              Add
-            </button>
-            <button onClick={() => { setAdding(false); setSearch('') }}
-              className="text-xs px-2 py-1 text-gray-400 hover:text-gray-600 cursor-pointer">
-              <X size={10} />
-            </button>
-          </div>
+          )}
         </div>
       )}
+      {/* Slots */}
+      <div>
+        {SLOTS.map(slot => {
+          const slotA = assignments.filter(a => a.slot === slot)
+          const isAddingHere = addingSlot === slot
+          return (
+            <div key={slot} className="border-b border-gray-50 last:border-b-0 px-2 pt-1.5 pb-1">
+              <p className={`text-xs font-semibold uppercase tracking-wide mb-1 ${SLOT_COLOURS[slot].split(' ')[1]}`}>{slot}</p>
+              {slotA.map(a => {
+                const item = items.find(x => x.id === a.itemId)
+                return item ? (
+                  <div
+                    key={a.id}
+                    draggable
+                    onDragStart={e => {
+                      e.dataTransfer.setData('drag-type', 'cell')
+                      e.dataTransfer.setData('assignment-id', a.id)
+                      e.dataTransfer.effectAllowed = 'move'
+                      e.stopPropagation()
+                    }}
+                    className="flex items-center gap-1 mb-1 group cursor-grab active:cursor-grabbing"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-gray-700 truncate leading-tight">{item.name}</p>
+                      <p className="text-xs text-gray-400">{Math.round(item.kcal * a.servings)} kcal</p>
+                    </div>
+                    <div className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100">
+                      {onUpsert && <>
+                        <button onClick={() => onUpsert(item.id, slot, Math.max(0.5, a.servings - 0.5))} aria-label="Decrease servings" className="w-4 h-4 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer flex items-center justify-center"><Minus size={7} /></button>
+                        <span className="text-xs font-mono w-4 text-center">{a.servings}</span>
+                        <button onClick={() => onUpsert(item.id, slot, a.servings + 0.5)} aria-label="Increase servings" className="w-4 h-4 rounded bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer flex items-center justify-center"><Plus size={7} /></button>
+                      </>}
+                      {onLog && <button onClick={e => { e.stopPropagation(); onLog(item, a.servings, slot, isoDate(date)) }} className="text-xs text-teal-600 hover:text-teal-800 cursor-pointer" title="Log to tracking">+Log</button>}
+                      <button onClick={() => onRemove(a.id)} className="text-gray-300 hover:text-red-500 cursor-pointer"><X size={9} /></button>
+                    </div>
+                  </div>
+                ) : null
+              })}
+              {isAddingHere ? (
+                <div className="relative mb-1">
+                  <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
+                    onBlur={() => { if (!search) setAddingSlot(null) }}
+                    placeholder="Search…"
+                    className="w-full text-xs border border-teal-400 rounded-lg px-2 py-0.5 focus:outline-none" />
+                  {search && matched.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-20 mt-0.5 max-h-32 overflow-y-auto">
+                      {matched.map(i => (
+                        <button key={i.id} type="button"
+                          onMouseDown={() => { onAdd(i.id, slot); setSearch(''); setAddingSlot(null) }}
+                          className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-50 cursor-pointer">
+                          {i.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button onClick={() => setAddingSlot(slot)} className="text-xs text-gray-300 hover:text-teal-500 cursor-pointer flex items-center gap-0.5">
+                  <Plus size={9} /> Add
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -2191,16 +2347,55 @@ function CalendarWeekCell({
 // ─── planner view ─────────────────────────────────────────────────────────────
 
 function PlannerView({
-  items, assignments, setAssignments, weekOffset, setWeekOffset,
+  items, assignments, setAssignments, weekOffset, setWeekOffset, setLogEntries, profile,
 }: {
   items: Item[]; assignments: Assignment[]
   setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>
   weekOffset: number; setWeekOffset: (n: number) => void
+  setLogEntries: React.Dispatch<React.SetStateAction<MealLogEntry[]>>
+  profile: Profile
 }) {
-  const [tab, setTab] = useState<'summary' | 'daycards' | 'calendar'>('summary')
+  const [tab, setTab] = useState<'summary' | 'calendar'>('summary')
   const { label, dates } = getWeekDates(weekOffset)
   const { dates: currDates } = getWeekDates(0)
   const isCurrentWeek = dates[0].toDateString() === currDates[0].toDateString()
+
+  function logItem(item: Item, servings: number, slot?: Slot, date?: string) {
+    setLogEntries(prev => {
+      const ex = prev.find(e => e.itemName === item.name && e.date === date)
+      if (ex) return prev.map(e => e.itemName === item.name && e.date === date ? {
+        ...e, quantity: e.quantity + servings,
+        kcal: e.kcal + Math.round(item.kcal * servings),
+        protein: Math.round((e.protein + item.protein * servings) * 10) / 10,
+        fat: Math.round((e.fat + item.fat * servings) * 10) / 10,
+        carbs: Math.round((e.carbs + item.carbs * servings) * 10) / 10,
+      } : e)
+      return [...prev, {
+        id: uid(), itemName: item.name, quantity: servings, unit: 'serving',
+        kcal: Math.round(item.kcal * servings),
+        protein: Math.round(item.protein * servings * 10) / 10,
+        fat: Math.round(item.fat * servings * 10) / 10,
+        carbs: Math.round(item.carbs * servings * 10) / 10,
+        date,
+        slot,
+      }]
+    })
+  }
+
+  function logDay(day: Day, date: Date) {
+    const ds = isoDate(date)
+    assignments.filter(a => (a.weekOffset ?? 0) === weekOffset && a.day === day).forEach(a => {
+      const item = items.find(x => x.id === a.itemId)
+      if (item) logItem(item, a.servings, a.slot, ds)
+    })
+  }
+
+  function logWeek() {
+    assignments.filter(a => (a.weekOffset ?? 0) === weekOffset).forEach(a => {
+      const item = items.find(x => x.id === a.itemId)
+      if (item) logItem(item, a.servings, a.slot, isoDate(dates[DAYS.indexOf(a.day)]))
+    })
+  }
 
   function upsertAssignment(itemId: string, day: Day, slot: Slot, servings: number) {
     setAssignments(prev => {
@@ -2209,6 +2404,28 @@ function PlannerView({
       if (existing) return prev.map(a => a.itemId === itemId && a.day === day && a.slot === slot && (a.weekOffset ?? 0) === weekOffset ? { ...a, servings } : a)
       return [...prev, { id: uid(), itemId, day, slot, servings, weekOffset }]
     })
+  }
+
+  function downloadPlanPdf() {
+    const weekA = assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)
+    if (weekA.length === 0) return
+    const win = window.open('', '_blank')
+    if (!win) return
+    const dayRows = DAYS.map((day, i) => {
+      const dayA = weekA.filter(a => a.day === day)
+      if (dayA.length === 0) return ''
+      const totalKcal = dayA.reduce((s, a) => { const it = items.find(x => x.id === a.itemId); return s + (it ? it.kcal * a.servings : 0) }, 0)
+      const slotRows = SLOTS.map(slot => {
+        const slotA = dayA.filter(a => a.slot === slot)
+        if (slotA.length === 0) return ''
+        const lines = slotA.map(a => { const it = items.find(x => x.id === a.itemId); return it ? `<p style="margin:2px 0;font-size:12px;padding-left:8px">${it.name} × ${a.servings} srv (${Math.round(it.kcal * a.servings)} kcal)</p>` : '' }).join('')
+        return `<p style="font-size:11px;font-weight:600;margin:6px 0 2px;text-transform:uppercase;color:#6b7280">${slot}</p>${lines}`
+      }).join('')
+      return `<div style="margin-bottom:14px;padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><strong style="font-size:13px">${day} · ${dates[i].toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</strong><span style="font-size:12px;color:#374151">${Math.round(totalKcal)} kcal</span></div>${slotRows}</div>`
+    }).join('')
+    win.document.write(`<!DOCTYPE html><html><head><title>Meal Plan</title></head><body style="font-family:sans-serif;padding:24px;max-width:680px"><h1 style="font-size:18px;margin-bottom:4px">Meal Plan</h1><p style="font-size:12px;color:#6b7280;margin-bottom:16px">${label}</p>${dayRows}</body></html>`)
+    win.document.close()
+    win.print()
   }
 
   return (
@@ -2229,11 +2446,19 @@ function PlannerView({
             This week
           </button>
         )}
+        {assignments.filter(a => (a.weekOffset ?? 0) === weekOffset).length > 0 && (
+          <button onClick={logWeek} className="px-3 py-2 text-xs font-medium bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 cursor-pointer flex-shrink-0">
+            Log week
+          </button>
+        )}
+        <button onClick={downloadPlanPdf} aria-label="Download PDF" className="p-2 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 flex-shrink-0 flex items-center gap-1">
+          <Download size={13} /><span className="text-xs">PDF</span>
+        </button>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-        {([['summary', 'Weekly summary'], ['daycards', 'Day cards'], ['calendar', 'Calendar']] as const).map(([id, l]) => (
+        {([['summary', 'Week summary'], ['calendar', 'Calendar']] as const).map(([id, l]) => (
           <button
             key={id}
             onClick={() => setTab(id)}
@@ -2247,11 +2472,8 @@ function PlannerView({
       {tab === 'summary' && (
         <WeeklySummary items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
       )}
-      {tab === 'daycards' && (
-        <DayCardsView items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
-      )}
       {tab === 'calendar' && (
-        <CalendarView items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
+        <CalendarView items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} onLog={logItem} profile={profile} />
       )}
     </div>
   )
@@ -2325,6 +2547,21 @@ function ShoppingListView({ assignments, items, list, setList, stale, setStale }
 
   const categories = list ? [...new Set(list.map(l => l.category))] : []
 
+  function downloadPdf() {
+    if (!list || list.length === 0) return
+    const win = window.open('', '_blank')
+    if (!win) return
+    const rows = categories.map(cat => {
+      const lines = list.filter(l => l.category === cat).map(line =>
+        `<p style="margin:4px 0;font-size:13px">${line.name}<span style="float:right;font-family:monospace">${Number.isInteger(line.amount) ? line.amount : line.amount.toFixed(1)} ${line.unit}</span></p>`
+      ).join('')
+      return `<h3 style="font-size:13px;margin:14px 0 4px;padding:3px 8px;background:#f3f4f6;border-radius:4px">${cat}</h3>${lines}`
+    }).join('')
+    win.document.write(`<!DOCTYPE html><html><head><title>Grocery List</title></head><body style="font-family:sans-serif;padding:24px;max-width:580px"><h1 style="font-size:18px;margin-bottom:4px">Grocery List</h1><p style="font-size:12px;color:#6b7280;margin-bottom:16px">${fromDate} – ${toDate}</p>${rows}</body></html>`)
+    win.document.close()
+    win.print()
+  }
+
   return (
     <div className="space-y-4 max-w-2xl">
       <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
@@ -2358,10 +2595,7 @@ function ShoppingListView({ assignments, items, list, setList, stale, setStale }
             {planSummary.map(item => (
               <div key={item.id} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50">
                 <span className="text-gray-800">{item.name}</span>
-                <div className="flex gap-4 text-xs">
-                  <span className="text-gray-400">{item.servings} srv</span>
-                  <span className="font-medium text-gray-600">{Math.round(item.kcal)} kcal</span>
-                </div>
+                <span className="text-xs text-gray-400">{item.servings} srv</span>
               </div>
             ))}
           </div>
@@ -2380,7 +2614,12 @@ function ShoppingListView({ assignments, items, list, setList, stale, setStale }
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-700">Grocery list</h2>
-            <span className="text-xs text-gray-400">{list.length} items</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-400">{list.length} items</span>
+              <button onClick={downloadPdf} className="flex items-center gap-1 text-xs text-gray-600 hover:text-teal-600 border border-gray-200 rounded-lg px-2 py-1 cursor-pointer hover:border-teal-400 transition-colors">
+                <Download size={11} /> PDF
+              </button>
+            </div>
           </div>
           {categories.map(cat => (
             <div key={cat}>
@@ -2407,6 +2646,50 @@ function ShoppingListView({ assignments, items, list, setList, stale, setStale }
 
 // ─── profile view ─────────────────────────────────────────────────────────────
 
+function MacroPiePct({ proteinPct, fatPct, carbsPct }: { proteinPct: number; fatPct: number; carbsPct: number }) {
+  const gradient = `conic-gradient(#3b82f6 0% ${proteinPct.toFixed(1)}%, #f97316 ${proteinPct.toFixed(1)}% ${(proteinPct + fatPct).toFixed(1)}%, #22c55e ${(proteinPct + fatPct).toFixed(1)}% 100%)`
+  return (
+    <div className="flex items-center gap-2">
+      <div className="w-10 h-10 rounded-full flex-shrink-0" style={{ background: gradient }} />
+      <div className="text-xs space-y-0.5">
+        <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block flex-shrink-0" /><span className="text-gray-600">P {proteinPct}%</span></div>
+        <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-orange-500 inline-block flex-shrink-0" /><span className="text-gray-600">F {fatPct}%</span></div>
+        <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 inline-block flex-shrink-0" /><span className="text-gray-600">C {carbsPct}%</span></div>
+      </div>
+    </div>
+  )
+}
+
+function NutritionPie({ protein, fat, carbs }: { protein: number; fat: number; carbs: number }) {
+  const pKcal = protein * 4
+  const fKcal = fat * 9
+  const cKcal = carbs * 4
+  const total = pKcal + fKcal + cKcal || 1
+  const pPct = pKcal / total * 100
+  const fPct = fKcal / total * 100
+  const cPct = 100 - pPct - fPct
+  const gradient = `conic-gradient(#3b82f6 0% ${pPct.toFixed(1)}%, #f97316 ${pPct.toFixed(1)}% ${(pPct + fPct).toFixed(1)}%, #22c55e ${(pPct + fPct).toFixed(1)}% 100%)`
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-14 h-14 rounded-full flex-shrink-0" style={{ background: gradient }} />
+      <div className="text-xs space-y-0.5">
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block flex-shrink-0" />
+          <span className="text-gray-600">Protein: {fmtMacro(protein)}g ({Math.round(pPct)}%)</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-orange-500 inline-block flex-shrink-0" />
+          <span className="text-gray-600">Fat: {fmtMacro(fat)}g ({Math.round(fPct)}%)</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full bg-green-500 inline-block flex-shrink-0" />
+          <span className="text-gray-600">Carbs: {fmtMacro(carbs)}g ({Math.round(cPct)}%)</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ProfileView({
   profile, setProfile, diets, logEntries, setLogEntries, items,
 }: {
@@ -2428,12 +2711,46 @@ function ProfileView({
   const [logUnit, setLogUnit] = useState('serving')
   const [editLogId, setEditLogId] = useState<string | null>(null)
   const [editLogQty, setEditLogQty] = useState('1')
+  const [profileTab, setProfileTab] = useState<'profile' | 'tracking'>('profile')
+  const [trackView, setTrackView] = useState<'today' | 'week' | 'month'>('today')
+  const [trackWeekOffset, setTrackWeekOffset] = useState(0)
   const matched = items.filter(i => i.name.toLowerCase().includes(logSearch.toLowerCase())).slice(0, 5)
   const selectedItem = items.find(i => i.name.toLowerCase() === logSearch.toLowerCase())
   const dailyKcal = logEntries.reduce((s, e) => s + e.kcal, 0)
   const dailyProtein = logEntries.reduce((s, e) => s + e.protein, 0)
   const dailyFat = logEntries.reduce((s, e) => s + e.fat, 0)
   const dailyCarbs = logEntries.reduce((s, e) => s + e.carbs, 0)
+  const proteinTargetG = profile.calorieTarget > 0 && profile.macros.protein > 0
+    ? Math.round(profile.calorieTarget * profile.macros.protein / 100 / 4) : 0
+  const fatTargetG = profile.calorieTarget > 0 && profile.macros.fat > 0
+    ? Math.round(profile.calorieTarget * profile.macros.fat / 100 / 9) : 0
+  const carbsTargetG = profile.calorieTarget > 0 && profile.macros.carbs > 0
+    ? Math.round(profile.calorieTarget * profile.macros.carbs / 100 / 4) : 0
+  const corridorStatus = corridor && logEntries.length > 0
+    ? (dailyKcal < corridor.low ? 'below' : dailyKcal > corridor.high ? 'above' : 'within') as 'below' | 'above' | 'within'
+    : null
+  const { dates: trackDates, label: trackLabel } = getWeekDates(trackWeekOffset)
+  const entriesByDate = logEntries.reduce<Record<string, { kcal: number }>>((acc, e) => {
+    if (!e.date) return acc
+    acc[e.date] = { kcal: (acc[e.date]?.kcal ?? 0) + e.kcal }
+    return acc
+  }, {})
+  const weekDaysOnTarget = corridor ? trackDates.filter(d => {
+    const ds = isoDate(d)
+    const dk = entriesByDate[ds]?.kcal ?? 0
+    return dk > 0 && dk >= corridor.low && dk <= corridor.high
+  }).length : 0
+
+  const todayStr = isoDate(new Date())
+  const todayEntries = logEntries.filter(e => e.date === todayStr)
+  const todayKcal = todayEntries.reduce((s, e) => s + e.kcal, 0)
+  const todayProtein = todayEntries.reduce((s, e) => s + e.protein, 0)
+  const todayFat = todayEntries.reduce((s, e) => s + e.fat, 0)
+  const todayCarbs = todayEntries.reduce((s, e) => s + e.carbs, 0)
+  const weekEntries = logEntries.filter(e => trackDates.some(d => isoDate(d) === e.date))
+  const weekProtein = weekEntries.reduce((s, e) => s + e.protein, 0)
+  const weekFat = weekEntries.reduce((s, e) => s + e.fat, 0)
+  const weekCarbs = weekEntries.reduce((s, e) => s + e.carbs, 0)
 
   function addLog() {
     if (!selectedItem) return
@@ -2445,6 +2762,7 @@ function ProfileView({
       protein: Math.round(selectedItem.protein * qty * 10) / 10,
       fat: Math.round(selectedItem.fat * qty * 10) / 10,
       carbs: Math.round(selectedItem.carbs * qty * 10) / 10,
+      date: isoDate(new Date()),
     }])
     setLogSearch(''); setLogQty('1')
   }
@@ -2469,152 +2787,301 @@ function ProfileView({
 
   return (
     <div className="space-y-4 max-w-xl">
-      {/* Diet preferences */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-4">
-        <h2 className="text-sm font-semibold text-gray-800">Diet preferences</h2>
-
-        <Field label="Active diet">
-          <select value={profile.activeDiet ?? ''} onChange={e => setProfile(p => ({ ...p, activeDiet: e.target.value || null }))} className={inputCls}>
-            <option value="">— None —</option>
-            {diets.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-          </select>
-        </Field>
-
-        <Field label="Daily calorie target (kcal)">
-          <input type="number" min="0" value={profile.calorieTarget} onChange={e => setProfile(p => ({ ...p, calorieTarget: Number(e.target.value) }))} className={inputCls} />
-        </Field>
-
-        {corridor && (
-          <div className="text-sm bg-teal-50 rounded-xl px-3 py-2 text-teal-800">
-            Calorie corridor: <strong>{corridor.low} – {corridor.high} kcal</strong>
-          </div>
-        )}
-
-        <div>
-          <label className="text-xs font-medium text-gray-500 mb-2 block">Macro split (%)</label>
-          <div className="grid grid-cols-3 gap-2">
-            {(['protein', 'fat', 'carbs'] as const).map(k => (
-              <div key={k}>
-                <label className="text-xs text-gray-400 mb-1 block capitalize">{k}</label>
-                <input
-                  type="number" min="0" max="100"
-                  value={profile.macros[k]}
-                  onChange={e => setProfile(p => ({ ...p, macros: { ...p.macros, [k]: Number(e.target.value) } }))}
-                  className={cn(inputCls, !macroOk && macroSum > 0 && 'border-amber-400')}
-                />
-              </div>
-            ))}
-          </div>
-          <p className={cn('mt-1.5 text-xs flex items-center gap-1', macroOk ? 'text-green-600' : macroSum === 0 ? 'text-gray-400' : 'text-amber-600')}>
-            {macroOk ? <Check size={12} /> : <AlertTriangle size={12} />}
-            Total: {macroSum}%{!macroOk && macroSum > 0 ? ' — must sum to 100%' : ''}
-          </p>
-        </div>
+      {/* Top-level tabs */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
+        {([['profile', 'Profile'], ['tracking', 'Meal tracking']] as const).map(([t, l]) => (
+          <button key={t} onClick={() => setProfileTab(t)}
+            className={cn('px-4 py-1.5 rounded-lg text-sm font-medium cursor-pointer',
+              profileTab === t ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700')}>
+            {l}
+          </button>
+        ))}
       </div>
 
-      {/* Personal settings */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
-        <h2 className="text-sm font-semibold text-gray-800">Personal settings</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Language">
-            <select value={profile.language} onChange={e => setProfile(p => ({ ...p, language: e.target.value }))} className={inputCls}>
-              <option value="en">English</option>
-              <option value="uk">Ukrainian</option>
-            </select>
-          </Field>
-          <Field label="Unit system">
-            <select value={profile.unitSystem} onChange={e => setProfile(p => ({ ...p, unitSystem: e.target.value as 'metric' | 'imperial' }))} className={inputCls}>
-              <option value="metric">Metric (g, kg, ml)</option>
-              <option value="imperial">US Customary (oz, lb)</option>
-            </select>
-          </Field>
-          <Field label="Gender">
-            <select value={profile.gender} onChange={e => setProfile(p => ({ ...p, gender: e.target.value }))} className={inputCls}>
-              <option value="">—</option>
-              <option value="female">Female</option>
-              <option value="male">Male</option>
-              <option value="other">Other / prefer not to say</option>
-            </select>
-          </Field>
-          <Field label="Age">
-            <input type="number" min="1" max="120" value={profile.age} onChange={e => setProfile(p => ({ ...p, age: e.target.value }))} className={inputCls} placeholder="Years" />
-          </Field>
-          <Field label={`Weight (${profile.unitSystem === 'metric' ? 'kg' : 'lb'})`}>
-            <input type="number" min="0" value={profile.weight} onChange={e => setProfile(p => ({ ...p, weight: e.target.value }))} className={inputCls} />
-          </Field>
-        </div>
-      </div>
+      {profileTab === 'profile' && (
+        <>
+          {/* Diet preferences */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-800">Diet preferences</h2>
 
-      {/* Meal log */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-800">Meal tracking log</h2>
-          {logEntries.length > 0 && (
-            <div className="flex gap-2 flex-wrap">
-              <span className="text-xs bg-teal-50 text-teal-700 px-2.5 py-0.5 rounded-full font-medium">{Math.round(dailyKcal)} kcal</span>
-              <span className="text-xs bg-blue-50 text-blue-600 px-2.5 py-0.5 rounded-full">{fmtMacro(dailyProtein)}g P</span>
-              <span className="text-xs bg-orange-50 text-orange-500 px-2.5 py-0.5 rounded-full">{fmtMacro(dailyFat)}g F</span>
-              <span className="text-xs bg-green-50 text-green-600 px-2.5 py-0.5 rounded-full">{fmtMacro(dailyCarbs)}g C</span>
-            </div>
-          )}
-        </div>
+            <Field label="Active diet">
+              <select value={profile.activeDiet ?? ''} onChange={e => setProfile(p => ({ ...p, activeDiet: e.target.value || null }))} className={inputCls}>
+                <option value="">— None —</option>
+                {diets.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </Field>
 
-        <div className="flex gap-2 flex-wrap">
-          <div className="relative flex-1 min-w-44">
-            <input value={logSearch} onChange={e => setLogSearch(e.target.value)} placeholder="Search food or recipe…" className={inputCls} />
-            {logSearch && matched.length > 0 && (
-              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-10 mt-1">
-                {matched.map(i => (
-                  <button key={i.id} type="button" onClick={() => setLogSearch(i.name)} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 cursor-pointer first:rounded-t-xl last:rounded-b-xl">
-                    {i.name} <span className="text-gray-400">({i.kcal} kcal)</span>
-                  </button>
-                ))}
+            <Field label="Daily calorie target (kcal)">
+              <input type="number" min="0" value={profile.calorieTarget} onChange={e => setProfile(p => ({ ...p, calorieTarget: Number(e.target.value) }))} className={inputCls} />
+            </Field>
+
+            {corridor && (
+              <div className="text-sm bg-teal-50 rounded-xl px-3 py-2 text-teal-800">
+                Calorie corridor: <strong>{corridor.low} – {corridor.high} kcal</strong>
               </div>
             )}
-          </div>
-          <input type="number" min="0.5" step="0.5" value={logQty} onChange={e => setLogQty(e.target.value)} className="w-16 text-sm border border-gray-200 rounded-xl px-2 py-2 focus:outline-none focus:border-teal-500" />
-          <select value={logUnit} onChange={e => setLogUnit(e.target.value)} className="text-sm border border-gray-200 rounded-xl px-2 py-2 cursor-pointer focus:outline-none focus:border-teal-500">
-            {['serving','g','ml'].map(u => <option key={u}>{u}</option>)}
-          </select>
-          <button onClick={addLog} disabled={!selectedItem} className="px-3 py-2 bg-teal-600 text-white text-xs font-medium rounded-xl hover:bg-teal-700 cursor-pointer disabled:opacity-40 flex items-center gap-1">
-            <Plus size={13} /> Log
-          </button>
-        </div>
 
-        {logEntries.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-2">No entries yet. Log what you eat today.</p>
-        ) : (
-          <div className="space-y-1">
-            {logEntries.map(e => (
-              <div key={e.id} className="py-1.5 border-b border-gray-50 group">
-                {editLogId === e.id ? (
-                  <div className="flex items-center gap-2">
-                    <span className="flex-1 text-sm text-gray-700 truncate">{e.itemName}</span>
-                    <input type="number" min="0.5" step="0.5" value={editLogQty} onChange={ev => setEditLogQty(ev.target.value)}
-                      className="w-16 text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-teal-500" />
-                    <button onClick={() => saveEditLog(e.id)} className="text-xs px-2 py-1 bg-teal-600 text-white rounded-lg cursor-pointer hover:bg-teal-700"><Check size={11} /></button>
-                    <button onClick={() => setEditLogId(null)} className="text-xs px-2 py-1 text-gray-400 hover:text-gray-600 cursor-pointer"><X size={11} /></button>
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-2 block">Macro split (%)</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(['protein', 'fat', 'carbs'] as const).map(k => (
+                  <div key={k}>
+                    <label className="text-xs text-gray-400 mb-1 block capitalize">{k}</label>
+                    <input
+                      type="number" min="0" max="100"
+                      value={profile.macros[k]}
+                      onChange={e => setProfile(p => ({ ...p, macros: { ...p.macros, [k]: Number(e.target.value) } }))}
+                      className={cn(inputCls, !macroOk && macroSum > 0 && 'border-amber-400')}
+                    />
                   </div>
-                ) : (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-700">{e.itemName}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-400">{e.quantity} {e.unit}</span>
-                      <span className="text-xs font-medium text-gray-600">{e.kcal} kcal</span>
-                      <button onClick={() => { setEditLogId(e.id); setEditLogQty(String(e.quantity)) }} aria-label="Edit entry" className="text-gray-300 hover:text-teal-500 cursor-pointer opacity-0 group-hover:opacity-100">
-                        <Edit2 size={11} />
-                      </button>
-                      <button onClick={() => setLogEntries(prev => prev.filter(x => x.id !== e.id))} aria-label="Remove entry" className="text-gray-300 hover:text-red-500 cursor-pointer opacity-0 group-hover:opacity-100">
-                        <X size={11} />
-                      </button>
-                    </div>
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
+              <p className={cn('mt-1.5 text-xs flex items-center gap-1', macroOk ? 'text-green-600' : macroSum === 0 ? 'text-gray-400' : 'text-amber-600')}>
+                {macroOk ? <Check size={12} /> : <AlertTriangle size={12} />}
+                Total: {macroSum}%{!macroOk && macroSum > 0 ? ' — must sum to 100%' : ''}
+              </p>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Personal settings */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+            <h2 className="text-sm font-semibold text-gray-800">Personal settings</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Language">
+                <select value={profile.language} onChange={e => setProfile(p => ({ ...p, language: e.target.value }))} className={inputCls}>
+                  <option value="en">English</option>
+                  <option value="uk">Ukrainian</option>
+                </select>
+              </Field>
+              <Field label="Unit system">
+                <select value={profile.unitSystem} onChange={e => setProfile(p => ({ ...p, unitSystem: e.target.value as 'metric' | 'imperial' }))} className={inputCls}>
+                  <option value="metric">Metric (g, kg, ml)</option>
+                  <option value="imperial">US Customary (oz, lb)</option>
+                </select>
+              </Field>
+              <Field label="Gender">
+                <select value={profile.gender} onChange={e => setProfile(p => ({ ...p, gender: e.target.value }))} className={inputCls}>
+                  <option value="">—</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                  <option value="other">Other / prefer not to say</option>
+                </select>
+              </Field>
+              <Field label="Age">
+                <input type="number" min="1" max="120" value={profile.age} onChange={e => setProfile(p => ({ ...p, age: e.target.value }))} className={inputCls} placeholder="Years" />
+              </Field>
+              <Field label={`Weight (${profile.unitSystem === 'metric' ? 'kg' : 'lb'})`}>
+                <input type="number" min="0" value={profile.weight} onChange={e => setProfile(p => ({ ...p, weight: e.target.value }))} className={inputCls} />
+              </Field>
+            </div>
+          </div>
+        </>
+      )}
+
+      {profileTab === 'tracking' && (
+        <div className="bg-white rounded-2xl border border-gray-200 p-4 space-y-3">
+          {/* Tracking header */}
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-800">Meal tracking</h2>
+              {corridor && (
+                <p className="text-xs text-gray-500 mt-0.5"><span className="font-medium text-gray-700">{weekDaysOnTarget} / 7</span> days on target</p>
+              )}
+            </div>
+            <div className="flex gap-0.5 bg-gray-100 p-0.5 rounded-lg">
+              {(['today', 'week', 'month'] as const).map(v => (
+                <button key={v} onClick={() => setTrackView(v)}
+                  className={cn('px-2 py-1 rounded-md text-xs font-medium cursor-pointer',
+                    trackView === v ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:bg-white')}>
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {corridorStatus && (
+            <div className={cn('rounded-xl px-3 py-2 text-sm flex items-center justify-between',
+              corridorStatus === 'within' ? 'bg-green-50 text-green-800' :
+              corridorStatus === 'below' ? 'bg-amber-50 text-amber-800' :
+              'bg-red-50 text-red-700')}>
+              <span className="font-medium">
+                {corridorStatus === 'within' ? 'Within goal' : corridorStatus === 'below' ? 'Below target' : 'Above target'}
+              </span>
+              <span className="text-xs">{Math.round(dailyKcal)} / {corridor!.low}–{corridor!.high} kcal</span>
+            </div>
+          )}
+
+          {/* Add log form */}
+          <div className="flex gap-2 flex-wrap">
+            <div className="relative flex-1 min-w-44">
+              <input value={logSearch} onChange={e => setLogSearch(e.target.value)} placeholder="Search food or recipe…" className={inputCls} />
+              {logSearch && matched.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-10 mt-1">
+                  {matched.map(i => (
+                    <button key={i.id} type="button" onClick={() => setLogSearch(i.name)} className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 cursor-pointer first:rounded-t-xl last:rounded-b-xl">
+                      {i.name} <span className="text-gray-400">({i.kcal} kcal)</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <input type="number" min="0.5" step="0.5" value={logQty} onChange={e => setLogQty(e.target.value)} className="w-16 text-sm border border-gray-200 rounded-xl px-2 py-2 focus:outline-none focus:border-teal-500" />
+            <select value={logUnit} onChange={e => setLogUnit(e.target.value)} className="text-sm border border-gray-200 rounded-xl px-2 py-2 cursor-pointer focus:outline-none focus:border-teal-500">
+              {['serving','g','ml'].map(u => <option key={u}>{u}</option>)}
+            </select>
+            <button onClick={addLog} disabled={!selectedItem} className="px-3 py-2 bg-teal-600 text-white text-xs font-medium rounded-xl hover:bg-teal-700 cursor-pointer disabled:opacity-40 flex items-center gap-1">
+              <Plus size={13} /> Log
+            </button>
+          </div>
+
+          {/* Today view */}
+          {trackView === 'today' && (
+            <>
+              {todayEntries.length > 0 && (
+                <div className="border-t border-gray-100 pt-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Today's nutrition</p>
+                    <span className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium">{Math.round(todayKcal)} kcal</span>
+                  </div>
+                  <NutritionPie protein={todayProtein} fat={todayFat} carbs={todayCarbs} />
+                </div>
+              )}
+              {todayEntries.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-2">No entries yet for today. Log what you eat.</p>
+              ) : (
+                <div className="space-y-1">
+                  {todayEntries.map(e => (
+                    <div key={e.id} className="py-1.5 border-b border-gray-50 group">
+                      {editLogId === e.id ? (
+                        <div className="flex items-center gap-2">
+                          <span className="flex-1 text-sm text-gray-700 truncate">{e.itemName}</span>
+                          <input type="number" min="0.5" step="0.5" value={editLogQty} onChange={ev => setEditLogQty(ev.target.value)}
+                            className="w-16 text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:border-teal-500" />
+                          <button onClick={() => saveEditLog(e.id)} className="text-xs px-2 py-1 bg-teal-600 text-white rounded-lg cursor-pointer hover:bg-teal-700"><Check size={11} /></button>
+                          <button onClick={() => setEditLogId(null)} className="text-xs px-2 py-1 text-gray-400 hover:text-gray-600 cursor-pointer"><X size={11} /></button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-700">{e.itemName}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400">{e.quantity} {e.unit}</span>
+                            <span className="text-xs font-medium text-gray-600">{e.kcal} kcal</span>
+                            <button onClick={() => { setEditLogId(e.id); setEditLogQty(String(e.quantity)) }} aria-label="Edit entry" className="text-gray-300 hover:text-teal-500 cursor-pointer opacity-0 group-hover:opacity-100">
+                              <Edit2 size={11} />
+                            </button>
+                            <button onClick={() => setLogEntries(prev => prev.filter(x => x.id !== e.id))} aria-label="Remove entry" className="text-gray-300 hover:text-red-500 cursor-pointer opacity-0 group-hover:opacity-100">
+                              <X size={11} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Week view */}
+          {trackView === 'week' && (
+            <div className="space-y-3">
+              {weekEntries.length > 0 && (
+                <div className="border-t border-gray-100 pt-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Weekly nutrition</p>
+                  <NutritionPie protein={weekProtein} fat={weekFat} carbs={weekCarbs} />
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <button onClick={() => setTrackWeekOffset(p => p - 1)} aria-label="Previous week" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
+                  <ChevronLeft size={14} />
+                </button>
+                <span className="text-xs font-medium text-gray-600">{trackLabel}</span>
+                <button onClick={() => setTrackWeekOffset(p => p + 1)} aria-label="Next week" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {DAYS.map((day, i) => {
+                  const ds = isoDate(trackDates[i])
+                  const dayKcal = entriesByDate[ds]?.kcal ?? 0
+                  const isToday = ds === isoDate(new Date())
+                  const inCorridor = corridor && dayKcal > 0 && dayKcal >= corridor.low && dayKcal <= corridor.high
+                  const belowCorridor = corridor && dayKcal > 0 && dayKcal < corridor.low
+                  const aboveCorridor = corridor && dayKcal > 0 && dayKcal > corridor.high
+                  return (
+                    <div key={day} className={cn(
+                      'rounded-xl border p-2 text-center',
+                      isToday ? 'border-teal-400 bg-teal-50' : 'border-gray-100 bg-gray-50',
+                    )}>
+                      <p className={cn('text-xs font-semibold', isToday ? 'text-teal-700' : 'text-gray-500')}>{day}</p>
+                      <p className="text-xs text-gray-400">{trackDates[i].getDate()}</p>
+                      {dayKcal > 0 ? (
+                        <p className={cn('text-xs font-medium mt-1',
+                          inCorridor ? 'text-green-600' : belowCorridor ? 'text-amber-600' : aboveCorridor ? 'text-red-600' : 'text-gray-600'
+                        )}>{dayKcal}</p>
+                      ) : (
+                        <p className="text-xs text-gray-300 mt-1">—</p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Month view */}
+          {trackView === 'month' && (() => {
+            const baseMonth = new Date(trackDates[0].getFullYear(), trackDates[0].getMonth() + trackWeekOffset, 1)
+            const firstDay = new Date(baseMonth.getFullYear(), baseMonth.getMonth(), 1)
+            const dow = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1
+            const gridStart = new Date(firstDay)
+            gridStart.setDate(firstDay.getDate() - dow)
+            const gridDays = Array.from({ length: 42 }, (_, i) => { const d = new Date(gridStart); d.setDate(gridStart.getDate() + i); return d })
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setTrackWeekOffset(p => p - 1)} aria-label="Previous month" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
+                    <ChevronLeft size={14} />
+                  </button>
+                  <span className="text-xs font-medium text-gray-600">
+                    {firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+                  </span>
+                  <button onClick={() => setTrackWeekOffset(p => p + 1)} aria-label="Next month" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-7 border border-gray-100 rounded-xl overflow-hidden text-center">
+                  {['M','T','W','T','F','S','S'].map((d, i) => (
+                    <div key={i} className="text-xs font-semibold text-gray-400 py-1.5 bg-gray-50">{d}</div>
+                  ))}
+                  {gridDays.map((d, i) => {
+                    const ds = isoDate(d)
+                    const dayKcal = entriesByDate[ds]?.kcal ?? 0
+                    const isToday = ds === isoDate(new Date())
+                    const isCurrentMonth = d.getMonth() === firstDay.getMonth()
+                    const inCorridor = corridor && dayKcal > 0 && dayKcal >= corridor.low && dayKcal <= corridor.high
+                    const belowCorridor = corridor && dayKcal > 0 && dayKcal < corridor.low
+                    const aboveCorridor = corridor && dayKcal > 0 && dayKcal > corridor.high
+                    return (
+                      <div key={i} className={cn('border-t border-r border-gray-50 p-1.5 min-h-12', !isCurrentMonth && 'opacity-30')}>
+                        <span className={cn('inline-flex items-center justify-center w-5 h-5 text-xs font-semibold rounded-full',
+                          isToday ? 'bg-teal-600 text-white' : 'text-gray-500')}>
+                          {d.getDate()}
+                        </span>
+                        {dayKcal > 0 && (
+                          <p className={cn('text-xs mt-0.5',
+                            inCorridor ? 'text-green-600' : belowCorridor ? 'text-amber-500' : aboveCorridor ? 'text-red-500' : 'text-gray-500'
+                          )}>{dayKcal}</p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })()}
+        </div>
+      )}
     </div>
   )
 }
@@ -2655,7 +3122,7 @@ export default function App() {
         <Topbar view={activeView} profile={profile} assignments={assignments} items={items} />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">
           {activeView === 'planner' && (
-            <PlannerView items={items} assignments={assignments} setAssignments={setAssignments} weekOffset={weekOffset} setWeekOffset={setWeekOffset} />
+            <PlannerView items={items} assignments={assignments} setAssignments={setAssignments} weekOffset={weekOffset} setWeekOffset={setWeekOffset} setLogEntries={setLogEntries} profile={profile} />
           )}
           {activeView === 'products' && (
             <ProductsView items={items} setItems={setItems} assignments={assignments} setAssignments={setAssignments} />
@@ -2664,7 +3131,7 @@ export default function App() {
           {activeView === 'recipes' && (
             <RecipesView items={items} setItems={setItems} assignments={assignments} setAssignments={setAssignments} />
           )}
-          {activeView === 'diets' && <DietsView diets={SEED_DIETS} />}
+          {activeView === 'diets' && <DietsView diets={SEED_DIETS} items={items} />}
           {activeView === 'shopping' && <ShoppingListView assignments={assignments} items={items} list={shoppingList} setList={setShoppingList} stale={shoppingStale} setStale={setShoppingStale} />}
           {activeView === 'profile' && (
             <ProfileView profile={profile} setProfile={setProfile} diets={SEED_DIETS} logEntries={logEntries} setLogEntries={setLogEntries} items={items} />

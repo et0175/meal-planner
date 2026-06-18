@@ -91,3 +91,20 @@ Requirements: [08_authentication.md](../requirements/08_authentication.md)
 - [ ] Any direct URL to a protected route redirects unauthenticated visitors to the sign-in screen.
 - [ ] After signing in, the user is redirected to the originally requested URL (or the default view if no specific URL was requested).
 - [ ] No application data (products, recipes, plans) is accessible or visible before sign-in.
+
+---
+
+## US-AUTH-007 User and Nutritionist roles have identical permissions in MVP1
+
+**As a** system  
+**I want** both the User and Nutritionist roles to have identical access in MVP1  
+**So that** role infrastructure is in place without exposing unimplemented permission differences.
+
+Source: [08_authentication.md](../requirements/08_authentication.md) — Roles
+
+**Acceptance criteria**
+
+- [ ] Users register with the User role by default; the Nutritionist role is not selectable at sign-up.
+- [ ] The Nutritionist role can only be assigned by a system administrator.
+- [ ] In MVP1, both roles see the same navigation, features, and data — no permission differences are enforced.
+- [ ] The system stores the user's role on the account but does not expose role-specific UI in MVP1.

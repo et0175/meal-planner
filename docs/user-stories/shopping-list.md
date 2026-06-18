@@ -39,7 +39,7 @@ Requirements: [07_shopping_list.md](../requirements/07_shopping_list.md)
 
 **Acceptance criteria**
 
-- [ ] A plan summary section lists each planned item with its total servings and kcal contribution across the selected range.
+- [ ] A plan summary section lists each planned item with its name and total servings planned across the selected range.
 - [ ] Items with zero assignments in the range are not shown.
 
 ---
@@ -90,3 +90,21 @@ Source: [07_shopping_list.md](../requirements/07_shopping_list.md)
 - [ ] The plan summary and grocery list sections are populated on first load.
 - [ ] Changing the date range immediately regenerates the list from the new range without requiring a separate trigger.
 - [ ] Stale detection still applies: if the plan changes after the auto-generated list is shown, the stale indicator appears.
+
+---
+
+## US-SL-007 Download grocery list as PDF
+
+**As a** user who wants to shop without a phone  
+**I want** to download my grocery list as a PDF  
+**So that** I can print or share it and use it without the app.
+
+Source: [07_shopping_list.md](../requirements/07_shopping_list.md) — PDF download
+
+**Acceptance criteria**
+
+- [ ] A **"Download PDF"** button is visible in the shopping list view.
+- [ ] Triggering it downloads a PDF containing the categorised grocery list: all groups (Produce, Dairy, Meat, Fish, Grains, Legumes, Nuts & Seeds, Beverages, Condiments, Other) with ingredient name, total quantity, and unit per line.
+- [ ] The PDF header shows the selected date range.
+- [ ] Empty categories are omitted from the PDF.
+- [ ] If the grocery list is empty (no items in range), the PDF still downloads with the date range header and a "No items" note.

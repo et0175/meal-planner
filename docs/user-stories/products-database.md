@@ -12,7 +12,7 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 
 **Acceptance criteria**
 
-- [ ] A product list and cards view are available; list view shows one row per product with columns: name, category, protein (g), fat (g), carbs (g), kcal.
+- [ ] A product list view is available; list view shows one row per product with columns: name, category, protein (g), fat (g), carbs (g), fiber (g), kcal, serving size.
 - [ ] Opening or expanding a product shows a nutritional breakdown that includes at minimum protein, fat, carbohydrates, and calories.
 
 ---
@@ -25,8 +25,10 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 
 **Acceptance criteria**
 
-- [ ] Category filter controls are visible on the product browsing view.
+- [ ] Category filter controls are visible **in list view only** (not in category cards view).
 - [ ] Applying a filter updates the list to only products in that category (or “all” when cleared).
+- [ ] Diet tag filter is available in list view; selecting a diet tag (e.g. “keto”) narrows the list to products carrying that tag.
+- [ ] “This week” and “Next week” filter toggles are available in list view.
 
 ---
 
@@ -38,8 +40,10 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 
 **Acceptance criteria**
 
-- [ ] A search input is available on the product browsing experience.
-- [ ] Results update to match the query and empty states are handled clearly.
+- [ ] A search input is available in list view (not in category cards view).
+- [ ] Search matches **product name** (case-insensitive) and **diet tags** (e.g. typing "keto" returns all products tagged keto).
+- [ ] Results update as the user types; an empty state is shown when no products match.
+- [ ] Clearing the search restores the full unfiltered list.
 
 ---
 
@@ -65,7 +69,8 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 
 **Acceptance criteria**
 
-- [ ] Authenticated user can submit a new product with required fields (including nutrition breakdown as defined by the product form).
+- [ ] Authenticated user can submit a new product with required fields: name, category, base unit, serving amount, kcal, protein (g), fat (g), carbs (g).
+- [ ] Fiber (g) is optional; if not provided it is stored as null and displayed as "—" in list view.
 - [ ] The new product is immediately visible to all users in All products.
 - [ ] Only the creator can edit or delete their product (system-wide products are not editable by regular users).
 
@@ -96,26 +101,27 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 - [ ] User can toggle “This week” and “Next week” flags on any product independently.
 - [ ] Both flags are visible on product cards and in the list view.
 - [ ] Marking “This week” adds the product to the Meal planner Weekly summary (Lunch slot by default).
-- [ ] Removing “This week” when the product has no day-card assignments removes it from the Weekly summary automatically.
-- [ ] Removing “This week” when the product already has day-card assignments shows a confirmation prompt before any assignments are removed.
+- [ ] Removing “This week” when the product has no calendar assignments removes it from the Weekly summary automatically.
+- [ ] Removing “This week” when the product already has calendar assignments shows a confirmation prompt before any assignments are removed.
 - [ ] On week rollover (each Monday), “Next week” flags auto-promote to “This week” and the product appears in the current week's planner summary (Lunch slot by default).
 - [ ] User can filter the product list to show only “This week” or “Next week” items.
 
 ---
 
-## US-PA-008 Switch between list, cards, and category cards views
+## US-PA-008 Switch between list view and category cards view
 
 **As a** user  
-**I want** to toggle All products between a card layout, a table layout, and a category browsing layout  
-**So that** I can browse visually, compare nutrition in a table, or quickly jump to a category.
+**I want** to toggle All products between a category browsing layout and a table layout  
+**So that** I can navigate by food group or compare nutrition in a table.
 
 **Acceptance criteria**
 
-- [ ] A three-way toggle control switches between list view, cards view, and category cards view.
+- [ ] All products opens in **category cards view by default**.
+- [ ] A toggle switches between category cards view and list view.
+- [ ] Category cards view shows one card per product category; **no search bar or filter controls are visible in this view**.
+- [ ] Clicking a category card navigates to the products in that category in list view, with the category filter pre-set to that category.
 - [ ] List view shows products in a table with columns: name, category, protein (g), fat (g), carbs (g), fiber (g), kcal, and serving size (amount + unit where defined).
-- [ ] Cards view shows product cards with image, macros strip, and diet tags.
-- [ ] Category cards view shows one card per product category; clicking a category card displays all products in that category.
-- [ ] Returning from a category in category cards view shows the full category list again.
+- [ ] A "back" or breadcrumb control returns the user to the category cards view. The category filter is cleared on return — the full category grid is shown (filter state is not preserved).
 
 ---
 
@@ -131,9 +137,9 @@ Source: [01_products-database.md](../requirements/01_products-database.md)
 
 - [ ] In category cards view, one card is shown per distinct product category in the database.
 - [ ] Each category card shows the category name and an item count badge.
-- [ ] Clicking a category card shows the products in that category (filtered list or cards view).
+- [ ] No search bar or filter controls are visible in category cards view.
+- [ ] Clicking a category card navigates to the list view filtered to that category only; the category filter is pre-set.
 - [ ] A "back" or breadcrumb control returns the user to the full category cards grid.
-- [ ] Active search and diet filters still apply inside the category view.
 
 ---
 
@@ -152,3 +158,38 @@ Source: [01_products-database.md](../requirements/01_products-database.md)
 - [ ] The detail view shows absolute macro values: protein (g), fat (g), carbs (g), kcal, fiber (g) if applicable.
 - [ ] The detail view shows a **units conversion table** listing, for each applicable unit (g, ml, pc, tbsp, tsp, serving), the equivalent gram weight and scaled nutrition values.
 - [ ] The detail view is dismissible (modal close or back navigation).
+
+---
+
+## US-PA-011 Sort the product list
+
+**As a** user comparing products in list view  
+**I want** to sort the product table by any column  
+**So that** I can quickly find the highest-protein or lowest-calorie options.
+
+Source: [01_products-database.md](../requirements/01_products-database.md)
+
+**Acceptance criteria**
+
+- [ ] Each column header in list view is clickable and toggles between ascending and descending sort order.
+- [ ] The active sort column is visually indicated (e.g. arrow icon).
+- [ ] Default sort order (before any column header is clicked) is alphabetical by name.
+- [ ] Sorting applies to the currently visible set (after any active filters).
+
+---
+
+## US-PA-012 Define multiple alternative units per product with clear conversion labels
+
+**As a** user adding or editing a product  
+**I want** to define more than one alternative unit and see clearly labelled conversion fields  
+**So that** the product can be measured accurately in every context where it is used.
+
+Source: [01_products-database.md](../requirements/01_products-database.md)
+
+**Acceptance criteria**
+
+- [ ] The product form supports adding multiple alternative units (e.g. both "tbsp" and "cup" for the same product).
+- [ ] Each alternative unit has its own gram-conversion input.
+- [ ] When the selected unit is not a weight unit (not g or kg), the conversion input label reads **"grams per [unit name]"** (e.g. "grams per tbsp", "grams per cup").
+- [ ] When the selected unit is a weight unit, no conversion label is needed (the value is the gram weight directly).
+- [ ] Alternative units are saved and reflected in the product's units conversion table visible on the product detail card.

@@ -12,18 +12,19 @@
 
 ---
 
-### TC-PRF-001: Profile view sections are present
-**AC:** US-PC-001 – US-PC-006 — all profile sections visible  
+### TC-PRF-001: Personal cabinet has two tabs — Profile and Meal tracking
+**AC:** US-PC-010 — two top-level tabs visible; correct content in each  
 **Priority:** High
 
 **Steps:**
-1. Click **Profile** in the sidebar.
+1. Click **Personal cabinet** in the sidebar.
 
 **Expected result:**
-All sections present:
-- Personal: email/password, language, unit system, gender, age, weight
-- Diet preferences: diet selector, calorie target, macro % inputs, calorie corridor
-- Meal tracking log
+- Two tabs visible at the top: **Profile** and **Meal tracking**
+- **Profile** tab is selected by default and shows:
+  - Personal section: email/password, language, unit system, gender, age, weight
+  - Diet preferences section: diet selector, calorie target, macro % inputs, calorie corridor
+- **Meal tracking** tab is accessible and shows the meal tracking log area
 
 **Status:** ✅
 
@@ -36,14 +37,15 @@ All sections present:
 **Test data:** `formInputs.profileForm.calorieTarget`
 
 **Steps:**
-1. Set calorie target to **2000**.
-2. Observe corridor display.
+1. Open **Personal cabinet > Profile** tab.
+2. Set calorie target to **2000**.
+3. Observe corridor display.
 
 **Expected result:**
 - Corridor shows **"1850 – 2150 kcal"**
 
 **Steps:**
-3. Change target to **1500**.
+4. Change target to **1500**.
 
 **Expected result:**
 - Corridor shows **"1350 – 1650 kcal"**
@@ -59,8 +61,9 @@ All sections present:
 **Test data:** `formInputs.profileForm.validMacros[0]` — protein 30, fat 35, carbs 35 (sum = 100)
 
 **Steps:**
-1. Set protein = 30%, fat = 35%, carbs = 35%.
-2. Observe UI.
+1. Open **Personal cabinet > Profile** tab.
+2. Set protein = 30%, fat = 35%, carbs = 35%.
+3. Observe UI.
 
 **Expected result:**
 - No warning shown
@@ -77,8 +80,9 @@ All sections present:
 **Test data:** `formInputs.profileForm.invalidMacros[0]` — protein 50, fat 50, carbs 50 (sum = 150)
 
 **Steps:**
-1. Set protein = 50%, fat = 50%, carbs = 50%.
-2. Observe UI.
+1. Open **Personal cabinet > Profile** tab.
+2. Set protein = 50%, fat = 50%, carbs = 50%.
+3. Observe UI.
 
 **Expected result:**
 - Warning message shown: "Macro percentages must sum to 100%" (or equivalent)
@@ -95,7 +99,8 @@ All sections present:
 **Test data:** `formInputs.profileForm.invalidMacros[1]` — protein 10, fat 10, carbs 10 (sum = 30)
 
 **Steps:**
-1. Set protein = 10%, fat = 10%, carbs = 10%.
+1. Open **Personal cabinet > Profile** tab.
+2. Set protein = 10%, fat = 10%, carbs = 10%.
 
 **Expected result:**
 - Same warning as TC-PRF-004
@@ -109,7 +114,7 @@ All sections present:
 **Priority:** High
 
 **Steps:**
-1. In Profile, set active diet to **Ketogenic**.
+1. In **Personal cabinet > Profile**, set active diet to **Ketogenic**.
 2. Navigate to Planner.
 
 **Expected result:**
@@ -125,7 +130,7 @@ All sections present:
 **Priority:** Medium
 
 **Steps:**
-1. In Profile, clear / deselect the active diet.
+1. In **Personal cabinet > Profile**, clear / deselect the active diet.
 2. Navigate to Planner.
 
 **Expected result:**
@@ -140,7 +145,7 @@ All sections present:
 **Priority:** Low
 
 **Steps:**
-1. Open Profile > Personal section.
+1. Open **Personal cabinet > Profile** tab, Personal section.
 
 **Expected result:**
 - Language dropdown present (options: English, Ukrainian at minimum)
@@ -154,7 +159,7 @@ All sections present:
 **Priority:** Medium
 
 **Steps:**
-1. Open Profile > Personal section.
+1. Open **Personal cabinet > Profile** tab, Personal section.
 
 **Expected result:**
 - Metric / US customary (imperial) toggle present
@@ -168,7 +173,7 @@ All sections present:
 **Priority:** Medium
 
 **Steps:**
-1. Open Profile > Personal section.
+1. Open **Personal cabinet > Profile** tab, Personal section.
 
 **Expected result:**
 - Fields present: Gender (selector), Age (numeric input), Weight (numeric input)
@@ -184,8 +189,9 @@ All sections present:
 **Test data:** `formInputs.profileForm.validMacros[1]` — protein 25, fat 70, carbs 5
 
 **Steps:**
-1. Set protein = 25%, fat = 70%, carbs = 5%.
-2. Set calorie target to 1800.
+1. Open **Personal cabinet > Profile** tab.
+2. Set protein = 25%, fat = 70%, carbs = 5%.
+3. Set calorie target to 1800.
 
 **Expected result:**
 - No macro warning (sums to 100%)
@@ -202,7 +208,7 @@ All sections present:
 **Test data:** User u-001 (ol.melnikowa@gmail.com); existing user u-002 has a different email
 
 **Steps (happy path):**
-1. Open Profile.
+1. Open **Personal cabinet > Profile** tab.
 2. Locate the **Change email** control.
 3. Enter a new unique email address and the current password.
 4. Submit.
@@ -235,7 +241,7 @@ All sections present:
 **Test data:** User u-001; current password known
 
 **Steps (happy path):**
-1. Open Profile.
+1. Open **Personal cabinet > Profile** tab.
 2. Locate the **Change password** control.
 3. Enter the current password and a new password of 8+ characters.
 4. Submit.

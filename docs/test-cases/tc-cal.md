@@ -7,7 +7,7 @@
 ---
 
 **Requirement:** [`06_meal_planner.md`](../requirements/06_meal_planner.md) — Tab 3  
-**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-011 – US-MP-018  
+**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-011 – US-MP-018, US-MP-021  
 **Test data:** `plannerSeeds` from test-data.json (8 assignments)
 
 ---
@@ -89,7 +89,7 @@
 
 **Expected result:**
 - Chia pudding appears in Thursday calendar cell with "Snacks" label
-- Weekly summary > Snacks slot shows Chia pudding with `1` in Thursday column
+- Week summary > Snacks slot shows Chia pudding with `1` in Thursday column
 - Thursday macro strip updates: +210 kcal
 
 **Status:** ✅
@@ -123,7 +123,7 @@
 
 **Expected result:**
 - Lentil tomato soup removed from Tuesday calendar cell
-- Weekly summary Tuesday Dinner cell clears
+- Week summary Tuesday Dinner cell clears
 
 **Status:** ✅
 
@@ -139,22 +139,24 @@
 **Expected result:**
 - Avocado toast appears in Saturday with "Breakfast" slot label
 - Friday cell no longer shows Avocado toast
-- Weekly summary: Friday Breakfast cell clears; Saturday Breakfast cell shows the assignment
+- Week summary: Friday Breakfast cell clears; Saturday Breakfast cell shows the assignment
 
 **Status:** 🚫
 
 ---
 
-### TC-CAL-009: Calendar changes reflect in day cards
-**AC:** US-MP-011 — all three tabs share the same data  
+### TC-CAL-009: Calendar changes reflect in Week summary
+**AC:** US-MP-011 — Calendar and Week summary tabs share the same data  
 **Priority:** High
+
+> Note: Day cards tab has been removed. Cross-tab verification now uses Week summary.
 
 **Steps:**
 1. Add Chia pudding to Thursday via Calendar (TC-CAL-005).
-2. Switch to **Day cards** tab.
+2. Switch to **Week summary** tab.
 
 **Expected result:**
-- Thursday Snacks slot shows Chia pudding
+- Week summary > Snacks row shows Chia pudding in the Thursday column
 
 **Status:** ✅
 
@@ -272,17 +274,19 @@
 
 ---
 
-### TC-CAL-017: Calendar plan summary panel is shown above the grid
-**AC:** US-MP-018 — plan summary lists all items in visible range  
+### TC-CAL-017: Calendar plan summary is organised as a gallery grouped by meal slots
+**AC:** US-MP-018 — plan summary shows a gallery with one column per meal slot  
 **Priority:** High
 
 **Steps:**
 1. Open Calendar tab (Week sub-view; current week).
 
 **Expected result:**
-- A plan summary section appears above the 7-column grid
-- Lists all 8 seeded items with their total servings and kcal contribution
-- Example: "Berry overnight oats — 1 serving — 385 kcal"
+- A plan summary section appears above the sub-view grid
+- Items are organised in a **gallery layout with four columns: Breakfast, Lunch, Dinner, Snacks**
+- Each column contains item cards for planned items in that slot
+- Example: Breakfast column shows Berry overnight oats (1 serving, 385 kcal); Lunch column shows Chicken quinoa bowl (1 serving, 450 kcal)
+- All 8 seeded items appear in their respective slot columns
 
 **Status:** ✅
 
@@ -301,7 +305,7 @@
 - A new assignment is created: Thursday Dinner — Greek salad
 - Greek salad **still appears** in the plan summary (it was already planned; this adds a new day)
 - Thursday cell in the grid now shows Greek salad
-- Weekly summary: Thursday Dinner column shows Greek salad
+- Week summary: Thursday Dinner column shows Greek salad
 
 **Status:** ✅
 
@@ -317,7 +321,7 @@
 **Expected result:**
 - Avocado toast **disappears** from Friday
 - Avocado toast appears in Saturday with the same meal slot (Breakfast)
-- Weekly summary: Friday Breakfast clears; Saturday Breakfast shows Avocado toast
+- Week summary: Friday Breakfast clears; Saturday Breakfast shows Avocado toast
 
 **Status:** ✅
 
@@ -330,14 +334,14 @@
 **Steps:**
 1. In Planner (any view), select **Monday**.
 2. Trigger **"Log this day"** action.
-3. Navigate to Profile > Meal tracking.
+3. Navigate to **Personal cabinet > Meal tracking** tab.
 
 **Expected result:**
 - Today's tracking log contains entries for Berry overnight oats (1 serving, 385 kcal) and Chicken quinoa bowl (1 serving, 450 kcal)
 - Entries are editable
 - No new planner assignments were created
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -358,7 +362,7 @@
 - All entries are editable
 - No planner assignments were added, changed, or removed
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -370,11 +374,55 @@
 
 **Steps:**
 1. In Planner, select **Monday** and trigger **"Log this day"** a second time.
-2. Navigate to Profile > Meal tracking and inspect Monday's entries.
+2. Navigate to **Personal cabinet > Meal tracking** tab and inspect Monday's entries.
 
 **Expected result:**
 - Berry overnight oats entry shows **2 servings** (original 1 + new 1), not two separate 1-serving entries
 - Chicken quinoa bowl entry similarly shows 2 servings
 - No orphaned duplicate entries for Monday
 
-**Status:** 🚫
+**Status:** ✅
+
+---
+
+### TC-CAL-023: Log individual item from Calendar view
+**AC:** US-MP-021 — per-item "Log" action in Calendar creates a single tracking entry  
+**Priority:** High
+
+**Preconditions:** Calendar week view open; Monday cell shows Chicken quinoa bowl (Mon Lunch seed)
+
+**Steps:**
+1. In Calendar (week sub-view), locate **Chicken quinoa bowl** in Monday's cell.
+2. Click the **"+ Log"** per-item action on that item.
+3. Navigate to **Personal cabinet > Meal tracking** tab.
+4. Inspect Monday's entries.
+
+**Expected result:**
+- A Meal tracking entry is created for Chicken quinoa bowl, 1 serving, Monday, Lunch
+- Berry overnight oats and other Monday items are **not** logged (per-item only)
+- No planner assignments are altered
+- If triggered again, the entry adds to existing (not duplicate)
+
+**Status:** ✅
+
+---
+
+### TC-CAL-024: Calendar day column shows target-reaching summary (kcal + macros vs. corridor)
+**AC:** US-MP-019 — Calendar sub-views show per-macro target-reaching summary with colour-coded indicators  
+**Priority:** Medium
+
+**Preconditions:** User u-001 has targets: 2000 kcal corridor, protein 30%, fat 35%, carbs 35%; seed data loaded (Monday: Berry overnight oats 385 kcal + Chicken quinoa bowl 450 kcal = 835 kcal total; protein ≈ 42 g, fat ≈ 22 g, carbs ≈ 118 g)
+
+**Steps:**
+1. Open Planner > Calendar tab > Week sub-view.
+2. Inspect the **Monday** column's target-reaching summary strip.
+
+**Expected result:**
+- Monday column shows a target-reaching summary strip with four indicators: **kcal**, **protein**, **fat**, **carbs**
+- Each indicator shows the planned value and its % of the corresponding target corridor (e.g. kcal: 835 / 2000 = ~42%)
+- Each indicator is colour-coded: green if within corridor, amber if approaching the upper limit, red if above the corridor
+- The summary format matches the Personal cabinet Meal tracking display (same visual style)
+- Columns with no assignments do not show the strip (or show 0/target)
+- If u-001 has no calorie target set, the strip is hidden
+
+**Status:** ✅

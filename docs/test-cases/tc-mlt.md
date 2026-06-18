@@ -7,20 +7,20 @@
 ---
 
 **Requirement:** [`05_personal_cabinet.md`](../requirements/05_personal_cabinet.md) — Meal tracking section  
-**User stories:** [`personal-cabinet.md`](../user-stories/personal-cabinet.md) — US-PC-006 – US-PC-009  
+**User stories:** [`personal-cabinet.md`](../user-stories/personal-cabinet.md) — US-PC-006 – US-PC-010  
 **Test data:** Users u-001 (Mediterranean, 2000 kcal target); products p-001, r-001 for log entries
 
 ---
 
-### TC-MLT-001: Meal tracking section present in Profile
+### TC-MLT-001: Meal tracking section present in Personal cabinet
 **AC:** US-PC-006 — log section visible  
 **Priority:** High
 
 **Steps:**
-1. Open Profile.
+1. Open **Personal cabinet > Meal tracking** tab.
 
 **Expected result:**
-- Meal tracking / food log section present
+- Meal tracking tab is accessible
 - "Add entry" button visible
 - Daily history area visible
 
@@ -33,10 +33,11 @@
 **Priority:** High
 
 **Steps:**
-1. Click **"Add entry"** in Meal tracking.
-2. Search for **Greek yogurt** (p-001).
-3. Enter quantity: 200 g.
-4. Confirm.
+1. Open **Personal cabinet > Meal tracking** tab.
+2. Click **"Add entry"**.
+3. Search for **Greek yogurt** (p-001).
+4. Enter quantity: 200 g.
+5. Confirm.
 
 **Expected result:**
 - Entry appears in today's log: "Greek yogurt — 200 g — 117 kcal" (88 kcal per 150 g × 200/150)
@@ -51,10 +52,11 @@
 **Priority:** High
 
 **Steps:**
-1. Click **"Add entry"**.
-2. Search for **Berry overnight oats** (r-001).
-3. Enter quantity: 1 serving.
-4. Confirm.
+1. Open **Personal cabinet > Meal tracking** tab.
+2. Click **"Add entry"**.
+3. Search for **Berry overnight oats** (r-001).
+4. Enter quantity: 1 serving.
+5. Confirm.
 
 **Expected result:**
 - Entry appears: "Berry overnight oats — 1 serving — 385 kcal"
@@ -71,7 +73,7 @@
 **Preconditions:** Add Greek yogurt 200 g (TC-MLT-002) and Berry overnight oats 1 serving (TC-MLT-003)
 
 **Steps:**
-1. View daily summary in Meal tracking.
+1. View daily summary in **Personal cabinet > Meal tracking** tab.
 
 **Expected result:**
 - Total kcal: 117 + 385 = **502 kcal**
@@ -88,7 +90,7 @@
 **Priority:** High
 
 **Steps:**
-1. Log **Chicken quinoa bowl** (r-004) in Meal tracking.
+1. Log **Chicken quinoa bowl** (r-004) in **Personal cabinet > Meal tracking** tab.
 2. Navigate to Planner > Weekly summary.
 
 **Expected result:**
@@ -105,7 +107,7 @@
 
 **Steps:**
 1. In Planner, add **Almond energy snack** (r-011) to Friday Snacks.
-2. Navigate to Meal tracking.
+2. Navigate to **Personal cabinet > Meal tracking** tab.
 
 **Expected result:**
 - No entry for Almond energy snack in today's Meal tracking log
@@ -121,9 +123,10 @@
 **Preconditions:** Greek yogurt 200 g entry added (TC-MLT-002)
 
 **Steps:**
-1. Click edit on the Greek yogurt entry.
-2. Change quantity from 200 g to 300 g.
-3. Save.
+1. Open **Personal cabinet > Meal tracking** tab.
+2. Click edit on the Greek yogurt entry.
+3. Change quantity from 200 g to 300 g.
+4. Save.
 
 **Expected result:**
 - Entry updates: 300 g, kcal recalculated (≈ 176 kcal)
@@ -140,7 +143,8 @@
 **Preconditions:** Berry overnight oats entry added (TC-MLT-003)
 
 **Steps:**
-1. Click delete on the Berry overnight oats log entry.
+1. Open **Personal cabinet > Meal tracking** tab.
+2. Click delete on the Berry overnight oats log entry.
 
 **Expected result:**
 - Entry removed from today's log
@@ -150,36 +154,45 @@
 
 ---
 
-### TC-MLT-009: Meal tracking calendar view is accessible
-**AC:** US-PC-007 — calendar view shows logged days  
+### TC-MLT-009: Meal tracking Today / Week / Month toggle is accessible
+**AC:** US-PC-007 — Today/Week/Month layout views available; Today is default  
 **Priority:** High
 
 **Steps:**
-1. Log **Greek yogurt 200 g** (TC-MLT-002) and **Berry overnight oats 1 serving** (TC-MLT-003).
-2. In Profile > Meal tracking, switch to the calendar view.
+1. Open **Personal cabinet > Meal tracking** tab.
+2. Observe the layout toggle.
 
 **Expected result:**
-- Calendar view renders with day cells for the current week
-- Today's cell shows Greek yogurt and Berry overnight oats (or total kcal 502)
-- A visual indicator shows whether today's logged kcal is within the calorie corridor
+- A **Today / Week / Month** toggle is visible at the top of the Meal tracking tab
+- **Today** is selected by default
+- Today layout shows the current day's log entries
 
-**Status:** 🚫
+**Steps:**
+3. Click **Week**.
+
+**Expected result:**
+- Week calendar view renders with day cells for the current week
+- Today's cell shows logged kcal (or empty if no entries)
+- A visual indicator shows whether today's kcal is within the calorie corridor
+
+**Status:** ✅
 
 ---
 
-### TC-MLT-010: Calendar tracking view navigates between weeks
-**AC:** US-PC-007 — week/month navigation in tracking calendar  
+### TC-MLT-010: Meal tracking week view navigates between weeks
+**AC:** US-PC-007 — week/month navigation in tracking  
 **Priority:** Medium
 
 **Steps:**
-1. In the tracking calendar view, click **Prev week**.
-2. Click **Next week**.
+1. In **Personal cabinet > Meal tracking**, switch to **Week** layout.
+2. Click **Prev week**.
+3. Click **Next week**.
 
 **Expected result:**
 - Calendar shifts to the previous / next week
 - Empty cells shown for days with no logged entries
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -193,14 +206,14 @@
 
 **Steps:**
 1. Log entries summing to 1950 kcal.
-2. View the goal corridor summary panel.
+2. Open **Personal cabinet > Meal tracking** and view the goal corridor summary panel.
 
 **Expected result:**
 - Panel shows today's logged kcal: 1950
 - Status label: "Within goal" (or equivalent positive indicator)
 - Corridor shown: 1850–2150 kcal
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -212,12 +225,12 @@
 
 **Steps:**
 1. Log entries summing to 1200 kcal.
-2. View corridor summary panel.
+2. Open **Personal cabinet > Meal tracking** and view corridor summary panel.
 
 **Expected result:**
 - Status label: "Below target" (or equivalent warning indicator)
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -228,12 +241,12 @@
 **Preconditions:** Mock scenario: 4 days this week have logged kcal within 1850–2150; 3 days do not
 
 **Steps:**
-1. View the weekly corridor summary in Meal tracking.
+1. Open **Personal cabinet > Meal tracking** and view the weekly corridor summary.
 
 **Expected result:**
 - Summary shows: "4 / 7 days on target" (or equivalent)
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -245,7 +258,7 @@
 **Preconditions:** Log entries: Greek yogurt 200 g + Berry overnight oats 1 serving → total kcal 502
 
 **Steps:**
-1. View daily nutrition progress in Meal tracking.
+1. Open **Personal cabinet > Meal tracking** and view daily nutrition progress.
 
 **Expected result:**
 - kcal consumed: 502 → **25%** of 2000 target shown
@@ -254,4 +267,42 @@
 - Carbs: ~72 g → ~41% of 175 g target shown
 - Percentage values update when a new entry is added or removed
 
-**Status:** 🚫
+**Status:** ✅
+
+---
+
+### TC-MLT-015: Daily nutrition summary displays a pie chart
+**AC:** US-PC-009 — daily nutrition shown as pie chart  
+**Priority:** High
+
+**Preconditions:** Log entries: Greek yogurt 200 g + Berry overnight oats 1 serving (502 kcal total)
+
+**Steps:**
+1. Open **Personal cabinet > Meal tracking > Today** layout.
+2. Observe the daily nutrition summary area.
+
+**Expected result:**
+- A **pie chart** is shown with three slices: protein, fat, carbs
+- Slice proportions reflect the caloric contribution of each macro (protein 4 kcal/g, fat 9 kcal/g, carbs 4 kcal/g)
+- The chart is accompanied by % of target values for kcal, protein, fat, and carbs
+
+**Status:** ✅
+
+---
+
+### TC-MLT-016: Weekly nutrition summary displays a pie chart
+**AC:** US-PC-009 — weekly nutrition shown as pie chart  
+**Priority:** Medium
+
+**Preconditions:** Log entries across multiple days in the current week
+
+**Steps:**
+1. Open **Personal cabinet > Meal tracking > Week** layout.
+2. Observe the weekly nutrition summary area.
+
+**Expected result:**
+- A **pie chart** is shown for the week's aggregated nutrition
+- Slice proportions reflect average protein / fat / carbs caloric contribution across logged days
+- Average % of target per macro is displayed alongside the chart
+
+**Status:** ✅

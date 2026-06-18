@@ -1,0 +1,11 @@
+1. When typing in the "search" field for product and/or recipe sort popup results should be sorted by the recently used by the current user in meal planner or in a meal tracking logs, user owned products\recipies and then alphabetically  
+2. Product analyser - in the units dropdown only show units the product has conversion for
+3. Diets - display nutrients as a pie chart
+4. Diets - when clicking on a diet card open the product and recipe lists for the diet
+5. Edit recipe - when editing recipe the total nutrients should be recalculated
+6. Edit recipe - show nutrients on the top
+7. Grocerie list - add possibility to download pdf
+8. Meal plan - add possibility to download pdf 
+9. Meal plan - weekly summary - rename to week summary
+10. Meal plan - weekly summary - add a column to select unit ("gr/servings")
+11. Meal plan - calendar view - add the same summary about target reaching as for meal tracking

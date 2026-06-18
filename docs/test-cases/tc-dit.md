@@ -82,3 +82,44 @@
 - MIND filter in Recipes returns Greek salad
 
 **Status:** ✅
+
+---
+
+### TC-DIT-005: Diet card shows a macro pie chart where applicable
+**AC:** US-DA-002 — pie chart of protein/fat/carbs proportions shown on diet card  
+**Priority:** Medium
+
+**Steps:**
+1. Click **Diets** in the sidebar.
+2. Inspect the **Mediterranean** diet card.
+3. Inspect the **WeightWatchers (WW)** diet card.
+
+**Expected result:**
+- Mediterranean card shows a **pie chart** with three slices: protein ~15%, fat ~35%, carbs ~50% (matching test-data.json `macroGuidance`: proteinPct 15, fatPct 35, carbsPct 50)
+- Slices are proportional by caloric contribution (matching pie chart style on product/recipe cards)
+- WW card **does not show a pie chart**; instead shows a text note such as "Points-based — no fixed percentage split"
+
+**Status:** ✅
+
+---
+
+### TC-DIT-006: Clicking a diet card opens a filtered product and recipe list
+**AC:** US-DA-005 — clicking a diet card navigates to combined filtered view  
+**Priority:** Medium
+
+**Test data:** Mediterranean diet; products with `dietTags` containing "mediterranean": Broccoli (p-013), Cherry tomatoes (p-016), Olive oil (p-025), etc. Recipes: Berry overnight oats (r-001), Greek salad (r-005), etc.
+
+**Steps:**
+1. Click **Diets** in the sidebar.
+2. Click the **Mediterranean** diet card.
+3. Inspect the resulting view.
+
+**Expected result:**
+- View is labelled with the diet name (e.g. "Mediterranean — compatible foods" or similar)
+- A **Products** section lists all products tagged `mediterranean` in their dietTags
+- A **Recipes** section lists all recipes tagged `mediterranean` in their dietTags
+- Products and recipes not tagged `mediterranean` are **not shown**
+- A back control or breadcrumb returns to the diet catalogue
+- Berry overnight oats and Chicken quinoa bowl (tagged `mediterranean`) appear in the Recipes section; system products tagged `mediterranean` appear in the Products section
+
+**Status:** ✅

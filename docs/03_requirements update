@@ -1,0 +1,15 @@
+1. All products - open "category" view by default. In this view we'll not have "search" and filter fields
+2. All products - add sorting of products list
+3. When we open category card - we should get only products belonging to the selected category and corresponding filter drop-down should be filled.
+4. Let's remove "cards" view from the "All products"
+5. Products editing - if the user selects unit different from weight unit - then label of the conversion field should be "grams per <<selected unit>>. (e.g. The user selects tbsp - then "grams per tblsp")
+6. It should be possible to have more than one alternative units
+7. Recipe card - let's make it similar to the product card 
+(pie chart for nutrients, for alternative units we can take weight unit/servings)
+8. Recipe cards - add instructions and time to prepare fields
+9. Recipes - add "fiber" column to the list
+10. Recipes - start from the "categories" cards by default and remove "cards" view - the same as for "All products"
+11. Products analyser - for recipies it should be possible to choose "servings""/"grams" for units
+12. Products analyser - for recipies let's also have possibility to add "this\next" week flags
+13. Shopping list - remove kcal from Plan summary items
+14. Planner - add possiblity to add food to the Meal tracking log for the user from "day cards" and calendar view

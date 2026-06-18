@@ -27,7 +27,7 @@ Requirements: [02_products-analyser.md](../requirements/02_products-analyser.md)
 **Acceptance criteria**
 
 - [ ] Column 1 is a free-text search input that narrows results from a merged list of All products and All recipes as the user types.
-- [ ] Search results are sorted with recently used items (recently planned or logged) shown first.
+- [ ] Search results are sorted: recently used items (recently planned or logged) first, then items owned by the current user, then all others alphabetically.
 - [ ] Selecting a product suggestion pins it to the row; the nutrition columns populate from the product's per-serving values immediately.
 - [ ] Selecting a recipe suggestion pins it to the row; the unit is fixed to "serving" and the nutrition columns populate from the recipe's total ingredient nutrition per serving.
 - [ ] If no match is found among products, the user is offered an option to add a new product (see US-PAN-008).
@@ -37,12 +37,13 @@ Requirements: [02_products-analyser.md](../requirements/02_products-analyser.md)
 ## US-PAN-003 Choose unit and quantity per row
 
 **As a** user  
-**I want** to set the unit and quantity for each product in my list  
+**I want** to set the unit and quantity for each item in my list  
 **So that** the nutrition reflects the actual amount I am using.
 
 **Acceptance criteria**
 
-- [ ] Column 2 is a unit dropdown defaulting to **g**; available options include g, ml, pc, tbsp, tsp, serving.
+- [ ] Column 2 is a unit dropdown. For **product rows**, it defaults to the product's base unit (typically **g**); only units for which the product has a defined gram conversion are listed (always includes the base unit and "serving"; additional units such as tbsp, tsp, or cup are shown only when the product has a conversion factor for them).
+- [ ] For **recipe rows**, the unit dropdown offers **"serving"** (default) and **"grams"** as options; nutrition columns are scaled accordingly.
 - [ ] Column 3 is a numeric quantity input.
 - [ ] Changing unit or quantity immediately recalculates the row's nutrition columns.
 
@@ -119,16 +120,19 @@ Requirements: [02_products-analyser.md](../requirements/02_products-analyser.md)
 
 ---
 
-## US-PAN-009 Flag columns are suppressed for recipe rows
+## US-PAN-009 Weekly flags apply to both product rows and recipe rows
 
 **As a** user analysing a mix of products and recipes  
-**I want** the "This week" and "Next week" flag columns to appear only for product rows, not for recipe rows  
-**So that** the interface is clean and I am not confused about what the flags do.
+**I want** "This week" and "Next week" flags to be available on both product rows and recipe rows  
+**So that** I can schedule any item for the week directly from the analyser.
 
 Source: [02_products-analyser.md](../requirements/02_products-analyser.md)
 
 **Acceptance criteria**
 
-- [ ] Rows where the selected item is a recipe do not show "This week" or "Next week" toggle columns.
-- [ ] Rows where the selected item is a product still show both flag columns as before.
-- [ ] Removing a product from a row that had flags set does not leave ghost flag states if a recipe is then selected for that row.
+- [ ] All rows — both product rows and recipe rows — show "This week" and "Next week" toggle columns.
+- [ ] Toggling a flag on a **product row** mirrors the same flag on the product in All products (bidirectional sync).
+- [ ] Toggling a flag on a **recipe row** mirrors the same flag on the recipe in the recipe catalog (bidirectional sync).
+- [ ] All unflagging and week-rollover rules from the respective catalogs apply.
+- [ ] The flag state is pre-filled from the catalog when an item is selected.
+- [ ] Removing an item from a row clears the flag display without modifying the catalog flag.

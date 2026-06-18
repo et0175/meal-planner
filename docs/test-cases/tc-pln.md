@@ -45,12 +45,12 @@
 
 ---
 
-### TC-PLN-003: Weekly summary has four meal slots
+### TC-PLN-003: Week summary has four meal slots
 **AC:** US-MP-003 — four meal slots: Breakfast, Lunch, Dinner, Snacks  
 **Priority:** High
 
 **Steps:**
-1. Open Planner > Weekly summary tab.
+1. Open Planner > Week summary tab.
 
 **Expected result:**
 - Four labelled meal slot groups visible: Breakfast, Lunch, Dinner, Snacks
@@ -67,7 +67,7 @@
 **Preconditions:** Current week loaded; planner seeds applied
 
 **Steps:**
-1. Open Weekly summary.
+1. Open Week summary.
 
 **Expected result** (from test-data.json `plannerSeeds.assignments`):
 
@@ -91,13 +91,12 @@
 **Priority:** High
 
 **Steps:**
-1. In Weekly summary, find **Chickpea curry** in the Lunch slot.
+1. In Week summary, find **Chickpea curry** in the Lunch slot.
 2. The Wednesday cell shows `2`. Change it to `3`.
 
 **Expected result:**
 - Wednesday cell shows `3`
-- Day cards Wednesday Lunch updates to 3 servings
-- Calendar Wednesday cell reflects the change
+- Calendar Wednesday Lunch slot reflects the change (3 servings)
 - Topbar kcal total increases by 310 (1 extra serving of Chickpea curry)
 
 **Status:** ✅
@@ -109,13 +108,12 @@
 **Priority:** High
 
 **Steps:**
-1. In Weekly summary, find **Berry overnight oats** Monday Breakfast cell (currently `1`).
+1. In Week summary, find **Berry overnight oats** Monday Breakfast cell (currently `1`).
 2. Change the value to `0` (or clear it).
 
 **Expected result:**
 - Monday Breakfast cell is empty
-- Day cards Monday Breakfast no longer shows Berry overnight oats
-- Calendar Monday no longer shows Berry overnight oats
+- Calendar Monday Breakfast slot no longer shows Berry overnight oats
 
 **Status:** ✅
 
@@ -141,7 +139,7 @@
 **Expected result:**
 - Values revert to servings display; secondary label shows gram equivalent
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -157,7 +155,7 @@
 **Expected result:**
 - "g" toggle not shown or is disabled for that row
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -207,7 +205,7 @@
 **Steps:**
 1. Navigate to Products.
 2. Mark Broccoli "This week".
-3. Return to Planner > Weekly summary.
+3. Return to Planner > Week summary.
 
 **Expected result:**
 - Broccoli appears in the **Lunch** meal slot of the summary
@@ -217,39 +215,79 @@
 
 ---
 
-### TC-PLN-012: Day card shows kcal as percentage of calorie target
-**AC:** US-MP-019 — each day card shows planned kcal as % of calorie corridor  
+### TC-PLN-012: Calendar day column shows kcal nutrition strip
+**AC:** US-MP-019 — each day column in Calendar shows planned kcal and macros  
 **Priority:** Medium
 
-**Preconditions:** User u-001 has calorie target 2000 kcal; seed data loaded (Mon has r-001 385 kcal + r-004 450 kcal = 835 kcal); navigate to Day cards tab
+**Preconditions:** User u-001 has calorie target 2000 kcal; seed data loaded (Mon has r-001 385 kcal + r-004 450 kcal = 835 kcal)
 
 **Steps:**
-1. Open Planner > Day cards.
-2. Inspect the **Monday** card.
+1. Open Planner > Calendar tab > Week sub-view.
+2. Inspect the **Monday** column.
 
 **Expected result:**
-- Monday card shows: "835 kcal" and a percentage indicator such as "42%" (835 / 2000)
-- Percentage is shown as a bar, label, or numeric indicator
-- If no calorie target is set (user u-003), percentage strip is absent
+- Monday column shows a nutrition strip: **835 kcal**, protein (P), fat (F), carbs (C) totals
+- Strip visible when the column has at least one assignment
+- Empty columns do not show the strip
+
+**Status:** ✅
+
+---
+
+### TC-PLN-013: Planner item search sorted — recently used → user owned → alphabetical
+**AC:** US-MP-020 — search suggestions sorted: recently used first, then user-owned, then alphabetical  
+**Priority:** Medium
+
+**Preconditions:** Seed assignments include Berry overnight oats (r-001) and Chicken quinoa bowl (r-004); Hemp seeds (p-026) and Flax seeds (p-028) are user-owned but not recently used
+
+**Steps:**
+1. Open Planner > Week summary.
+2. In any meal-slot row, click the item search input.
+3. Observe default suggestions (no text typed or type a single generic letter).
+
+**Expected result:**
+- Berry overnight oats (r-001) and Chicken quinoa bowl (r-004) (recently planned) appear first
+- Hemp seeds (p-026) and Flax seeds (p-028) (user-owned, not recently used) appear after the recently-used group but before system items
+- System items with no recent usage appear last, sorted alphabetically
+- The three-tier sort (recently used → user owned → alphabetical) is preserved as the user types
 
 **Status:** 🚫
 
 ---
 
-### TC-PLN-013: Planner item search sorts recently used items first
-**AC:** US-MP-020 — search suggestions in planner show recently planned items at top  
-**Priority:** Medium
-
-**Preconditions:** Seed assignments include Berry overnight oats (r-001) on Monday Breakfast
+### TC-PLN-014: Switch between Week summary and Calendar tabs
+**AC:** US-MP-002 — two tabs are visible; selecting a tab shows its content and hides the other; both tabs reflect the same underlying week  
+**Priority:** High
 
 **Steps:**
-1. Open Planner > Weekly summary.
-2. In any meal-slot row, click the item search input.
-3. Observe default suggestions (no text typed or type a single generic letter).
+1. Open Planner; note the default active tab (Week summary).
+2. Click **Calendar** tab.
+3. Click **Week summary** tab.
 
 **Expected result:**
-- Berry overnight oats (r-001) and other seeded items appear at or near the top
-- Items with no recent usage appear below the recently-used group
-- Typing additional characters narrows results but preserves the recently-used ordering within the visible set
+- After step 1: Week summary content visible; Calendar hidden; "Week summary" tab highlighted
+- After step 2: Calendar content visible; Week summary hidden; same assignments visible in calendar cells (Mon Breakfast: Berry overnight oats)
+- After step 3: Week summary visible again; data consistent across tabs
 
-**Status:** 🚫
+**Status:** ✅
+
+---
+
+### TC-PLN-015: Download meal plan as PDF
+**AC:** US-MP-022 — PDF download available in planner; contains full Week summary grid  
+**Priority:** Medium
+
+**Preconditions:** Current week loaded with seed assignments
+
+**Steps:**
+1. Open Planner > Week summary.
+2. Locate the **"Download PDF"** button (in the planner header or Week summary toolbar).
+3. Click it.
+
+**Expected result:**
+- A PDF file is downloaded (browser download triggered)
+- The PDF contains the full Week summary grid: item names, meal slots, Mon–Sun columns with serving counts
+- The selected week date range (e.g. "Mon 15 Jun – Sun 21 Jun") appears in the PDF header
+- Seeded items (Berry overnight oats Mon Breakfast, Chicken quinoa bowl Mon Lunch, etc.) appear in the correct slots
+
+**Status:** ✅

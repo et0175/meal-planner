@@ -23,7 +23,7 @@
 2. Observe the sidebar.
 
 **Expected result:**
-- Sidebar contains exactly 7 items in order: **Planner, Products, Products analyser, Recipes, Diets, Shopping list, Profile**
+- Sidebar contains exactly 7 items in order: **Planner, All Products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet**
 - Shopping list is a top-level item, not nested inside Planner
 - Products analyser is a top-level item, not nested inside Products
 - All 7 labels are visible without scrolling

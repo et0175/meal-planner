@@ -12,32 +12,38 @@
 
 ---
 
-### TC-RCP-001: Recipes view shows only recipes
-**AC:** US-RA-001 — recipe list is scoped to recipes  
+### TC-RCP-001: Recipes view opens in category cards view by default
+**AC:** US-RA-014 — recipes opens in category cards view; no cards view  
 **Priority:** High
 
 **Steps:**
 1. Click **Recipes** in the sidebar.
 
 **Expected result:**
-- All 12 seed recipes visible
-- No product items appear (e.g. "Greek yogurt" must not appear)
+- Recipes view opens in **category cards view** (one card per recipe category)
+- No individual recipe cards shown in the default state
+- No product items appear
 
 **Status:** ✅
 
 ---
 
-### TC-RCP-002: Each recipe card shows title, category, and macro summary
+### TC-RCP-002: Recipe list view shows all 12 recipes with macro summary
 **AC:** US-RA-002 — list is scannable without opening each item  
 **Priority:** High
 
+**Preconditions:** Recipes view in list view (switched from default category cards)
+
 **Steps:**
-1. Locate **Berry overnight oats** (r-001) in the list.
-2. Inspect the card without opening it.
+1. Toggle to **list view**.
+2. Locate **Berry overnight oats** (r-001) in the list.
+3. Inspect the row without opening it.
 
 **Expected result:**
-- Visible without opening: name, category "Breakfasts", kcal 385 (or macro strip showing 15g protein / 8g fat / 65g carbs)
+- All 12 seed recipes visible in the list
+- Row shows: name "Berry overnight oats", category "Breakfasts", kcal 385 (or macro strip)
 - Heart icon visible (r-001 has `favorite: true`)
+- No product items appear (e.g. "Greek yogurt" must not appear)
 
 **Status:** ✅
 
@@ -146,18 +152,23 @@
 
 ---
 
-### TC-RCP-009: Open recipe detail card
-**AC:** US-RA-011 — card shows image, ingredients, nutrition, servings, kcal/serving  
+### TC-RCP-009: Open recipe detail card — pie chart, units conversion, instructions, prep time
+**AC:** US-RA-011 — card shows image, ingredients, nutrition pie chart, units conversion, servings, kcal/serving, prep time, and instructions  
 **Priority:** High
 
 **Steps:**
-1. Click the card image or title of **Chicken quinoa bowl** (r-004).
+1. Click the title of **Chicken quinoa bowl** (r-004).
 
 **Expected result:**
 - Detail modal or expanded card opens
 - Visible: image (or placeholder), servings "1", kcal/serving "450"
 - Ingredients listed: Chicken breast 150 g, Quinoa 85 g, Baby spinach 30 g, Cherry tomatoes 50 g, Olive oil 0.5 tbsp
 - Nutrition summary: protein 38 g / fat 12 g / carbs 42 g
+- **Pie chart** visible showing caloric proportions: protein / fat / carbs slices
+- **Units conversion reference** visible (g per serving, and 1 serving values)
+- **Preparation time** shown when the field is populated
+- **Step-by-step cooking instructions** shown when populated
+- Optional fields are hidden (not shown as blank) when not provided
 
 **Status:** ✅
 
@@ -267,7 +278,7 @@ ingredients: (none)
 - User can review and save
 - Saved recipe appears in the list and in Mine filter
 
-**Status:** 🚫
+**Status:** ✅
 
 ---
 
@@ -341,5 +352,89 @@ ingredients: (none)
 **Expected result:**
 - No edit or delete buttons visible on system recipes
 - Turkey meatballs (user-owned) does show edit/delete controls
+
+**Status:** ✅
+
+---
+
+### TC-RCP-019: Recipe category cards — click a category to see its recipes
+**AC:** US-RA-014 — clicking a category card navigates to filtered list with category pre-set  
+**Priority:** High
+
+**Preconditions:** Recipes view in category cards view (default)
+
+**Steps:**
+1. Click the **Breakfasts** category card.
+
+**Expected result:**
+- View switches to list view showing only Breakfasts recipes
+- Category filter is pre-set to "Breakfasts"
+- Recipes shown include: Berry overnight oats (r-001), Chia pudding (r-012) (verify against test-data.json)
+- A "back" or breadcrumb control returns to category cards view
+
+**Status:** ✅
+
+---
+
+### TC-RCP-020: Recipe list view includes fiber column
+**AC:** US-RA-015 — fiber (g) column present in recipe list  
+**Priority:** Medium
+
+**Preconditions:** Recipes view in list view
+
+**Steps:**
+1. Inspect the recipe list table header.
+2. Locate **Berry overnight oats** (r-001) row.
+
+**Expected result:**
+- Column header "Fiber" (or "Fiber (g)") is visible in the list
+- Berry overnight oats row shows fiber value in that column
+- Fiber column is sortable like other nutrition columns
+
+**Status:** ✅
+
+---
+
+### TC-RCP-021: Next-week flag auto-promotes to this-week on week rollover
+**AC:** US-RA-008 — on Monday of a new week, recipes flagged "Next week" become "This week"  
+**Priority:** Medium
+
+**Preconditions:** **Chia pudding** (r-012) has `thisWeek: false`, `nextWeek: true`
+
+**Steps:**
+1. Simulate a week rollover: advance the application's reference date to the following Monday.
+2. Navigate to **Recipes** and locate Chia pudding.
+
+**Expected result:**
+- Chia pudding now shows "This week" flag active
+- "Next week" flag is cleared on Chia pudding
+- Chia pudding appears in the Planner Lunch slot for the new current week
+
+**Status:** 🚫
+
+---
+
+### TC-RCP-022: Edit form shows live nutrition summary at top; recalculates as ingredients change
+**AC:** US-RA-013 — nutrition summary shown at top of edit form; updates live during editing  
+**Priority:** High
+
+**Preconditions:** **Turkey meatballs** (r-009) is user-owned; current nutrition: kcal ≈ 405, protein ≈ 36 g (verify against test-data.json)
+
+**Steps:**
+1. Open Recipes and click **edit** on Turkey meatballs.
+2. Observe the top of the edit form **before changing anything**.
+3. Locate Ground turkey in the ingredient list; increase its amount from 200 g to 300 g (do **not** save yet).
+4. Observe the nutrition summary at the top of the form.
+
+**Expected result:**
+- Step 2: A nutrition summary (kcal, protein, fat, carbs, fiber) is visible **at the top of the edit form**, above the ingredient list, before any changes are made.
+- Step 4 (before save): The nutrition summary updates **immediately** after the quantity change — protein increases by approximately +17 g, kcal by +149. The form still shows "unsaved" state.
+- No save or submit action is required for the nutrition values to update.
+
+**Steps (save and verify):**
+5. Click **Save**.
+
+**Expected result:**
+- Recipe card now shows the updated nutrition values matching what was shown in the live preview.
 
 **Status:** ✅

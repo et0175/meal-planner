@@ -20,6 +20,9 @@ export interface Item {
   fat: number
   carbs: number
   fiber?: number
+  prepTime?: string
+  instructions?: string
+  altUnits?: { unit: string; gramsPerUnit: number }[]
   unit?: string
   servingAmount?: number
   servingLabel?: string
@@ -72,6 +75,8 @@ export interface MealLogEntry {
   protein: number
   fat: number
   carbs: number
+  date?: string
+  slot?: Slot
 }
 
 export interface ShoppingLine {

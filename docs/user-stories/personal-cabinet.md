@@ -28,7 +28,7 @@ Requirements: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md)
 
 **Acceptance criteria**
 
-- [ ] Language setting is available in profile or settings.
+- [ ] Language setting is available in the Profile tab.
 - [ ] Changing language updates the UI without requiring a full reinstall (per i18n implementation).
 
 ---
@@ -85,27 +85,28 @@ Requirements: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md)
 
 **Acceptance criteria**
 
-- [ ] User can add log entries for a day using products and/or recipes.
+- [ ] User can add log entries for a day using products and/or recipes from the Meal tracking tab of the Personal cabinet.
 - [ ] A daily view aggregates nutrition (calories and relevant macros/micros per product scope) for that day.
 - [ ] User can edit or remove incorrect log entries.
 
 ---
 
-## US-PC-007 View meal tracking in calendar view
+## US-PC-007 Navigate Meal tracking in Today, Week, and Month layouts
 
 **As a** user who wants to review my logging history  
-**I want** a calendar view of my Meal tracking that shows what I logged each day  
-**So that** I can spot patterns and gaps in my food intake at a glance.
+**I want** a Meal tracking section with Today, Week, and Month layout views  
+**So that** I can see today's entries at a glance and review patterns across weeks and months.
 
-Source: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md) — Calendar view
+Source: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md) — Meal tracking tab / Layout views
 
 **Acceptance criteria**
 
-- [ ] The Meal tracking section of the Personal cabinet includes a calendar view similar to the Meal planner's Calendar tab.
-- [ ] Each day cell in the calendar shows: logged items (names), total kcal logged, and a visual indicator of whether the calorie corridor was reached.
+- [ ] The Meal Tracking tab of the Personal cabinet shows a **Today / Week / Month** toggle at the top; **Today** is the default.
+- [ ] **Today** layout shows the current day's log entries and daily nutrition summary.
+- [ ] **Week** layout shows a 7-day calendar view: each day cell shows total kcal logged and a visual indicator of whether the calorie corridor was reached.
+- [ ] **Month** layout shows a month grid with per-day kcal totals and corridor indicators.
 - [ ] Days with no log entries show an empty or placeholder state.
-- [ ] The user can navigate between weeks and months in the tracking calendar.
-- [ ] Clicking a day cell navigates to or highlights that day's detailed log entries.
+- [ ] The user can navigate between weeks (in Week layout) and between months (in Month layout).
 
 ---
 
@@ -126,18 +127,36 @@ Source: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md) — Goa
 
 ---
 
-## US-PC-009 See nutrition progress percentages and weekly/monthly summaries
+## US-PC-009 See nutrition progress as pie charts and weekly/monthly summaries
 
 **As a** user tracking my intake  
-**I want** to see each macro as a percentage of my daily target, and summary views by week and month  
-**So that** I understand my consistency over time and can spot nutritional gaps.
+**I want** to see each macro as a percentage of my daily and weekly target displayed as a pie chart  
+**So that** I can understand my nutritional balance at a glance and spot gaps over time.
 
 Source: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md) — Nutrition progress percentages
 
 **Acceptance criteria**
 
-- [ ] The daily tracking view shows, for each macro (kcal, protein, fat, carbs), the consumed amount and the percentage of the target value.
-- [ ] A weekly summary view shows the average % of target per macro across all logged days in the week.
+- [ ] The daily tracking view shows a **pie chart** with slices for protein, fat, and carbs consumed, proportional to their caloric contribution. The chart is accompanied by % of target for each macro (kcal, protein, fat, carbs).
+- [ ] A weekly summary view shows a **pie chart** and average % of target per macro across all logged days in the week.
 - [ ] A monthly summary view shows the same averages across all logged days in the month.
 - [ ] Days with no entries are excluded from the average calculation (not counted as 0%).
 - [ ] The progress display is not shown if no profile targets are set.
+
+---
+
+## US-PC-010 Personal cabinet has Profile and Meal tracking tabs
+
+**As a** user  
+**I want** the Personal cabinet to be organised into Profile and Meal tracking tabs  
+**So that** I can navigate clearly between account settings and my food intake log.
+
+Source: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md) — Tab structure
+
+**Acceptance criteria**
+
+- [ ] The Personal cabinet view shows two top-level tabs: **Profile** and **Meal tracking**.
+- [ ] The Profile tab contains: personal details (email/password, language, unit system, demographics) and diet preferences (diet selector, calorie target, macro split, corridor).
+- [ ] The Meal tracking tab contains: log entries, Today/Week/Month layout toggle, corridor summary, and nutrition progress.
+- [ ] Switching tabs does not reset the state within either tab (e.g. week navigation in Meal tracking is preserved when toggling to Profile and back).
+- [ ] The sidebar navigation item is labelled **"Personal cabinet"**.
