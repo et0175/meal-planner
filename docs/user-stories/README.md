@@ -1,4 +1,4 @@
-# User stories
+# User Stories
 
 Stories are grouped by module. Each links to [business requirements](../requirements/).
 

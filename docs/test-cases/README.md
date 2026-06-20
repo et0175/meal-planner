@@ -23,8 +23,8 @@
 | 9 | Shopping list | [tc-shp.md](tc-shp.md) | 15 | 14 | 1 | 0 |
 | 10 | Personal cabinet / profile | [tc-prf.md](tc-prf.md) | 14 | 12 | 2 | 0 |
 | 11 | Meal tracking | [tc-mlt.md](tc-mlt.md) | 17 | 17 | 0 | 0 |
-| 12 | Authentication | [tc-auth.md](tc-auth.md) | 12 | 0 | 12 | 0 |
-| | **Total** | | **186** | **162** | **24** | **0** |
+| 12 | Authentication | [tc-auth.md](tc-auth.md) | 12 | 11 | 1 | 0 |
+| | **Total** | | **186** | **173** | **13** | **0** |
 
 ---
 

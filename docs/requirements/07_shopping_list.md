@@ -1,4 +1,4 @@
-# Business requirements: shopping list
+# Business Requirements: Shopping List
 
 > **Decision (OQ-003):** All planned items appear in the grocery list — both recipe ingredients and standalone products added directly to the planner.
 

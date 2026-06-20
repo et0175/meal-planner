@@ -93,8 +93,8 @@
 
 ---
 
-### TC-RCP-006: Mark recipe as favourite
-**AC:** US-RA-007 — favourite can be toggled; state persists in session  
+### TC-RCP-006: Mark recipe as favorite
+**AC:** US-RA-007 — favorite can be toggled; state persists in session  
 **Priority:** Medium
 
 **Preconditions:** **Lentil tomato soup** (r-006) has `favorite: false`
@@ -105,31 +105,31 @@
 
 **Expected result:**
 - Heart icon becomes filled/active
-- r-006 now appears when "Favourites" filter is active
+- r-006 now appears when "Favorites" filter is active
 
 **Steps:**
-3. Click the heart again to unfavourite.
+3. Click the heart again to unfavorite.
 
 **Expected result:**
 - Heart returns to inactive state
-- r-006 no longer in favourites filter
+- r-006 no longer in favorites filter
 
 **Status:** ✅
 
 ---
 
-### TC-RCP-007: Favourites-only filter
-**AC:** US-RA-004 — toggle shows only favourited recipes  
+### TC-RCP-007: Favorites-only filter
+**AC:** US-RA-004 — toggle shows only favorited recipes  
 **Priority:** Medium
 
 **Preconditions:** Seed data: r-001 (Berry overnight oats) and r-004 (Chicken quinoa bowl) have `favorite: true`
 
 **Steps:**
-1. Click **Favourites** toggle.
+1. Click **Favorites** toggle.
 
 **Expected result:**
 - Only Berry overnight oats and Chicken quinoa bowl shown (2 items)
-- All non-favourited recipes hidden
+- All non-favorited recipes hidden
 
 **Status:** ✅
 

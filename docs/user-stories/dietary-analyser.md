@@ -1,4 +1,4 @@
-# User stories: dietary analyser
+# User Stories: Dietary Analyser
 
 Requirements: [03_dietary_analyser.md](../requirements/03_dietary_analyser.md)
 

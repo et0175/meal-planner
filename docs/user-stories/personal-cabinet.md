@@ -1,4 +1,4 @@
-# User stories: personal cabinet
+# User Stories: Personal Cabinet
 
 Requirements: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md)
 

@@ -1,4 +1,4 @@
-# Business requirements: authentication
+# Business Requirements: Authentication
 
 All application modules are accessible to authenticated users only. Unauthenticated visitors are redirected to the sign-in screen.
 

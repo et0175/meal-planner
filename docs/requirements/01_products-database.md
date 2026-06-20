@@ -1,4 +1,4 @@
-# Business requirements: products database
+# Business Requirements: Products Database
 
 > **Decision (OQ-001):** User-added products are immediately visible to all users in All products. Only the creator can edit or delete their own products.
 

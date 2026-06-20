@@ -1,4 +1,4 @@
-# Business requirements: meal planner
+# Business Requirements: Meal Planner
 
 A module for planning meals across a selected calendar week.
 

@@ -1,4 +1,4 @@
-# User stories: products analyser
+# User Stories: Products Analyser
 
 Requirements: [02_products-analyser.md](../requirements/02_products-analyser.md)
 

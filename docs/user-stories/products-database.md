@@ -1,4 +1,4 @@
-# User stories: products database
+# User Stories: Products Database
 
 Requirements: [01_products-database.md](../requirements/01_products-database.md)
 

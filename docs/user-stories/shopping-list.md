@@ -1,4 +1,4 @@
-# User stories: shopping list
+# User Stories: Shopping List
 
 Requirements: [07_shopping_list.md](../requirements/07_shopping_list.md)
 

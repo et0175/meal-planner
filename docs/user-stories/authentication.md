@@ -1,4 +1,4 @@
-# User stories: authentication
+# User Stories: Authentication
 
 Requirements: [08_authentication.md](../requirements/08_authentication.md)
 

@@ -85,3 +85,16 @@ export interface ShoppingLine {
   unit: string
   category: string
 }
+
+export interface AuthUser {
+  id: string
+  email: string
+  role: 'user' | 'nutritionist'
+}
+
+export interface SeedUser {
+  id: string
+  email: string
+  password: string
+  role: 'user' | 'nutritionist'
+}

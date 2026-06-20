@@ -1,4 +1,4 @@
-# User stories: recipe analyser
+# User Stories: Recipe Analyser
 
 Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 
@@ -79,7 +79,7 @@ Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 **Acceptance criteria**
 
 - [ ] Search input updates the recipe list based on the query.
-- [ ] Clear empty and no-match states.
+- [ ] Empty-state and no-match messages are displayed clearly.
 
 ---
 

@@ -35,7 +35,7 @@
 Last 2 major versions of: Chrome, Firefox, Safari (macOS + iOS), Edge.
 Mobile browsers: Chrome for Android, Safari for iOS.
 
-## Data & Privacy
+## Data & privacy
 
 - No personally identifiable nutrition data is exposed to other users.
 - User-added products and recipes are private to the creating account unless explicitly shared.

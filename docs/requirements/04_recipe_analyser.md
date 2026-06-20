@@ -1,4 +1,4 @@
-# Business requirements: recipe analyser
+# Business Requirements: Recipe Analyser
 
 > **Decision (OQ-004):** Recipe import supports website URL and PDF for MVP. YouTube import is post-MVP.
 

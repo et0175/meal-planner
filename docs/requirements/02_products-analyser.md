@@ -1,4 +1,4 @@
-# Business requirements: products analyser
+# Business Requirements: Products Analyser
 
 The products analyser is a dedicated nutrition-calculation tool — separate from the Products database browser. It lets users compose a custom mixed list of **products and recipes** and instantly see the combined nutritional breakdown.
 

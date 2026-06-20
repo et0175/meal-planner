@@ -1,4 +1,4 @@
-# User stories: meal planner
+# User Stories: Meal Planner
 
 Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 

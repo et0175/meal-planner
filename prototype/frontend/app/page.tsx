@@ -5,10 +5,10 @@ import {
   UtensilsCrossed, ShoppingBasket, Apple, Leaf, CalendarDays,
   User, Search, Heart, Plus, Minus, X, ChevronLeft,
   ChevronRight, LayoutGrid, List, Edit2, Trash2, Check,
-  AlertTriangle, RefreshCw, Table2, Download,
+  AlertTriangle, RefreshCw, Table2, Download, Eye, EyeOff, LogOut,
 } from 'lucide-react'
-import { SEED_PRODUCTS, SEED_RECIPES, SEED_DIETS, SEED_ASSIGNMENTS } from '@/data/seed'
-import type { View, Day, Slot, Item, Assignment, Diet, Profile, MealLogEntry, ShoppingLine } from '@/types'
+import { SEED_PRODUCTS, SEED_RECIPES, SEED_DIETS, SEED_ASSIGNMENTS, SEED_USERS } from '@/data/seed'
+import type { View, Day, Slot, Item, Assignment, Diet, Profile, MealLogEntry, ShoppingLine, AuthUser, SeedUser } from '@/types'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -146,6 +146,233 @@ function EmptyState({
   )
 }
 
+// ─── auth screen ─────────────────────────────────────────────────────────────
+
+const LOCK_THRESHOLD = 5
+
+function AuthScreen({
+  users,
+  onAddUser,
+  onAuth,
+}: {
+  users: SeedUser[]
+  onAddUser: (u: SeedUser) => void
+  onAuth: (user: AuthUser) => void
+}) {
+  const [mode, setMode] = useState<'signin' | 'register' | 'forgot'>('signin')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPass, setShowPass] = useState(false)
+  const [emailError, setEmailError] = useState('')
+  const [passError, setPassError] = useState('')
+  const [globalError, setGlobalError] = useState('')
+  const [successMsg, setSuccessMsg] = useState('')
+  const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({})
+
+  function clearErrors() {
+    setEmailError(''); setPassError(''); setGlobalError(''); setSuccessMsg('')
+  }
+
+  function switchMode(m: 'signin' | 'register' | 'forgot') {
+    setMode(m); setEmail(''); setPassword(''); setShowPass(false); clearErrors()
+  }
+
+  function handleSignIn() {
+    clearErrors()
+    let valid = true
+    if (!email.trim()) { setEmailError('Email is required'); valid = false }
+    if (!password) { setPassError('Password is required'); valid = false }
+    if (!valid) return
+
+    const key = email.toLowerCase()
+    const attempts = failedAttempts[key] ?? 0
+    if (attempts >= LOCK_THRESHOLD) {
+      setGlobalError('Too many failed attempts. Please wait 15 minutes before trying again.')
+      return
+    }
+
+    const user = users.find(u => u.email.toLowerCase() === key && u.password === password)
+    if (user) {
+      onAuth({ id: user.id, email: user.email, role: user.role })
+    } else {
+      const next = attempts + 1
+      setFailedAttempts(prev => ({ ...prev, [key]: next }))
+      if (next >= LOCK_THRESHOLD) {
+        setGlobalError('Too many failed attempts. Please wait 15 minutes before trying again.')
+      } else {
+        setGlobalError('Invalid email or password.')
+      }
+    }
+  }
+
+  function handleRegister() {
+    clearErrors()
+    let valid = true
+    if (!email.trim()) { setEmailError('Email is required'); valid = false }
+    if (!password) { setPassError('Password is required'); valid = false }
+    else if (password.length < 8) { setPassError('Password must be at least 8 characters'); valid = false }
+    if (!valid) return
+
+    const existing = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase())
+    if (existing) {
+      setSuccessMsg('If this email is available, your account has been created. Try signing in.')
+      return
+    }
+
+    const newUser: SeedUser = { id: `u-${uid()}`, email: email.trim(), password, role: 'user' }
+    onAddUser(newUser)
+    onAuth({ id: newUser.id, email: newUser.email, role: newUser.role })
+  }
+
+  function handleForgot() {
+    clearErrors()
+    if (!email.trim()) { setEmailError('Email is required'); return }
+    setSuccessMsg('If an account with this email exists, a reset link has been sent. Check your inbox.')
+  }
+
+  const title = mode === 'signin' ? 'Sign in' : mode === 'register' ? 'Create account' : 'Reset password'
+  const subtitle = mode === 'signin'
+    ? 'Welcome back to Meal Forge'
+    : mode === 'register'
+      ? 'Start planning your meals'
+      : 'Enter your email to receive a reset link'
+
+  const onEnter = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Enter') return
+    if (mode === 'signin') handleSignIn()
+    else if (mode === 'register') handleRegister()
+    else handleForgot()
+  }
+
+  return (
+    <div className="min-h-dvh flex items-center justify-center p-4" style={{ background: '#F1F5F4' }}>
+      <div className="w-full max-w-sm">
+        <div className="flex items-center gap-2.5 justify-center mb-8">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#1A6B6E' }}>
+            <UtensilsCrossed size={20} className="text-white" />
+          </div>
+          <span className="text-xl font-semibold text-gray-900 tracking-tight">Meal Forge</span>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl px-6 py-7">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+            <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
+          </div>
+
+          {successMsg && (
+            <div role="status" className="rounded-xl p-3 bg-green-50 border border-green-200 text-sm text-green-700 mb-4">
+              {successMsg}
+            </div>
+          )}
+          {globalError && (
+            <div role="alert" className="rounded-xl p-3 bg-red-50 border border-red-200 text-sm text-red-700 mb-4">
+              {globalError}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="auth-email" className="text-xs font-medium text-gray-500 mb-1 block">Email *</label>
+              <input
+                id="auth-email"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={e => { setEmail(e.target.value); setEmailError('') }}
+                onKeyDown={onEnter}
+                className={cn(inputCls, emailError && 'border-red-300 focus:border-red-400 focus:ring-red-100')}
+                placeholder="you@example.com"
+                aria-describedby={emailError ? 'auth-email-err' : undefined}
+                aria-invalid={!!emailError}
+                aria-required="true"
+              />
+              {emailError && <p id="auth-email-err" role="alert" className="text-xs text-red-600 mt-1">{emailError}</p>}
+            </div>
+
+            {mode !== 'forgot' && (
+              <div>
+                <label htmlFor="auth-pass" className="text-xs font-medium text-gray-500 mb-1 block">Password *</label>
+                <div className="relative">
+                  <input
+                    id="auth-pass"
+                    type={showPass ? 'text' : 'password'}
+                    autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
+                    value={password}
+                    onChange={e => { setPassword(e.target.value); setPassError('') }}
+                    onKeyDown={onEnter}
+                    className={cn(inputCls, 'pr-10', passError && 'border-red-300 focus:border-red-400 focus:ring-red-100')}
+                    placeholder={mode === 'register' ? 'Minimum 8 characters' : ''}
+                    aria-describedby={passError ? 'auth-pass-err' : undefined}
+                    aria-invalid={!!passError}
+                    aria-required="true"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPass(p => !p)}
+                    aria-label={showPass ? 'Hide password' : 'Show password'}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+                {passError && <p id="auth-pass-err" role="alert" className="text-xs text-red-600 mt-1">{passError}</p>}
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={mode === 'signin' ? handleSignIn : mode === 'register' ? handleRegister : handleForgot}
+            className="w-full mt-5 py-2.5 rounded-xl text-sm font-medium text-white cursor-pointer hover:opacity-90 active:opacity-80 transition-opacity"
+            style={{ background: '#1A6B6E' }}
+          >
+            {mode === 'signin' ? 'Sign in' : mode === 'register' ? 'Create account' : 'Send reset link'}
+          </button>
+
+          <div className="mt-4 space-y-2 text-center text-sm">
+            {mode === 'signin' && (
+              <>
+                <button
+                  onClick={() => switchMode('forgot')}
+                  className="text-teal-700 hover:text-teal-900 cursor-pointer block w-full"
+                >
+                  Forgot password?
+                </button>
+                <p className="text-gray-500">
+                  No account?{' '}
+                  <button onClick={() => switchMode('register')} className="text-teal-700 hover:text-teal-900 cursor-pointer font-medium">
+                    Register
+                  </button>
+                </p>
+              </>
+            )}
+            {mode === 'register' && (
+              <p className="text-gray-500">
+                Already have an account?{' '}
+                <button onClick={() => switchMode('signin')} className="text-teal-700 hover:text-teal-900 cursor-pointer font-medium">
+                  Sign in
+                </button>
+              </p>
+            )}
+            {mode === 'forgot' && (
+              <button
+                onClick={() => switchMode('signin')}
+                className="text-teal-700 hover:text-teal-900 cursor-pointer block w-full"
+              >
+                Back to sign in
+              </button>
+            )}
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-gray-400 mt-4">
+          Demo: user@mealforge.com · password123
+        </p>
+      </div>
+    </div>
+  )
+}
+
 // ─── sidebar ──────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS: { id: View; label: string; icon: React.ReactNode }[] = [
@@ -158,7 +385,11 @@ const NAV_ITEMS: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'profile',  label: 'Personal cabinet',    icon: <User size={18} /> },
 ]
 
-function Sidebar({ active, setActive }: { active: View; setActive: (v: View) => void }) {
+function Sidebar({
+  active, setActive, userEmail, onSignOut,
+}: {
+  active: View; setActive: (v: View) => void; userEmail: string; onSignOut: () => void
+}) {
   return (
     <aside
       className="w-56 flex-shrink-0 flex flex-col h-full"
@@ -195,8 +426,21 @@ function Sidebar({ active, setActive }: { active: View; setActive: (v: View) => 
         })}
       </nav>
 
-      <div className="px-5 pb-5 pt-3 border-t border-white/10">
-        <p className="text-white/40 text-xs">MVP Prototype · v1.0</p>
+      <div className="px-4 pb-5 pt-3 border-t border-white/10 space-y-2">
+        <div className="flex items-center gap-2 min-w-0 px-1">
+          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+            <User size={12} className="text-white" />
+          </div>
+          <span className="text-white/70 text-xs truncate flex-1" title={userEmail}>{userEmail}</span>
+        </div>
+        <button
+          onClick={onSignOut}
+          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 cursor-pointer text-xs transition-colors"
+        >
+          <LogOut size={13} />
+          Sign out
+        </button>
+        <p className="text-white/30 text-xs px-1">MVP Prototype · v1.0</p>
       </div>
     </aside>
   )
@@ -899,8 +1143,8 @@ function RecipesView({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  {['Name', 'Category', 'Servings', 'kcal/srv', 'Protein', 'Fat', 'Carbs', 'Fiber', ''].map(h => (
-                    <th key={h} className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide', ['kcal/srv','Protein','Fat','Carbs','Servings','Fiber'].includes(h) ? 'text-right' : 'text-left')}>
+                  {['Name', 'Category', 'Servings', 'kcal', 'Protein', 'Fat', 'Carbs', 'Fiber', ''].map(h => (
+                    <th key={h} className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide', ['kcal','Protein','Fat','Carbs','Servings','Fiber'].includes(h) ? 'text-right' : 'text-left')}>
                       {h}
                     </th>
                   ))}
@@ -919,7 +1163,10 @@ function RecipesView({
                       <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', CATEGORY_COLOURS[r.category] ?? 'bg-gray-100 text-gray-600')}>{r.category}</span>
                     </td>
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{r.servings}</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-gray-700">{r.kcal}</td>
+                    <td className="px-4 py-2.5 text-right">
+                      <span className="font-mono text-gray-700">{r.kcal}</span>
+                      {r.servingG && <div className="text-xs text-gray-400 font-mono">{Math.round(r.kcal * 100 / r.servingG)}/100g</div>}
+                    </td>
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.protein)}g</td>
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.fat)}g</td>
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.carbs)}g</td>
@@ -961,12 +1208,32 @@ function RecipesView({
         const fPct = Math.round((fatKcal / totalMacroKcal) * 100)
         const cPct = 100 - pPct - fPct
         const pieGradient = `conic-gradient(#3b82f6 0% ${pPct}%, #ef4444 ${pPct}% ${pPct + fPct}%, #22c55e ${pPct + fPct}% 100%)`
+
+        // Per-100g: Case 2 (servingG) or Case 1 (auto-sum from ingredient weights)
+        const dServings = detail.servings ?? 1
+        let perServingG: number | null = detail.servingG ?? null
+        let isEstimated = false
+        if (!perServingG && detail.ingredients?.length) {
+          const totalG = detail.ingredients.reduce<number>((sum, ing) => {
+            if (!isFinite(sum)) return NaN
+            const prod = items.find(i => i.id === ing.productId)
+            if (!prod) return NaN
+            if (ing.unit === 'g' || ing.unit === 'ml') return sum + ing.amount
+            const altU = prod.altUnits?.find(a => a.unit === ing.unit)
+            if (altU) return sum + ing.amount * altU.gramsPerUnit
+            if (prod.servingG != null && prod.servingAmount) return sum + ing.amount * (prod.servingG / prod.servingAmount)
+            return NaN
+          }, 0)
+          if (isFinite(totalG) && totalG > 0) { perServingG = totalG / dServings; isEstimated = true }
+        }
+        const factor100g = perServingG ? 100 / perServingG : null
+
         return (
           <Modal title={detail.name} onClose={() => setDetail(null)} wide>
             <div className="space-y-4">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className={cn('text-sm px-3 py-1 rounded-full font-medium', CATEGORY_COLOURS[detail.category] ?? 'bg-gray-100 text-gray-600')}>{detail.category}</span>
-                <span className="text-sm text-gray-400">{detail.servings} serving{detail.servings !== 1 ? 's' : ''}</span>
+                <span className="text-sm text-gray-400">{dServings} serving{dServings !== 1 ? 's' : ''}</span>
                 {detail.prepTime && <span className="text-sm text-gray-400">· {detail.prepTime}</span>}
                 {detail.isUserAdded && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Your recipe</span>}
               </div>
@@ -977,12 +1244,21 @@ function RecipesView({
                   <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" /><span className="text-gray-600">Fat: {fmtMacro(detail.fat)} g ({fPct}%)</span></div>
                   <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" /><span className="text-gray-600">Carbs: {fmtMacro(detail.carbs)} g ({cPct}%)</span></div>
                   {detail.fiber !== undefined && <div className="text-xs text-gray-400">Fiber: {fmtMacro(detail.fiber)} g</div>}
-                  <div className="font-semibold text-gray-900">{detail.kcal} kcal / serving</div>
+                  <div className="font-semibold text-gray-900">
+                    {detail.kcal} kcal / serving
+                    {factor100g !== null && (
+                      <span className="ml-2 text-xs font-normal text-gray-400">
+                        · {Math.round(detail.kcal * factor100g)} kcal / 100 g{isEstimated ? ' (est.)' : ''}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-              {detail.servingG && (
+              {factor100g !== null && (
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Units conversion</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                    Nutrition reference{isEstimated ? ' · weight estimated from ingredients' : ''}
+                  </h3>
                   <table className="w-full text-xs border-collapse">
                     <thead>
                       <tr className="bg-gray-50 text-gray-500">
@@ -994,13 +1270,13 @@ function RecipesView({
                       </tr>
                     </thead>
                     <tbody>
-                      {[{ label: '1 serving', factor: 1 }, { label: '100 g', factor: 100 / detail.servingG }].map(({ label, factor }) => (
+                      {[{ label: '1 serving', f: 1 }, { label: '100 g', f: factor100g }].map(({ label, f }) => (
                         <tr key={label} className="border-t border-gray-100">
                           <td className="px-3 py-2 text-gray-700">{label}</td>
-                          <td className="px-3 py-2 text-right text-gray-700">{Math.round(detail.kcal * factor)}</td>
-                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.protein * factor)} g</td>
-                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.fat * factor)} g</td>
-                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.carbs * factor)} g</td>
+                          <td className="px-3 py-2 text-right text-gray-700">{Math.round(detail.kcal * f)}</td>
+                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.protein * f)} g</td>
+                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.fat * f)} g</td>
+                          <td className="px-3 py-2 text-right text-gray-600">{fmtMacro(detail.carbs * f)} g</td>
                         </tr>
                       ))}
                     </tbody>
@@ -1201,13 +1477,33 @@ function RecipeForm({
           <textarea value={instructions} onChange={e => setInstructions(e.target.value)} rows={3} placeholder="Step-by-step instructions…" className={cn(inputCls, 'resize-y')} />
         </Field>
 
-        <div className="grid grid-cols-4 gap-2 bg-teal-50 border border-teal-100 rounded-xl p-3">
-          {[['kcal', Math.round(nutrition.kcal)], ['Protein', `${fmtMacro(nutrition.protein)}g`], ['Fat', `${fmtMacro(nutrition.fat)}g`], ['Carbs', `${fmtMacro(nutrition.carbs)}g`]].map(([l, v]) => (
-            <div key={String(l)} className="text-center">
-              <p className="text-sm font-bold text-gray-800">{v}</p>
-              <p className="text-xs text-gray-400">{l}</p>
-            </div>
-          ))}
+        <div className="bg-teal-50 border border-teal-100 rounded-xl p-3 space-y-2">
+          <div className="grid grid-cols-4 gap-2">
+            {[['kcal', Math.round(nutrition.kcal)], ['Protein', `${fmtMacro(nutrition.protein)}g`], ['Fat', `${fmtMacro(nutrition.fat)}g`], ['Carbs', `${fmtMacro(nutrition.carbs)}g`]].map(([l, v]) => (
+              <div key={String(l)} className="text-center">
+                <p className="text-sm font-bold text-gray-800">{v}</p>
+                <p className="text-xs text-gray-400">{l} / recipe</p>
+              </div>
+            ))}
+          </div>
+          {recipeServingG && Number(recipeServingG) > 0 && Number(servings) > 0 && (() => {
+            const totalG = Number(recipeServingG) * Number(servings)
+            return (
+              <div className="border-t border-teal-200 pt-2 grid grid-cols-4 gap-2">
+                {[
+                  ['kcal', Math.round(nutrition.kcal / totalG * 100)],
+                  ['Protein', `${fmtMacro(nutrition.protein / totalG * 100)}g`],
+                  ['Fat', `${fmtMacro(nutrition.fat / totalG * 100)}g`],
+                  ['Carbs', `${fmtMacro(nutrition.carbs / totalG * 100)}g`],
+                ].map(([l, v]) => (
+                  <div key={String(l)} className="text-center">
+                    <p className="text-sm font-bold text-teal-700">{v}</p>
+                    <p className="text-xs text-gray-400">{l} / 100 g</p>
+                  </div>
+                ))}
+              </div>
+            )
+          })()}
         </div>
 
         <div>
@@ -3100,6 +3396,11 @@ const DEFAULT_PROFILE: Profile = {
 }
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    try { const s = sessionStorage.getItem('mf_user'); return s ? JSON.parse(s) : null } catch { return null }
+  })
+  const [registeredUsers, setRegisteredUsers] = useState<SeedUser[]>([...SEED_USERS])
+
   const [activeView, setActiveView] = useState<View>('planner')
   const [items, setItems] = useState<Item[]>([...SEED_PRODUCTS, ...SEED_RECIPES])
   const [assignments, setAssignments] = useState<Assignment[]>(SEED_ASSIGNMENTS)
@@ -3115,9 +3416,30 @@ export default function App() {
     if (shoppingListRef.current !== null) setShoppingStale(true)
   }, [assignments])
 
+  function handleAuth(user: AuthUser) {
+    try { sessionStorage.setItem('mf_user', JSON.stringify(user)) } catch {}
+    setCurrentUser(user)
+  }
+
+  function handleSignOut() {
+    try { sessionStorage.removeItem('mf_user') } catch {}
+    setCurrentUser(null)
+    setActiveView('planner')
+  }
+
+  if (!currentUser) {
+    return (
+      <AuthScreen
+        users={registeredUsers}
+        onAddUser={u => setRegisteredUsers(prev => [...prev, u])}
+        onAuth={handleAuth}
+      />
+    )
+  }
+
   return (
     <div className="flex h-full overflow-hidden" style={{ background: '#F1F5F4' }}>
-      <Sidebar active={activeView} setActive={setActiveView} />
+      <Sidebar active={activeView} setActive={setActiveView} userEmail={currentUser.email} onSignOut={handleSignOut} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar view={activeView} profile={profile} assignments={assignments} items={items} />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">

@@ -1,4 +1,4 @@
-# User stories: navigation
+# User Stories: Navigation
 
 Requirements: Navigation structure is implied by all module requirements — no dedicated navigation requirements file.
 

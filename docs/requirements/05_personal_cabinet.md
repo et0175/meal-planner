@@ -1,4 +1,4 @@
-# Business requirements: personal cabinet
+# Business Requirements: Personal Cabinet
 
 > **Decision (OQ-007):** Supported unit systems are metric and US customary (oz/lb, fl oz/cups/tbsp/tsp). UK Imperial is not in scope.  
 > **Decision (OQ-008):** "Log from plan" is now included in MVP (overrides OQ-006). Tracking and planning data stores remain independent; the log action copies data without linking the two stores.
