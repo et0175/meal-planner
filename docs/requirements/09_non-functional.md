@@ -37,5 +37,6 @@ Mobile browsers: Chrome for Android, Safari for iOS.
 
 ## Data & privacy
 
-- No personally identifiable nutrition data is exposed to other users.
-- User-added products and recipes are private to the creating account unless explicitly shared.
+- No personally identifiable data (meal plans, tracking logs, profile information) is exposed to other users.
+- User-added products are visible to all users in the global catalogue (see OQ-001). Only the creator can edit or delete their own products.
+- User meal plans, tracking entries, and profile settings are private to the account holder.

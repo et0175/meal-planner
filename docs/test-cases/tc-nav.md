@@ -12,8 +12,8 @@
 
 ---
 
-### TC-NAV-001: Sidebar shows all seven navigation items
-**AC:** US-NAV-001 — sidebar contains exactly 7 items in defined order  
+### TC-NAV-001: Sidebar shows all eight navigation items
+**AC:** US-NAV-001 — sidebar contains exactly 8 items in defined order  
 **Priority:** High
 
 **Preconditions:** App loaded at `http://localhost:3001`
@@ -23,10 +23,11 @@
 2. Observe the sidebar.
 
 **Expected result:**
-- Sidebar contains exactly 7 items in order: **Planner, All Products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet**
+- Sidebar contains exactly 8 items in order: **Planner, All products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet, Advanced search**
 - Shopping list is a top-level item, not nested inside Planner
-- Products analyser is a top-level item, not nested inside Products
-- All 7 labels are visible without scrolling
+- Products analyser is a top-level item, not nested inside All products
+- Advanced search is a top-level item
+- All 8 labels are visible without scrolling
 
 **Status:** ✅
 
@@ -70,7 +71,7 @@
 **Priority:** Medium
 
 **Steps:**
-1. Click each of the 6 nav items in sequence.
+1. Click each of the other 7 nav items in sequence (starting from Planner as the initial view).
 
 **Expected result:**
 - The `<h1>` or topbar title matches the clicked view label each time

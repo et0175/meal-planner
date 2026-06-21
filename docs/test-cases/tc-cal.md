@@ -7,7 +7,7 @@
 ---
 
 **Requirement:** [`06_meal_planner.md`](../requirements/06_meal_planner.md) — Tab 2 — Calendar  
-**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-011 – US-MP-021  
+**User stories:** [`meal-planner.md`](../user-stories/meal-planner.md) — US-MP-011 – US-MP-023  
 **Test data:** `plannerSeeds` from test-data.json (8 assignments)
 
 ---
@@ -424,5 +424,35 @@
 - The summary format matches the Personal cabinet Meal tracking display (same visual style)
 - Columns with no assignments do not show the strip (or show 0/target)
 - If u-001 has no calorie target set, the strip is hidden
+
+**Status:** ✅
+
+---
+
+### TC-CAL-025: Add item to plan summary panel via inline search
+**AC:** US-MP-023 — each summary slot has a + button; selecting an item adds it as an assignment on the first visible day  
+**Priority:** High
+
+**Preconditions:** Planner Calendar tab open (Week sub-view); plan has at least one existing assignment so the plan summary panel is visible
+
+**Steps:**
+1. In the plan summary panel, click the **+** button in the **Breakfast** slot header.
+2. Type `yogurt` in the inline search input.
+3. Click **Greek yogurt** in the dropdown.
+4. Inspect the **Monday Breakfast** day cell.
+
+**Expected result:**
+- Clicking + opens an inline search input inside the Breakfast column
+- Typing "yogurt" shows matching items (e.g. Greek yogurt 88 kcal)
+- After selecting Greek yogurt, the search input closes
+- The plan summary Breakfast column now shows Greek yogurt
+- Monday Breakfast day cell shows Greek yogurt with 1 serving
+- Planner topbar kcal total increases by 88 kcal
+
+**Steps (close without selecting):**
+5. Click + in the **Lunch** slot; then click + again to dismiss.
+
+**Expected result:**
+- Clicking + a second time dismisses the inline search without adding anything
 
 **Status:** ✅

@@ -293,13 +293,26 @@ Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers 
 
 ---
 
+---
+
+## 🟡 ISSUE-020 — Mark as favourite not available in Advanced Search
+
+**Severity:** Prototype gap  
+**Affected view:** Advanced Search — Recipes tab  
+**Requirements:** `10_advanced_search.md` — "All recipe actions available in the Recipe Analyser are available here: mark as favourite, mark for this week / next week, open detail card."  
+**Related test case:** TC-AS-020
+
+**Description:** In the Advanced Search results Recipes tab, each recipe row shows a filled heart icon when `favorite: true`, but there is no toggle button to change the favourite status. The recipe detail modal in SearchView also lacks a favourite action. The requirement states that all recipe actions from the Recipe Analyser should be available in Advanced Search — favourite toggling is missing.
+
+---
+
 ## Summary
 
 | Severity | Count | IDs |
 |---|---|---|
 | 🔴 Bug | 4 | 001, 002, 003, 004 |
 | 🟠 UX defect | 5 | 005, 006, 007, 008, 009 |
-| 🟡 Prototype gap | 10 | 010–019 |
-| **Total** | **19** | |
+| 🟡 Prototype gap | 11 | 010–020 |
+| **Total** | **20** | |
 
-**Priority fixes before next user test session:** ISSUE-001 (search bleed), ISSUE-002 (timezone), ISSUE-006 (favorite toggle), ISSUE-010 (more diets).
+**Priority fixes before next user test session:** ISSUE-001 (search bleed), ISSUE-002 (timezone), ISSUE-006 (favorite toggle), ISSUE-010 (more diets), ISSUE-020 (favourite toggle in search).

@@ -5,7 +5,9 @@ import {
   UtensilsCrossed, ShoppingBasket, Apple, Leaf, CalendarDays,
   User, Search, Heart, Plus, Minus, X, ChevronLeft,
   ChevronRight, LayoutGrid, List, Edit2, Trash2, Check,
-  AlertTriangle, RefreshCw, Table2, Download, Eye, EyeOff, LogOut,
+  AlertTriangle, RefreshCw, Table2, Download, Eye, EyeOff, LogOut, SlidersHorizontal,
+  Sunrise, Salad, Soup, Sandwich, ChefHat, Cake, Coffee, BookOpen,
+  Milk, Fish, Wheat, Carrot, Drumstick, Bean, Nut, Droplet,
 } from 'lucide-react'
 import { SEED_PRODUCTS, SEED_RECIPES, SEED_DIETS, SEED_ASSIGNMENTS, SEED_USERS } from '@/data/seed'
 import type { View, Day, Slot, Item, Assignment, Diet, Profile, MealLogEntry, ShoppingLine, AuthUser, SeedUser } from '@/types'
@@ -77,6 +79,19 @@ const RECIPE_GRADIENTS = [
   'from-purple-100 to-pink-50', 'from-blue-100 to-sky-50',
   'from-green-100 to-emerald-50', 'from-rose-100 to-red-50',
 ]
+
+const PRODUCT_CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  Dairy: <Milk size={20} />, Fish: <Fish size={20} />, Grains: <Wheat size={20} />,
+  Produce: <Carrot size={20} />, Meat: <Drumstick size={20} />, Legumes: <Bean size={20} />,
+  'Nuts & Seeds': <Nut size={20} />, Condiments: <Droplet size={20} />,
+}
+
+const RECIPE_CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  Breakfasts: <Sunrise size={20} />, Salads: <Salad size={20} />, Soups: <Soup size={20} />,
+  'Main courses': <UtensilsCrossed size={20} />, Snacks: <Apple size={20} />,
+  Sandwiches: <Sandwich size={20} />, Sauces: <ChefHat size={20} />,
+  Desserts: <Cake size={20} />, Drinks: <Coffee size={20} />,
+}
 
 const inputCls = 'w-full text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200'
 
@@ -383,6 +398,7 @@ const NAV_ITEMS: { id: View; label: string; icon: React.ReactNode }[] = [
   { id: 'diets',    label: 'Diets',              icon: <Leaf size={18} /> },
   { id: 'shopping', label: 'Shopping list',      icon: <ShoppingBasket size={18} /> },
   { id: 'profile',  label: 'Personal cabinet',    icon: <User size={18} /> },
+  { id: 'search',   label: 'Advanced search',     icon: <SlidersHorizontal size={18} /> },
 ]
 
 function Sidebar({
@@ -577,8 +593,8 @@ function ProductCard({
       {p.imageUrl ? (
         <img src={p.imageUrl} alt={p.name} className="w-full h-28 object-cover" />
       ) : (
-        <div className={cn('w-full h-20 flex items-center justify-center text-2xl', CATEGORY_COLOURS[p.category] ?? 'bg-gray-50 text-gray-300')}>
-          🥗
+        <div className={cn('w-full h-20 flex items-center justify-center', CATEGORY_COLOURS[p.category] ?? 'bg-gray-50 text-gray-300')}>
+          {PRODUCT_CATEGORY_ICONS[p.category] ?? <UtensilsCrossed size={20} />}
         </div>
       )}
 
@@ -942,8 +958,8 @@ function ProductsView({
             return (
               <button key={cat} onClick={() => { setCatFilter(cat); setBrowseMode('list') }}
                 className="bg-white border border-gray-200 rounded-2xl p-5 text-left hover:shadow-md transition-shadow cursor-pointer">
-                <div className={cn('text-2xl mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
-                  {cat === 'Dairy' ? '🥛' : cat === 'Fish' ? '🐟' : cat === 'Grains' ? '🌾' : cat === 'Produce' ? '🥦' : cat === 'Meat' ? '🥩' : cat === 'Legumes' ? '🫘' : cat === 'Nuts & Seeds' ? '🥜' : cat === 'Condiments' ? '🧂' : '📦'}
+                <div className={cn('mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
+                  {PRODUCT_CATEGORY_ICONS[cat] ?? <UtensilsCrossed size={20} />}
                 </div>
                 <p className="font-semibold text-gray-900 text-sm">{cat}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{count} item{count !== 1 ? 's' : ''}</p>
@@ -982,12 +998,16 @@ function ProductsView({
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{p.fiber !== undefined ? `${fmtMacro(p.fiber)}g` : '—'}</td>
                     <td className="px-4 py-2.5 text-xs text-gray-400">{p.servingLabel ?? `${p.servingAmount ?? 100} ${p.unit ?? 'g'}`}</td>
                     <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
-                      {p.isUserAdded && (
-                        <div className="flex items-center gap-1">
-                          <button onClick={() => { setEditId(p.id); setShowForm(true) }} aria-label="Edit" className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-teal-600 cursor-pointer"><Edit2 size={12} /></button>
-                          <button onClick={() => deleteProduct(p.id)} aria-label="Delete" className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 size={12} /></button>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => toggleWeekFlag(p.id, 'thisWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', p.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>TW</button>
+                        <button onClick={() => toggleWeekFlag(p.id, 'nextWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', p.weekFlags.nextWeek ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>NW</button>
+                        {p.isUserAdded && (
+                          <>
+                            <button onClick={() => { setEditId(p.id); setShowForm(true) }} aria-label="Edit" className="p-1 rounded hover:bg-gray-100 text-gray-400 hover:text-teal-600 cursor-pointer"><Edit2 size={12} /></button>
+                            <button onClick={() => deleteProduct(p.id)} aria-label="Delete" className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-500 cursor-pointer"><Trash2 size={12} /></button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1085,6 +1105,23 @@ function RecipesView({
     setAssignments(prev => prev.filter(a => a.itemId !== id))
   }
 
+  function toggleWeekFlag(id: string, flag: 'thisWeek' | 'nextWeek') {
+    const item = items.find(i => i.id === id)!
+    const isRemoving = item.weekFlags[flag]
+    if (isRemoving && flag === 'thisWeek') {
+      const hasManual = assignments.some(a => a.itemId === id && !a.autoAdded)
+      if (hasManual && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
+      setAssignments(prev => prev.filter(a => a.itemId !== id))
+    }
+    if (!isRemoving && flag === 'thisWeek') {
+      setAssignments(prev => {
+        const already = prev.some(a => a.itemId === id && a.slot === 'Lunch')
+        return already ? prev : [...prev, { id: uid(), itemId: id, day: 'Mon', slot: 'Lunch', servings: 1, weekOffset: 0, autoAdded: true }]
+      })
+    }
+    setItems(prev => prev.map(i => i.id === id ? { ...i, weekFlags: { ...i.weekFlags, [flag]: !i.weekFlags[flag] } } : i))
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2 items-center">
@@ -1124,12 +1161,11 @@ function RecipesView({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {Array.from(new Set(recipes.map(r => r.category))).sort().map(cat => {
             const count = recipes.filter(r => r.category === cat).length
-            const catEmoji: Record<string, string> = { Breakfasts: '🌅', Salads: '🥗', Soups: '🍜', 'Main courses': '🍽️', Snacks: '🍎', Sandwiches: '🥪', Sauces: '🫙', Desserts: '🍰', Drinks: '🥤' }
             return (
               <button key={cat} onClick={() => { setCatFilter(cat); setBrowseMode('list') }}
                 className="bg-white border border-gray-200 rounded-2xl p-5 text-left hover:shadow-md transition-shadow cursor-pointer">
-                <div className={cn('text-2xl mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
-                  {catEmoji[cat] ?? '📖'}
+                <div className={cn('mb-3 w-10 h-10 rounded-xl flex items-center justify-center', CATEGORY_COLOURS[cat] ?? 'bg-gray-100')}>
+                  {RECIPE_CATEGORY_ICONS[cat] ?? <BookOpen size={20} />}
                 </div>
                 <p className="font-semibold text-gray-900 text-sm">{cat}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{count} recipe{count !== 1 ? 's' : ''}</p>
@@ -1173,6 +1209,8 @@ function RecipesView({
                     <td className="px-4 py-2.5 text-right font-mono text-gray-700">{r.fiber !== undefined ? `${fmtMacro(r.fiber)}g` : '—'}</td>
                     <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
+                        <button onClick={() => toggleWeekFlag(r.id, 'thisWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', r.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>TW</button>
+                        <button onClick={() => toggleWeekFlag(r.id, 'nextWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', r.weekFlags.nextWeek ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>NW</button>
                         <button onClick={() => toggleFav(r.id)} aria-label={r.favorite ? 'Remove favourite' : 'Add favourite'} className="p-1 rounded hover:bg-gray-100 text-gray-300 hover:text-red-500 cursor-pointer"><Heart size={12} fill={r.favorite ? '#ef4444' : 'none'} className={r.favorite ? 'text-red-500' : ''} /></button>
                         {r.isUserAdded && (
                           <>
@@ -1996,7 +2034,7 @@ function DaySlot({
             onChange={e => setSearch(e.target.value)}
             onBlur={() => { if (!search) { setAdding(false) } }}
             placeholder="Search…"
-            className="w-full text-xs border border-teal-400 rounded-lg px-2 py-1 focus:outline-none"
+            className="w-full text-xs border border-teal-400 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal-300"
           />
           {search && matched.length > 0 && (
             <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-20 mt-0.5 max-h-36 overflow-y-auto">
@@ -2140,7 +2178,7 @@ function WeeklySummary({
                             onChange={e => setAddSearch(e.target.value)}
                             onBlur={() => { if (!addSearch) setAddingSlot(null) }}
                             placeholder={`Add item to ${slot}…`}
-                            className="w-full text-xs border border-teal-400 rounded-lg px-3 py-1.5 focus:outline-none"
+                            className="w-full text-xs border border-teal-400 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-teal-300"
                           />
                           {addSearch && matchedItems.length > 0 && (
                             <div className="absolute top-full left-0 z-10 bg-white border border-gray-200 rounded-xl shadow-lg mt-1 w-64 max-h-40 overflow-y-auto">
@@ -2262,6 +2300,8 @@ function CalendarView({
   const [subView, setSubView] = useState<'day' | '4days' | 'week' | 'month'>('week')
   const [monthOffset, setMonthOffset] = useState(0)
   const [selectedDayIdx, setSelectedDayIdx] = useState(0)
+  const [summaryAddSlot, setSummaryAddSlot] = useState<Slot | null>(null)
+  const [summaryAddQuery, setSummaryAddQuery] = useState('')
   const today = new Date()
 
   const ViewToggle = () => (
@@ -2301,14 +2341,57 @@ function CalendarView({
 
   const PlanSummaryBar = () => {
     const totalItems = SLOTS.reduce((s, slot) => s + calPlanSummary[slot].length, 0)
-    if (totalItems === 0) return null
+    const summaryItems = summaryAddQuery.length > 0
+      ? items.filter(i => i.name.toLowerCase().includes(summaryAddQuery.toLowerCase())).slice(0, 8)
+      : []
+    if (totalItems === 0 && summaryAddSlot === null) return null
     return (
       <div className="bg-white rounded-2xl border border-gray-200 p-3">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Plan summary</h3>
         <div className="grid grid-cols-4 gap-2">
           {SLOTS.map(slot => (
             <div key={slot}>
-              <p className={`text-xs font-semibold mb-1.5 ${SLOT_COLOURS[slot].split(' ')[1]}`}>{slot}</p>
+              <div className="flex items-center justify-between mb-1.5">
+                <p className={`text-xs font-semibold ${SLOT_COLOURS[slot].split(' ')[1]}`}>{slot}</p>
+                <button
+                  onClick={() => { setSummaryAddSlot(summaryAddSlot === slot ? null : slot); setSummaryAddQuery('') }}
+                  className="p-0.5 rounded hover:bg-gray-100 text-gray-400 hover:text-teal-600 cursor-pointer"
+                  aria-label={`Add item to ${slot}`}
+                >
+                  <Plus size={12} />
+                </button>
+              </div>
+              {summaryAddSlot === slot && (
+                <div className="mb-1.5 relative">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={summaryAddQuery}
+                    onChange={e => setSummaryAddQuery(e.target.value)}
+                    placeholder="Search…"
+                    className="w-full text-xs border border-teal-300 rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-teal-400"
+                  />
+                  {summaryItems.length > 0 && (
+                    <div className="absolute z-20 top-full left-0 right-0 mt-0.5 bg-white border border-gray-200 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                      {summaryItems.map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            const targetDay = visibleDays[0] as Day
+                            upsertAssignment(item.id, targetDay, slot, 1)
+                            setSummaryAddSlot(null)
+                            setSummaryAddQuery('')
+                          }}
+                          className="w-full text-left px-2 py-1.5 text-xs hover:bg-teal-50 border-b border-gray-50 last:border-0 cursor-pointer"
+                        >
+                          <span className="font-medium text-gray-800">{item.name}</span>
+                          <span className="text-gray-400 ml-1">{item.kcal} kcal</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <div className="space-y-1">
                 {calPlanSummary[slot].length === 0 ? (
                   <p className="text-xs text-gray-300 italic">—</p>
@@ -2614,7 +2697,7 @@ function CalendarWeekCell({
                   <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
                     onBlur={() => { if (!search) setAddingSlot(null) }}
                     placeholder="Search…"
-                    className="w-full text-xs border border-teal-400 rounded-lg px-2 py-0.5 focus:outline-none" />
+                    className="w-full text-xs border border-teal-400 rounded-lg px-2 py-0.5 focus:outline-none focus:ring-1 focus:ring-teal-300" />
                   {search && matched.length > 0 && (
                     <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-20 mt-0.5 max-h-32 overflow-y-auto">
                       {matched.map(i => (
@@ -3382,6 +3465,512 @@ function ProfileView({
   )
 }
 
+// ─── advanced search view ────────────────────────────────────────────────────
+
+function SearchView({ items, setItems, assignments, setAssignments }: {
+  items: Item[]
+  setItems: React.Dispatch<React.SetStateAction<Item[]>>
+  assignments: Assignment[]
+  setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>
+}) {
+  const [query, setQuery] = useState('')
+  const [dietFilter, setDietFilter] = useState('')
+  const [kcalMin, setKcalMin] = useState('')
+  const [kcalMax, setKcalMax] = useState('')
+  const [proteinMin, setProteinMin] = useState('')
+  const [proteinMax, setProteinMax] = useState('')
+  const [fatMin, setFatMin] = useState('')
+  const [fatMax, setFatMax] = useState('')
+  const [carbsMin, setCarbsMin] = useState('')
+  const [carbsMax, setCarbsMax] = useState('')
+  const [catFilter, setCatFilter] = useState<string[]>([])
+  const [ingredient, setIngredient] = useState('')
+  const [activeTab, setActiveTab] = useState<'products' | 'recipes'>('products')
+  const [detailProduct, setDetailProduct] = useState<Item | null>(null)
+  const [detailRecipe, setDetailRecipe] = useState<Item | null>(null)
+  const [pSortBy, setPSortBy] = useState('name')
+  const [pSortDir, setPSortDir] = useState<'asc' | 'desc'>('asc')
+  const [rSortBy, setRSortBy] = useState('name')
+  const [rSortDir, setRSortDir] = useState<'asc' | 'desc'>('asc')
+
+  const products = items.filter(i => i.kind === 'product')
+  const recipes  = items.filter(i => i.kind === 'recipe')
+
+  const productCategories = Array.from(new Set(products.map(p => p.category))).sort()
+  const recipeCategories  = Array.from(new Set(recipes.map(r => r.category))).sort()
+
+  const hasFilters = !!(query || dietFilter || kcalMin || kcalMax || proteinMin || proteinMax
+    || fatMin || fatMax || carbsMin || carbsMax || catFilter.length || ingredient)
+
+  function sortItems(arr: Item[], by: string, dir: 'asc' | 'desc') {
+    return [...arr].sort((a, b) => {
+      const va = (a as unknown as Record<string, unknown>)[by] ?? ''
+      const vb = (b as unknown as Record<string, unknown>)[by] ?? ''
+      const cmp = typeof va === 'number' && typeof vb === 'number' ? va - vb : String(va).localeCompare(String(vb))
+      return dir === 'asc' ? cmp : -cmp
+    })
+  }
+
+  function toggleWeekFlag(id: string, flag: 'thisWeek' | 'nextWeek') {
+    const item = items.find(i => i.id === id)!
+    const isRemoving = item.weekFlags[flag]
+    if (isRemoving && flag === 'thisWeek') {
+      const hasManual = assignments.some(a => a.itemId === id && !a.autoAdded)
+      if (hasManual && !confirm(`"${item.name}" has planner assignments. Remove them?`)) return
+      setAssignments(prev => prev.filter(a => a.itemId !== id))
+    }
+    if (!isRemoving && flag === 'thisWeek') {
+      setAssignments(prev => {
+        const already = prev.some(a => a.itemId === id && a.slot === 'Lunch')
+        return already ? prev : [...prev, { id: uid(), itemId: id, day: 'Mon', slot: 'Lunch', servings: 1, weekOffset: 0, autoAdded: true }]
+      })
+    }
+    setItems(prev => prev.map(i => i.id === id ? { ...i, weekFlags: { ...i.weekFlags, [flag]: !i.weekFlags[flag] } } : i))
+  }
+
+  const productResults = useMemo(() => {
+    const filtered = products.filter(item => {
+      if (query && !item.name.toLowerCase().includes(query.toLowerCase())) return false
+      if (dietFilter && !item.dietTags.includes(dietFilter)) return false
+      if (kcalMin && item.kcal < Number(kcalMin)) return false
+      if (kcalMax && item.kcal > Number(kcalMax)) return false
+      if (proteinMin && item.protein < Number(proteinMin)) return false
+      if (proteinMax && item.protein > Number(proteinMax)) return false
+      if (fatMin && item.fat < Number(fatMin)) return false
+      if (fatMax && item.fat > Number(fatMax)) return false
+      if (carbsMin && item.carbs < Number(carbsMin)) return false
+      if (carbsMax && item.carbs > Number(carbsMax)) return false
+      if (catFilter.length > 0 && !catFilter.includes(item.category)) return false
+      return true
+    })
+    return sortItems(filtered, pSortBy, pSortDir)
+  }, [products, query, dietFilter, kcalMin, kcalMax, proteinMin, proteinMax, fatMin, fatMax, carbsMin, carbsMax, catFilter, pSortBy, pSortDir])
+
+  const recipeResults = useMemo(() => {
+    const filtered = recipes.filter(item => {
+      if (query && !item.name.toLowerCase().includes(query.toLowerCase())) return false
+      if (dietFilter && !item.dietTags.includes(dietFilter)) return false
+      if (kcalMin && item.kcal < Number(kcalMin)) return false
+      if (kcalMax && item.kcal > Number(kcalMax)) return false
+      if (proteinMin && item.protein < Number(proteinMin)) return false
+      if (proteinMax && item.protein > Number(proteinMax)) return false
+      if (fatMin && item.fat < Number(fatMin)) return false
+      if (fatMax && item.fat > Number(fatMax)) return false
+      if (carbsMin && item.carbs < Number(carbsMin)) return false
+      if (carbsMax && item.carbs > Number(carbsMax)) return false
+      if (catFilter.length > 0 && !catFilter.includes(item.category)) return false
+      if (ingredient && !item.ingredients?.some(ing => ing.productName.toLowerCase().includes(ingredient.toLowerCase()))) return false
+      return true
+    })
+    return sortItems(filtered, rSortBy, rSortDir)
+  }, [recipes, query, dietFilter, kcalMin, kcalMax, proteinMin, proteinMax, fatMin, fatMax, carbsMin, carbsMax, catFilter, ingredient, rSortBy, rSortDir])
+
+  const activeChips = [
+    ...(query         ? [{ key: 'q',    label: `"${query}"`,                           clear: () => setQuery('') }] : []),
+    ...(dietFilter    ? [{ key: 'diet', label: `Diet: ${DIET_LABELS[dietFilter] ?? dietFilter}`, clear: () => setDietFilter('') }] : []),
+    ...(kcalMin || kcalMax     ? [{ key: 'kcal',    label: `kcal ${kcalMin || '0'}–${kcalMax || '∞'}`,       clear: () => { setKcalMin(''); setKcalMax('') } }] : []),
+    ...(proteinMin || proteinMax ? [{ key: 'protein', label: `Protein ${proteinMin || '0'}–${proteinMax || '∞'} g`, clear: () => { setProteinMin(''); setProteinMax('') } }] : []),
+    ...(fatMin || fatMax         ? [{ key: 'fat',     label: `Fat ${fatMin || '0'}–${fatMax || '∞'} g`,           clear: () => { setFatMin(''); setFatMax('') } }] : []),
+    ...(carbsMin || carbsMax     ? [{ key: 'carbs',   label: `Carbs ${carbsMin || '0'}–${carbsMax || '∞'} g`,     clear: () => { setCarbsMin(''); setCarbsMax('') } }] : []),
+    ...catFilter.map(cat => ({ key: `cat-${cat}`, label: cat, clear: () => setCatFilter(prev => prev.filter(c => c !== cat)) })),
+    ...(ingredient ? [{ key: 'ing', label: `Contains: ${ingredient}`, clear: () => setIngredient('') }] : []),
+  ]
+
+  function clearAll() {
+    setQuery(''); setDietFilter('')
+    setKcalMin(''); setKcalMax('')
+    setProteinMin(''); setProteinMax('')
+    setFatMin(''); setFatMax('')
+    setCarbsMin(''); setCarbsMax('')
+    setCatFilter([]); setIngredient('')
+  }
+
+  const numCls = 'w-full text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200'
+
+  const macroRows = [
+    { label: 'Protein (g / serving)', min: proteinMin, setMin: setProteinMin, max: proteinMax, setMax: setProteinMax },
+    { label: 'Fat (g / serving)',     min: fatMin,     setMin: setFatMin,     max: fatMax,     setMax: setFatMax },
+    { label: 'Carbs (g / serving)',   min: carbsMin,   setMin: setCarbsMin,   max: carbsMax,   setMax: setCarbsMax },
+  ]
+
+  return (
+    <div className="flex -m-6" style={{ minHeight: 'calc(100vh - 64px)' }}>
+
+      {/* ── Filter panel ─────────────────────────────────────────────────── */}
+      <aside className="w-64 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col overflow-y-auto">
+
+        {/* Header */}
+        <div className="px-4 pt-5 pb-4 border-b border-gray-100 space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-800">Filters</h2>
+            {hasFilters && (
+              <button onClick={clearAll} className="text-xs text-teal-600 hover:text-teal-800 cursor-pointer transition-colors">
+                Clear all
+              </button>
+            )}
+          </div>
+          <div className="relative">
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input
+              type="search"
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Search by name…"
+              aria-label="Search products and recipes by name"
+              className="w-full text-sm border border-gray-200 rounded-xl pl-8 pr-3 py-2 bg-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200"
+            />
+          </div>
+        </div>
+
+        {/* Filter body */}
+        <div className="px-4 py-4 space-y-5 flex-1 overflow-y-auto">
+
+          {/* Diet */}
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Diet</label>
+            <select
+              value={dietFilter}
+              onChange={e => setDietFilter(e.target.value)}
+              aria-label="Filter by diet"
+              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-teal-500 cursor-pointer"
+            >
+              <option value="">Any diet</option>
+              {Object.entries(DIET_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+            </select>
+          </div>
+
+          {/* Calorie range */}
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Calories (kcal / serving)</label>
+            <div className="flex items-center gap-2">
+              <input type="number" min="0" value={kcalMin} onChange={e => setKcalMin(e.target.value)} placeholder="From" aria-label="Minimum calories" className={numCls} />
+              <span className="text-xs text-gray-400 flex-shrink-0">–</span>
+              <input type="number" min="0" value={kcalMax} onChange={e => setKcalMax(e.target.value)} placeholder="To"   aria-label="Maximum calories" className={numCls} />
+            </div>
+          </div>
+
+          {/* Macro ranges */}
+          {macroRows.map(({ label, min, setMin, max, setMax }) => (
+            <div key={label}>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">{label}</label>
+              <div className="flex items-center gap-2">
+                <input type="number" min="0" value={min} onChange={e => setMin(e.target.value)} placeholder="From" aria-label={`Minimum ${label}`} className={numCls} />
+                <span className="text-xs text-gray-400 flex-shrink-0">–</span>
+                <input type="number" min="0" value={max} onChange={e => setMax(e.target.value)} placeholder="To"   aria-label={`Maximum ${label}`} className={numCls} />
+              </div>
+            </div>
+          ))}
+
+          {/* Category */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Category</label>
+              {catFilter.length > 0 && (
+                <button onClick={() => setCatFilter([])} className="text-xs text-teal-600 hover:text-teal-800 cursor-pointer">Clear</button>
+              )}
+            </div>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-gray-400 mb-1.5 font-medium">Products</p>
+                <div className="space-y-1.5">
+                  {productCategories.map(cat => (
+                    <label key={cat} className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={catFilter.includes(cat)}
+                        onChange={() => setCatFilter(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])}
+                        className="rounded border-gray-300 text-teal-600 cursor-pointer focus:ring-teal-500"
+                      />
+                      <span className="text-xs text-gray-700 group-hover:text-gray-900 transition-colors">{cat}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 mb-1.5 font-medium">Recipes</p>
+                <div className="space-y-1.5">
+                  {recipeCategories.map(cat => (
+                    <label key={cat} className="flex items-center gap-2 cursor-pointer group">
+                      <input
+                        type="checkbox"
+                        checked={catFilter.includes(cat)}
+                        onChange={() => setCatFilter(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])}
+                        className="rounded border-gray-300 text-teal-600 cursor-pointer focus:ring-teal-500"
+                      />
+                      <span className="text-xs text-gray-700 group-hover:text-gray-900 transition-colors">{cat}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Ingredient include (recipes only) */}
+          <div>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1 block">Contains ingredient</label>
+            <p className="text-xs text-gray-400 mb-2">Applies to the Recipes tab only</p>
+            <input
+              type="text"
+              value={ingredient}
+              onChange={e => setIngredient(e.target.value)}
+              placeholder="e.g. chicken"
+              aria-label="Filter recipes by ingredient"
+              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-200"
+            />
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Results area ─────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 p-6">
+
+        {/* Active filter chips */}
+        {activeChips.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4" role="list" aria-label="Active filters">
+            {activeChips.map(chip => (
+              <span
+                key={chip.key}
+                role="listitem"
+                className="inline-flex items-center gap-1 text-xs bg-teal-50 text-teal-700 border border-teal-200 rounded-full px-2.5 py-1 font-medium"
+              >
+                {chip.label}
+                <button
+                  onClick={chip.clear}
+                  aria-label={`Remove filter: ${chip.label}`}
+                  className="ml-0.5 text-teal-500 hover:text-teal-800 cursor-pointer rounded-full"
+                >
+                  <X size={11} />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Tab bar */}
+        <div className="flex items-center gap-0 border-b border-gray-200 mb-4" role="tablist">
+          {(['products', 'recipes'] as const).map(tab => (
+            <button
+              key={tab}
+              role="tab"
+              aria-selected={activeTab === tab}
+              onClick={() => setActiveTab(tab)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors cursor-pointer',
+                activeTab === tab
+                  ? 'border-teal-600 text-teal-700'
+                  : 'border-transparent text-gray-500 hover:text-gray-700',
+              )}
+            >
+              {tab === 'products' ? 'Products' : 'Recipes'}
+              <span className={cn(
+                'text-xs font-semibold px-1.5 py-0.5 rounded-full',
+                activeTab === tab ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-500',
+              )}>
+                {tab === 'products' ? productResults.length : recipeResults.length}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {/* Initial empty state */}
+        {!hasFilters && (
+          <EmptyState
+            icon={<SlidersHorizontal size={32} />}
+            message="Enter a search term or apply a filter to find products and recipes across the full catalogue."
+          />
+        )}
+
+        {/* Products tab */}
+        {hasFilters && activeTab === 'products' && (
+          productResults.length === 0 ? (
+            <EmptyState icon={<Apple size={32} />} message="No products match your filters." />
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm" role="grid">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50">
+                      {([['Name','name'],['Category','category'],['kcal','kcal'],['Protein','protein'],['Fat','fat'],['Carbs','carbs'],['Fiber','fiber'],['Serving',''],['Week','']] as [string,string][]).map(([h, key]) => (
+                        <th key={h} onClick={() => { if (!key) return; if (pSortBy === key) setPSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setPSortBy(key); setPSortDir('asc') } }}
+                          className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide select-none', ['kcal','Protein','Fat','Carbs','Fiber'].includes(h) ? 'text-right' : 'text-left', key ? 'cursor-pointer hover:text-gray-700' : '')}>
+                          {h}{key && pSortBy === key ? (pSortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {productResults.map((p, idx) => (
+                      <tr
+                        key={p.id}
+                        onClick={() => setDetailProduct(p)}
+                        className={cn('border-b border-gray-50 hover:bg-teal-50/30 cursor-pointer transition-colors', idx % 2 !== 0 && 'bg-gray-50/30')}
+                      >
+                        <td className="px-4 py-2.5 font-medium text-gray-900">{p.name}</td>
+                        <td className="px-4 py-2.5">
+                          <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', CATEGORY_COLOURS[p.category] ?? 'bg-gray-100 text-gray-600')}>{p.category}</span>
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{p.kcal}</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(p.protein)}g</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(p.fat)}g</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(p.carbs)}g</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{p.fiber !== undefined ? `${fmtMacro(p.fiber)}g` : '—'}</td>
+                        <td className="px-4 py-2.5 text-xs text-gray-400">{p.servingLabel ?? `${p.servingAmount ?? 100} ${p.unit ?? 'g'}`}</td>
+                        <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => toggleWeekFlag(p.id, 'thisWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', p.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>TW</button>
+                            <button onClick={() => toggleWeekFlag(p.id, 'nextWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', p.weekFlags.nextWeek ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>NW</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        )}
+
+        {/* Recipes tab */}
+        {hasFilters && activeTab === 'recipes' && (
+          recipeResults.length === 0 ? (
+            <EmptyState icon={<UtensilsCrossed size={32} />} message="No recipes match your filters." />
+          ) : (
+            <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm" role="grid">
+                  <thead>
+                    <tr className="border-b border-gray-100 bg-gray-50">
+                      {([['Name','name'],['Category','category'],['Servings','servings'],['kcal','kcal'],['Protein','protein'],['Fat','fat'],['Carbs','carbs'],['Fiber','fiber'],['Week','']] as [string,string][]).map(([h, key]) => (
+                        <th key={h} onClick={() => { if (!key) return; if (rSortBy === key) setRSortDir(d => d === 'asc' ? 'desc' : 'asc'); else { setRSortBy(key); setRSortDir('asc') } }}
+                          className={cn('px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide select-none', ['kcal','Protein','Fat','Carbs','Servings','Fiber'].includes(h) ? 'text-right' : 'text-left', key ? 'cursor-pointer hover:text-gray-700' : '')}>
+                          {h}{key && rSortBy === key ? (rSortDir === 'asc' ? ' ↑' : ' ↓') : ''}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recipeResults.map((r, idx) => (
+                      <tr
+                        key={r.id}
+                        onClick={() => setDetailRecipe(r)}
+                        className={cn('border-b border-gray-50 hover:bg-teal-50/30 cursor-pointer transition-colors', idx % 2 !== 0 && 'bg-gray-50/30')}
+                      >
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-gray-900">{r.name}</span>
+                            {r.favorite && <Heart size={11} fill="#ef4444" className="text-red-500 flex-shrink-0" />}
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', CATEGORY_COLOURS[r.category] ?? 'bg-gray-100 text-gray-600')}>{r.category}</span>
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{r.servings}</td>
+                        <td className="px-4 py-2.5 text-right">
+                          <span className="font-mono text-gray-700">{r.kcal}</span>
+                          {r.servingG && <div className="text-xs text-gray-400 font-mono">{Math.round(r.kcal * 100 / r.servingG)}/100g</div>}
+                        </td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.protein)}g</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.fat)}g</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{fmtMacro(r.carbs)}g</td>
+                        <td className="px-4 py-2.5 text-right font-mono text-gray-700">{r.fiber !== undefined ? `${fmtMacro(r.fiber)}g` : '—'}</td>
+                        <td className="px-4 py-2.5" onClick={e => e.stopPropagation()}>
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => toggleWeekFlag(r.id, 'thisWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', r.weekFlags.thisWeek ? 'bg-teal-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>TW</button>
+                            <button onClick={() => toggleWeekFlag(r.id, 'nextWeek')} className={cn('text-xs px-1.5 py-0.5 rounded font-medium cursor-pointer', r.weekFlags.nextWeek ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200')}>NW</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+
+      {/* Product detail modal */}
+      {detailProduct && <ProductDetailModal product={detailProduct} onClose={() => setDetailProduct(null)} />}
+
+      {/* Recipe detail modal */}
+      {detailRecipe && (() => {
+        const d = detailRecipe
+        const protKcal = d.protein * 4; const fatKcal = d.fat * 9; const carbKcal = d.carbs * 4
+        const totalMK = protKcal + fatKcal + carbKcal || 1
+        const pPct = Math.round((protKcal / totalMK) * 100)
+        const fPct = Math.round((fatKcal / totalMK) * 100)
+        const cPct = 100 - pPct - fPct
+        const pieGradient = `conic-gradient(#3b82f6 0% ${pPct}%, #ef4444 ${pPct}% ${pPct + fPct}%, #22c55e ${pPct + fPct}% 100%)`
+        const dServings = d.servings ?? 1
+        let perServingG: number | null = d.servingG ?? null
+        let isEst = false
+        if (!perServingG && d.ingredients?.length) {
+          const totalG = d.ingredients.reduce<number>((sum, ing) => {
+            if (!isFinite(sum)) return NaN
+            const prod = items.find(i => i.id === ing.productId)
+            if (!prod) return NaN
+            if (ing.unit === 'g' || ing.unit === 'ml') return sum + ing.amount
+            const altU = prod.altUnits?.find(a => a.unit === ing.unit)
+            if (altU) return sum + ing.amount * altU.gramsPerUnit
+            if (prod.servingG != null && prod.servingAmount) return sum + ing.amount * (prod.servingG / prod.servingAmount)
+            return NaN
+          }, 0)
+          if (isFinite(totalG) && totalG > 0) { perServingG = totalG / dServings; isEst = true }
+        }
+        const f100 = perServingG ? 100 / perServingG : null
+        return (
+          <Modal title={d.name} onClose={() => setDetailRecipe(null)} wide>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={cn('text-sm px-3 py-1 rounded-full font-medium', CATEGORY_COLOURS[d.category] ?? 'bg-gray-100 text-gray-600')}>{d.category}</span>
+                <span className="text-sm text-gray-400">{dServings} serving{dServings !== 1 ? 's' : ''}</span>
+                {d.prepTime && <span className="text-sm text-gray-400">· {d.prepTime}</span>}
+              </div>
+              <div className="flex items-center gap-5">
+                <div style={{ width: 80, height: 80, borderRadius: '50%', background: pieGradient, flexShrink: 0 }} />
+                <div className="space-y-1 text-sm">
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /><span className="text-gray-600">Protein: {fmtMacro(d.protein)} g ({pPct}%)</span></div>
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-red-500 inline-block" /><span className="text-gray-600">Fat: {fmtMacro(d.fat)} g ({fPct}%)</span></div>
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-green-500 inline-block" /><span className="text-gray-600">Carbs: {fmtMacro(d.carbs)} g ({cPct}%)</span></div>
+                  {d.fiber !== undefined && <div className="text-xs text-gray-400">Fiber: {fmtMacro(d.fiber)} g</div>}
+                  <div className="font-semibold text-gray-900">
+                    {d.kcal} kcal / serving
+                    {f100 !== null && <span className="ml-2 text-xs font-normal text-gray-400">· {Math.round(d.kcal * f100)} kcal / 100 g{isEst ? ' (est.)' : ''}</span>}
+                  </div>
+                </div>
+              </div>
+              {d.ingredients && d.ingredients.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Ingredients</h3>
+                  <ul className="space-y-1">
+                    {d.ingredients.map(ing => (
+                      <li key={ing.productId} className="flex items-center justify-between text-sm py-1.5 border-b border-gray-50">
+                        <span className="text-gray-700">{ing.productName}</span>
+                        <span className="text-gray-400 font-mono text-xs">{ing.amount} {ing.unit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {d.instructions && (
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Instructions</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{d.instructions}</p>
+                </div>
+              )}
+              {d.dietTags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {d.dietTags.map(t => <span key={t} className="text-xs bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium">{DIET_LABELS[t] ?? t}</span>)}
+                </div>
+              )}
+            </div>
+          </Modal>
+        )
+      })()}
+    </div>
+  )
+}
+
 // ─── root app ─────────────────────────────────────────────────────────────────
 
 const DEFAULT_PROFILE: Profile = {
@@ -3458,6 +4047,7 @@ export default function App() {
           {activeView === 'profile' && (
             <ProfileView profile={profile} setProfile={setProfile} diets={SEED_DIETS} logEntries={logEntries} setLogEntries={setLogEntries} items={items} />
           )}
+          {activeView === 'search' && <SearchView items={items} setItems={setItems} assignments={assignments} setAssignments={setAssignments} />}
         </main>
       </div>
     </div>

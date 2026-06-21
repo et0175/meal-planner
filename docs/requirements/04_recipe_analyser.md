@@ -47,7 +47,7 @@
 
 - The recipe list opens in **category cards view by default**. Category cards view shows one card per recipe category; clicking a category card navigates to the recipes in that category with the category filter pre-set.
 - The recipe list supports toggling between **list view** and **category cards view**. A dedicated cards view showing individual recipe cards is **not available**.
-- In list view, recipes are shown in a table with columns: name, category, servings, kcal/serving, protein, fat, carbs, **fiber**.
+- In list view, recipes are shown in a table with columns: name, category, servings, kcal/serving, protein, fat, carbs, **fiber**. Each row includes **"This week" (TW) and "Next week" (NW)** toggle buttons, following the same rules as recipe cards.
 - The recipe list may follow the layout shown in [recipe list reference](images/recipe_analyser/01_recipe_list.png) (see also [product analyser images](images/products-analyser/) for related patterns).
 - On the recipe card, the nutrition summary is displayed as a **pie chart** with slices proportional to the caloric contribution of protein, fat, and carbs (matching the product card layout).
 - The recipe card shows a **units conversion reference**: for the recipe's weight unit per serving (g) and for servings, listing the equivalent gram weight and scaled nutrition values.

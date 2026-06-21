@@ -105,7 +105,7 @@ Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 **Acceptance criteria**
 
 - [ ] User can toggle “This week” and “Next week” flags on a recipe independently.
-- [ ] Both flags are visible on recipe cards.
+- [ ] Both flags are visible on recipe cards and in the recipe list view (as compact TW/NW toggle buttons per row).
 - [ ] Marking “This week” adds the recipe to the Meal planner Weekly summary (Lunch slot by default, same as products).
 - [ ] Removing “This week” when the recipe has no calendar assignments removes it from the Week summary automatically.
 - [ ] Removing “This week” when the recipe already has calendar assignments shows a confirmation prompt before any assignments are removed.

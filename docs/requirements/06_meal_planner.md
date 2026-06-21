@@ -43,6 +43,7 @@ The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** 
 - A collapsible **plan summary panel** is shown at the top of the Calendar tab (above the sub-view grid), similar in structure to the plan summary in the Shopping list.
 - The panel lists all items planned within the visible date range, organised as a **gallery grouped by meal slots** (Breakfast, Lunch, Dinner, Snacks). Each slot group shows item cards with item name, total servings, and kcal contribution.
 - **Drag from summary:** the user can drag an item from the summary panel onto any day cell to create an assignment for that day. The item remains in the summary after the drag (it is still planned; only a new day assignment is added).
+- **Add to summary:** each meal slot column in the plan summary panel has an **add (+)** button. Clicking it opens an inline search input; typing filters all items by name; selecting an item adds it as an assignment on the first visible day in that slot.
 - **Drag between days:** items are draggable between day cells; dropping an item from one day cell onto another moves the assignment (the item disappears from the source day and appears on the target day in the same meal slot).
 
 ##### Day sub-view

@@ -1,6 +1,8 @@
 # Open Questions — Meal Forge MVP
 
-All questions resolved as of 2026-06-17. Decisions are recorded here and written into the affected requirement and user story files.
+OQ-001 – OQ-008 resolved as of 2026-06-17. Decisions are recorded here and written into the affected requirement and user story files.
+
+OQ-009 and OQ-010 are open (Advanced Search module, added 2026-06-17).
 
 ---
 
@@ -99,3 +101,25 @@ The requirement said "metric or other" without defining what "other" means.
 OQ-006 (2026-06-17) intentionally decoupled the Meal planner and Meal tracking, deferring a "log from plan" shortcut to post-MVP. A subsequent product review (2026-06-17) requested adding "a possibility to log a day and a week from the planner" with the ability to edit log entries afterwards in the personal page.
 
 **Decision:** ✅ Log from plan is now included in MVP. A user can trigger "Log this day" or "Log this week" from the Meal planner, which creates Meal tracking entries pre-filled from the planned items and quantities. Created entries are editable in the Meal tracking section of the Personal cabinet. Tracking and planning data stores remain independent — the log action copies data; it does not link the two stores. This overrides the post-MVP deferral in OQ-006.
+
+---
+
+## OQ-009 — Should the ingredient filter support multiple ingredients simultaneously?
+
+**Affects:** `10_advanced_search.md`, future US-AS-NNN
+
+**Context:**
+The Advanced Search ingredient filter (recipe tab) currently specifies one ingredient at a time (MVP1 scope). A user who wants to find recipes containing both chicken and spinach must run two separate searches and compare manually. Supporting multiple include constraints would require an AND/OR logic choice and a more complex UI (tag-style input).
+
+**Decision:** 🔴 Open — not yet decided.
+
+---
+
+## OQ-010 — Should calorie and macro range filters apply per 100 g as well as per serving?
+
+**Affects:** `10_advanced_search.md`, future US-AS-NNN
+
+**Context:**
+The Advanced Search calorie and macro range filters are currently defined as per-serving values (consistent with how products and recipes display nutrition throughout the app). However, per-100g is the standard basis for comparing energy density across different foods. A user wanting to find high-protein-density foods (e.g. > 20 g protein per 100 g) cannot do so with per-serving filters alone, since serving sizes vary widely.
+
+**Decision:** 🔴 Open — not yet decided.

@@ -29,7 +29,7 @@
 ---
 
 ### TC-RCP-002: Recipe list view shows all 12 recipes with macro summary
-**AC:** US-RA-002 — list is scannable without opening each item  
+**AC:** US-RA-001 / US-RA-002 — recipe database shows nutrition; list is scannable without opening each item  
 **Priority:** High
 
 **Preconditions:** Recipes view in list view (switched from default category cards)
@@ -153,7 +153,7 @@
 ---
 
 ### TC-RCP-009: Open recipe detail card — pie chart, units conversion, instructions, prep time
-**AC:** US-RA-011 — card shows image, ingredients, nutrition pie chart, units conversion, servings, kcal/serving, prep time, and instructions  
+**AC:** US-RA-001 / US-RA-011 — detail shows ingredients mapped to products and nutrition breakdown; card shows image, ingredients, nutrition pie chart, units conversion, servings, kcal/serving, prep time, and instructions  
 **Priority:** High
 
 **Steps:**
@@ -440,5 +440,25 @@ ingredients: (none)
 
 **Expected result:**
 - Recipe card now shows the updated nutrition values matching what was shown in the live preview.
+
+**Status:** ✅
+
+---
+
+### TC-RCP-023: Mark recipe "This week" from list view
+**AC:** US-RA-008 — TW/NW buttons visible and functional in recipe list view rows  
+**Priority:** High
+
+**Preconditions:** Recipes view switched to **list view**; **Lentil tomato soup** (r-006) has `thisWeek: false`
+
+**Steps:**
+1. Switch to list view.
+2. Locate Lentil tomato soup; click its **TW** button.
+3. Navigate to **Planner > Week summary**.
+
+**Expected result:**
+- TW button in the Lentil tomato soup row becomes highlighted (active, teal)
+- Lentil tomato soup appears in the **Lunch** slot of the weekly summary
+- Navigating back confirms TW remains active
 
 **Status:** ✅

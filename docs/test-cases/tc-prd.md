@@ -652,3 +652,23 @@ servingAmount: "abc", kcal: "lots", protein: "much", fat: "fat", carbs: "many"
 - Toggling the filter off restores the full product list
 
 **Status:** ✅
+
+---
+
+### TC-PRD-034: Mark product "This week" from list view
+**AC:** US-PA-007 — TW/NW buttons visible and functional in list view rows  
+**Priority:** High
+
+**Preconditions:** Products view switched to **list view**; **Atlantic salmon** (p-005) has `thisWeek: false`
+
+**Steps:**
+1. Switch to list view.
+2. Locate Atlantic salmon; click its **TW** button.
+3. Navigate to **Planner > Week summary**.
+
+**Expected result:**
+- TW button in the Atlantic salmon row becomes highlighted (active, teal)
+- Atlantic salmon appears in the **Lunch** slot of the weekly summary
+- Navigating back confirms TW remains active
+
+**Status:** ✅

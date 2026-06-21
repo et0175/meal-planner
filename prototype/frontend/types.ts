@@ -1,4 +1,4 @@
-export type View = 'planner' | 'products' | 'analyser' | 'recipes' | 'diets' | 'shopping' | 'profile'
+export type View = 'planner' | 'products' | 'analyser' | 'recipes' | 'diets' | 'shopping' | 'profile' | 'search'
 export type Day = 'Mon' | 'Tue' | 'Wed' | 'Thu' | 'Fri' | 'Sat' | 'Sun'
 export type Slot = 'Breakfast' | 'Lunch' | 'Dinner' | 'Snacks'
 export type ItemKind = 'product' | 'recipe'

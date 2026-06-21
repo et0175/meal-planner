@@ -20,6 +20,7 @@ This folder contains the business requirements for Meal Forge. Each file covers 
 | 07 | [`07_shopping_list.md`](07_shopping_list.md) | Shopping list | Grocery list generation from plan, category grouping, PDF export |
 | 08 | [`08_authentication.md`](08_authentication.md) | Authentication | Sign-in, registration, password reset, session management, roles |
 | 09 | [`09_non-functional.md`](09_non-functional.md) | Non-functional | Performance targets, accessibility (WCAG 2.1 AA), data limits, browser support |
+| 10 | [`10_advanced_search.md`](10_advanced_search.md) | Advanced search | Unified cross-module search with diet, calorie, macro, category, and ingredient filters |
 
 ---
 
@@ -28,7 +29,7 @@ This folder contains the business requirements for Meal Forge. Each file covers 
 | File | Purpose |
 |------|---------|
 | [`actors.yml`](actors.yml) | Canonical actor definitions — **User** (ACT-001), **Nutritionist** (ACT-002), **System** (ACT-003). Use only these names in requirements and stories. |
-| [`open-questions.md`](open-questions.md) | Decision log for resolved ambiguities. Current highest: **OQ-008**. All questions resolved as of 2026-06-17. |
+| [`open-questions.md`](open-questions.md) | Decision log. Current highest: **OQ-010**. OQ-001–OQ-008 resolved; OQ-009 and OQ-010 open (Advanced Search). |
 | [`TODO_later.md`](TODO_later.md) | Features explicitly deferred to post-MVP1 (localisation, mobile app, restaurant mode, etc.). |
 | [`images/`](images/) | Diagrams and mockups referenced from requirement files. |
 
@@ -43,9 +44,9 @@ Quick reference for the most common cases:
 ### Adding a new requirement
 
 1. Edit the relevant `NN_<module>.md` file.
-2. If the change resolves an open question, record the decision in `open-questions.md` first (next ID: **OQ-009**) and add a `> **Decision (OQ-NNN):**` callout in the requirement.
+2. If the change resolves an open question, record the decision in `open-questions.md` first (next ID: **OQ-011**) and add a `> **Decision (OQ-NNN):**` callout in the requirement.
 3. Write or update user stories in `../user-stories/<module>.md` (new story ID: next `US-<MODULE>-NNN`).
-4. Write a test case in `../test-cases/test-cases-detailed.md` (new ID: next `TC-<MODULE>-NNN`); set `**Status:** 🚫` until implemented.
+4. Write a test case in `../test-cases/tc-<module>.md` (new ID: next `TC-<MODULE>-NNN`); set `**Status:** 🚫` until implemented. Update the counts in `../test-cases/README.md`.
 5. If the prototype must change: update `prototype/frontend/app/page.tsx`, `types.ts`, and/or `data/seed.ts`; then flip the test case status to `✅`.
 
 ### Changing an existing requirement
@@ -81,7 +82,7 @@ Always use names from `actors.yml` exactly: **User**, **Nutritionist**, **System
 
 ### Open question IDs
 
-`OQ-NNN` — sequential, never reused. Next available: **OQ-009**.
+`OQ-NNN` — sequential, never reused. Next available: **OQ-011**.
 
 ---
 
@@ -102,7 +103,7 @@ docs/
 │   └── <module>.md         ← one file per module
 ├── test-cases/
 │   ├── README.md           ← TC counts per module
-│   ├── test-cases-detailed.md  ← authoritative TC source
+│   ├── tc-<module>.md          ← authoritative TC source (one per module)
 │   └── tc-<module>.md      ← per-module TC files
 └── process-requirements-update.md   ← full update procedure
 ```

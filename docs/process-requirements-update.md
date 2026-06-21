@@ -10,7 +10,7 @@
 |---|-------|----------|----------------------|
 | 1 | Business requirements | `docs/requirements/` | `NN_<module>.md` + `actors.yml` |
 | 2 | User stories | `docs/user-stories/` | one `<module>.md` per module |
-| 3 | Test cases | `docs/test-cases/` | `test-cases-detailed.md` (**single source of truth**) |
+| 3 | Test cases | `docs/test-cases/` | `tc-<module>.md` per-module files (**single source of truth**); `README.md` for counts |
 | 4 | Prototype | `prototype/frontend/` | `app/page.tsx`, `types.ts`, `data/seed.ts` |
 
 Supporting files (not layers, but must stay in sync):
@@ -40,6 +40,7 @@ Getting names wrong across files is the most common source of drift. Follow thes
 | Meal planner | `meal-planner.md` | `US-MP-NNN` |
 | Shopping list | `shopping-list.md` | `US-SL-NNN` |
 | Authentication | `authentication.md` | `US-AUTH-NNN` |
+| Advanced search | `advanced-search.md` | `US-AS-NNN` |
 
 ### Module abbreviations — test cases
 
@@ -57,6 +58,7 @@ Getting names wrong across files is the most common source of drift. Follow thes
 | Personal cabinet / profile | TC-PRF | `TC-PRF-NNN` |
 | Meal tracking | TC-MLT | `TC-MLT-NNN` |
 | Authentication | TC-AUTH | `TC-AUTH-NNN` |
+| Advanced search | TC-AS | `TC-AS-NNN` |
 
 > **Note:** The Products database story prefix (`US-PA`) differs from the test case prefix (`TC-PRD`). This is intentional — `PA` is the original abbreviation from the user stories and has not been renamed to avoid breaking links. Do not "fix" this.
 
@@ -66,7 +68,7 @@ Always use the names from `actors.yml`. Currently: **User**, **Nutritionist**, *
 
 ### Open question IDs
 
-`OQ-NNN` — sequential, never reused. The current highest ID is `OQ-007`.
+`OQ-NNN` — sequential, never reused. The current highest ID is `OQ-010`. OQ-009 and OQ-010 are open (Advanced Search module). The next available ID is `OQ-011`.
 
 ---
 
@@ -126,7 +128,7 @@ If the change is driven by an open question or unresolved ambiguity, **stop** an
 
 ### Step 3 — Update test cases
 
-1. Open `docs/test-cases/test-cases-detailed.md`.
+1. Open `docs/test-cases/tc-<module>.md` for the affected module.
 2. For each changed user story:
    - **Updated story / changed AC** → update the test case preconditions, steps, or expected result. Update the `**AC:**` reference line if the story ID changed.
    - **New story** → write a new test case block following the existing format. Use the next `TC-<MODULE>-NNN` ID. Include: AC reference, Priority, Preconditions, Steps, Expected result, Status.
@@ -210,7 +212,7 @@ The update is complete when all of the following are true:
 | Duplicate story or test IDs | `grep "US-SL-" docs/user-stories/shopping-list.md` before adding the next one |
 | Broken cross-document links after a rename | `grep -r "OLD-ID" docs/` after every rename |
 | Open question driving a change without a recorded decision | Step 0 must be done before anything else |
-| Updating `prototype-test-cases.md` instead of `test-cases-detailed.md` | `prototype-test-cases.md` is a legacy results log — it is not the authoritative test doc |
+| Updating `test-cases-detailed.md` instead of `tc-<module>.md` | `test-cases-detailed.md` and `prototype-test-cases.md` are legacy files — the authoritative TCs live in `tc-<module>.md` per-module files |
 
 ---
 

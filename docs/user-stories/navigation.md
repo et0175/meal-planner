@@ -13,9 +13,10 @@ Requirements: Navigation structure is implied by all module requirements — no 
 **Acceptance criteria**
 
 - [ ] Sidebar is visible on all authenticated screens.
-- [ ] Sidebar contains exactly 7 items in order: Planner, All Products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet.
+- [ ] Sidebar contains exactly 8 items in order: Planner, All products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet, Advanced search.
 - [ ] Shopping list appears as a top-level item (not nested inside Planner).
-- [ ] Products analyser appears as a top-level item (not nested inside All Products).
+- [ ] Products analyser appears as a top-level item (not nested inside All products).
+- [ ] Advanced search appears as a top-level item.
 
 ---
 

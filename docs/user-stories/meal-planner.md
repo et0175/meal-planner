@@ -346,3 +346,22 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — PDF export
 - [ ] Triggering it downloads a PDF file containing the full Week summary grid: item names, meal slots, day columns (Mon–Sun), serving counts, and nutrition totals.
 - [ ] The PDF includes the selected week date range in the header.
 - [ ] If the plan is empty, the PDF still downloads with the week header and empty slots (no error).
+
+---
+
+## US-MP-023 Add item directly to plan summary panel
+
+**As a** user planning in the Calendar tab  
+**I want** to add an item to a specific meal slot in the plan summary panel without switching views  
+**So that** I can build my plan quickly from within the Calendar tab itself.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Plan summary — Add to summary
+
+**Acceptance criteria**
+
+- [ ] Each meal slot column in the plan summary panel has an **add (+)** button visible in the slot header.
+- [ ] Clicking the + button opens an inline search input within that slot column.
+- [ ] Typing in the search input filters all items (products and recipes) by name in real time.
+- [ ] Selecting an item from the search results adds it as an assignment on the first visible day in that slot.
+- [ ] The plan summary updates immediately to show the newly added item.
+- [ ] The search input closes after an item is selected; clicking + again re-opens it.

@@ -11,5 +11,6 @@ Stories are grouped by module. Each links to [business requirements](../requirem
 | Dietary analyser | [dietary-analyser.md](dietary-analyser.md) — US-DA-001 – US-DA-005 |
 | Recipe analyser | [recipe-analyser.md](recipe-analyser.md) — US-RA-001 – US-RA-015 |
 | Personal cabinet | [personal-cabinet.md](personal-cabinet.md) — US-PC-001 – US-PC-010 |
-| Meal planner | [meal-planner.md](meal-planner.md) — US-MP-001 – US-MP-022 |
+| Meal planner | [meal-planner.md](meal-planner.md) — US-MP-001 – US-MP-023 |
 | Shopping list | [shopping-list.md](shopping-list.md) — US-SL-001 – US-SL-007 |
+| Advanced search | [advanced-search.md](advanced-search.md) — US-AS-001 – US-AS-014 |
