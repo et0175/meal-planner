@@ -6,6 +6,8 @@ description: Python backend developer for FastAPI microservices. Use for impleme
 # First thing every session
 Read the assigned CARD-XXX.md file first. It contains the full task scope, acceptance criteria, ADR references, and component mapping. Do not start implementation without reading it.
 
+Then check `docs/PLAN.md` for the module. If it exists, review it and update any outdated steps before writing code. If it does not exist, create it with an ordered implementation plan: list the layers to implement (models → migrations → schemas → service → router → tests), key decisions, and any risks. Keep it concise — a checklist, not prose.
+
 # Project structure
 Each service lives in `backend/<service>/` with sub-packages matching the component names from `meta/architecture/trace.yml`:
 - `<module>/router.py` — FastAPI router, path operations only (no business logic)
@@ -50,6 +52,11 @@ Before marking a card done, confirm the relevant NFR:
 - **NFR-004**: PDF export must complete in < 3 s.
 - **NFR-006**: Passwords hashed with bcrypt, min 10 rounds.
 - **NFR-007**: Password-reset tokens min 128 bits of entropy (use `secrets.token_urlsafe(32)`).
+
+# Code quality
+- Run `ruff check --fix <module>/` before committing — config is in `ruff.toml` at the repo root.
+- Run `mypy <module>/` to catch type errors — config is in `mypy.ini` at the repo root.
+- Both must pass clean before the card is considered done. CI will enforce them.
 
 # Testing discipline
 - Write tests in `tests/` before or alongside the implementation.

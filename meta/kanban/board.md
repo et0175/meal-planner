@@ -6,7 +6,7 @@ _Updated: 2026-06-22_
 
 | Wave | Cards | Status |
 |------|-------|--------|
-| 1 | CARD-001 P1 | ⏳ ready |
+| 1 | CARD-001 P1, CARD-009 P2 | ⏳ ready |
 | 2 | CARD-002 P1, CARD-003 P1 | ⏳ blocked (→ CARD-001) |
 | 3 | CARD-004 P2, CARD-005 P1 | ⏳ blocked (→ CARD-003) |
 | 4 | CARD-006 P1, CARD-007 P2 | ⏳ blocked (→ CARD-005) |
@@ -25,13 +25,14 @@ _Gantt: [meta/kanban/gantt.md](gantt.md)_
 
 ## Ready
 - **CARD-001** P1 · Identity service (Python) _(wave 1)_
-- **CARD-002** P1 · Navigation Shell + Auth UI _(wave 2)_
+- **CARD-009** P2 · Set up Railway services and Vercel project _(wave 1)_
+- **CARD-002** P1 · Navigation Shell + Auth UI (Next.js) _(wave 2)_
 - **CARD-003** P1 · Product Catalog service (Python) _(wave 2)_
-- **CARD-004** P2 · Product Catalog UI _(wave 3)_
+- **CARD-004** P2 · Product Catalog UI (Next.js) _(wave 3)_
 - **CARD-005** P1 · Meal Planning service (Python) _(wave 3)_
-- **CARD-006** P1 · Meal Planning UI _(wave 4)_
+- **CARD-006** P1 · Meal Planning UI (Next.js) _(wave 4)_
 - **CARD-007** P2 · Shopping List service (Python) _(wave 4)_
-- **CARD-008** P2 · Shopping List UI _(wave 5)_
+- **CARD-008** P2 · Shopping List UI (Next.js) _(wave 5)_
 
 ## In Progress
 _(none)_

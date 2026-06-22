@@ -6,6 +6,8 @@ description: Next.js frontend developer for the Meal Forge app. Use for implemen
 # First thing every session
 Read the assigned CARD-XXX.md file first. It contains the full task scope, acceptance criteria, ADR references, and component mapping. Do not start implementation without reading it.
 
+Then check `docs/PLAN.md` for the module. If it exists, review it and update any outdated steps before writing code. If it does not exist, create it with an ordered implementation plan: list the components to build, the order to build them in, key decisions, and any risks. Keep it concise — a checklist, not prose.
+
 Also check `prototype/frontend/` — the prototype implements the same flows with static data. Use it as a visual and structural reference, but do not copy it verbatim: the production app uses the `src/` layout, App Router route groups, and live API calls.
 
 # Project structure
@@ -57,6 +59,11 @@ frontend/src/
 - Extract a component when JSX exceeds ~60 lines or when the same structure appears twice.
 - Client components that fetch data use `useEffect` + loading/error states, or a custom hook from `lib/hooks/`.
 - Empty states, loading states, and error states are required for every data-fetching component — they are acceptance criteria.
+
+# Code quality
+- Run `npm run lint` (ESLint + eslint-config-next + eslint-config-prettier) before committing.
+- Run `npm run format:check` (Prettier) — config is in `frontend/.prettierrc`.
+- Both must pass clean before the card is considered done. CI will enforce them.
 
 # Accessibility baseline (NFR-013)
 - All interactive elements are keyboard-reachable and have visible focus rings.

@@ -3,6 +3,11 @@ name: devops
 description: DevOps agent for Meal Forge. Use for setting up the local Docker dev environment, writing Dockerfiles, configuring CI, and deploying the app. Frontend (Next.js) deploys to Vercel. Python backend services deploy to Railway (recommended) or Fly.io — Vercel does not support long-running Python processes with PostgreSQL connections.
 ---
 
+# First thing every session
+Read the assigned CARD-XXX.md file first. It contains the full task scope, acceptance criteria, and references. Do not start implementation without reading it.
+
+Then check `docs/PLAN.md` for the module. If it exists, review it and update any outdated steps before starting work. If it does not exist, create it with an ordered implementation plan: list the infrastructure tasks, the order to tackle them, key decisions, and any risks. Keep it concise — a checklist, not prose.
+
 # Deployment topology
 Vercel runs Next.js but **cannot** host the Python FastAPI services (no persistent processes, no PostgreSQL connection pooling). The recommended split:
 
@@ -146,11 +151,60 @@ restartPolicyType = "ON_FAILURE"
 
 The `startCommand` runs migrations then starts the server — safe because Alembic is idempotent.
 
+# Linting
+
+## Python — Ruff + mypy
+Config files already exist at the repo root: `ruff.toml` and `mypy.ini`.
+Dev dependencies are in `backend/requirements-dev.txt`.
+
+Install once for the whole backend:
+```bash
+pip install -r backend/requirements-dev.txt
+```
+
+Run locally:
+```bash
+ruff check backend/          # lint
+ruff format backend/         # format
+mypy backend/                # type-check
+```
+
+Fix all auto-fixable issues:
+```bash
+ruff check --fix backend/
+```
+
+## Next.js — ESLint + Prettier
+Config files: `frontend/.prettierrc`, `frontend/eslint.config.mjs` (Prettier already integrated).
+Dependencies already added to `frontend/package.json` (`prettier`, `eslint-config-prettier`).
+
+Install:
+```bash
+cd frontend && npm install
+```
+
+Run locally:
+```bash
+npm run lint            # ESLint
+npm run format:check    # Prettier check
+npm run format          # Prettier fix
+```
+
 # CI (GitHub Actions — .github/workflows/forge.yml already exists)
-Add a workflow step for backend tests and frontend build:
+Add workflow steps for lint, type-check, tests, and frontend build:
 
 ```yaml
 jobs:
+  python-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r backend/requirements-dev.txt
+      - run: ruff check backend/
+      - run: mypy backend/
+
   backend-test:
     runs-on: ubuntu-latest
     services:
@@ -163,17 +217,24 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -r backend/identity/requirements.txt
-      - run: python -m pytest backend/identity/tests/
-      # repeat for each service
+      - run: pip install -r backend/requirements-dev.txt
+      - run: |
+          pip install -r backend/identity/requirements.txt && python -m pytest backend/identity/tests/
+          pip install -r backend/catalog/requirements.txt  && python -m pytest backend/catalog/tests/
+          pip install -r backend/planning/requirements.txt && python -m pytest backend/planning/tests/
+          pip install -r backend/shopping/requirements.txt && python -m pytest backend/shopping/tests/
 
-  frontend-build:
+  frontend-lint-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: "20" }
       - run: npm ci
+        working-directory: frontend
+      - run: npm run lint
+        working-directory: frontend
+      - run: npm run format:check
         working-directory: frontend
       - run: npm run build
         working-directory: frontend
