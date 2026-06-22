@@ -1,0 +1,106 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+aggregates:
+  - id: AGG-001
+    name: UserAccount
+    description: >
+      Represents a registered user's identity and credentials. Owns the email,
+      hashed password, role (User | Nutritionist), and active session tokens.
+      Password reset tokens are lifecycle-managed inside this aggregate.
+    invariants:
+      - id: INV-001
+        statement: >
+          Email must be unique across all UserAccount instances — no two accounts
+          may share the same email address.
+      - id: INV-002
+        statement: >
+          A password reset token is single-use and expires after a defined time
+          window; once consumed or expired it must not be accepted again.
+      - id: INV-003
+        statement: >
+          A UserAccount may hold exactly one role: either "user" or "nutritionist".
+          In MVP1 both roles have identical permissions.
+
+  - id: AGG-002
+    name: Product
+    description: >
+      A food item in the catalog — either a global (system-added) product or a
+      user-added product. Carries nutrition facts, category, unit definitions, and
+      week-flag status (none | this_week | next_week). Only the creator may edit
+      or delete user-added products; global products are read-only for users.
+    invariants:
+      - id: INV-004
+        statement: >
+          A product must have at least one unit definition (its base unit with a
+          gram-conversion factor). Alternative units (up to 10 total) must each
+          have a valid gram-conversion factor > 0.
+      - id: INV-005
+        statement: >
+          Nutrition values (calories, protein, fat, carbohydrates) must all be
+          >= 0 and expressed per 100 g of the product.
+      - id: INV-006
+        statement: >
+          A user-added product may be edited or deleted only by the user who
+          created it; global products are immutable by regular users.
+      - id: INV-007
+        statement: >
+          A UserAccount may have at most 500 user-added products. The global
+          catalogue may contain at most 10,000 products.
+
+  - id: AGG-003
+    name: MealPlan
+    description: >
+      A user's weekly meal plan: a grid of assignments keyed by
+      (week_start_date, day, meal_slot, product_id). Each assignment carries a
+      quantity and unit. The plan is private to the owning user. Supports at most
+      10,000 total assignments across all time for a given user.
+    invariants:
+      - id: INV-008
+        statement: >
+          An assignment quantity must be > 0. The unit must be one of the
+          product's defined units.
+      - id: INV-009
+        statement: >
+          A MealPlan belongs to exactly one UserAccount. Assignments from one
+          user's plan are never visible to another user.
+      - id: INV-010
+        statement: >
+          Total assignments (all time, all weeks) for a single user must not
+          exceed 10,000.
+
+  - id: AGG-004
+    name: ShoppingList
+    description: >
+      A derived, date-range-scoped grocery list aggregated from a user's
+      MealPlan assignments. Groups items by product category. Computed
+      on-demand; marked stale when the underlying MealPlan changes after
+      the list was last generated.
+    invariants:
+      - id: INV-011
+        statement: >
+          A ShoppingList is associated with exactly one UserAccount and one
+          date range [from_date, to_date] where from_date <= to_date.
+      - id: INV-012
+        statement: >
+          A ShoppingList reflects only the assignments in the user's MealPlan
+          that fall within its date range; it must be regenerated (or flagged
+          stale) whenever those assignments change.
+
+  - id: AGG-005
+    name: NutritionTarget
+    description: >
+      A user's personal daily macro and calorie targets (corridor). Used by the
+      Meal Planner to show percentage-consumed indicators per planned day.
+      Belongs exclusively to the owning UserAccount.
+    invariants:
+      - id: INV-013
+        statement: >
+          Each macro target value (calories, protein, fat, carbohydrates) must
+          be >= 0. At least one target value must be > 0 for the target to be
+          considered "set".
+      - id: INV-014
+        statement: >
+          A NutritionTarget belongs to exactly one UserAccount; it is private
+          and never visible to other users.

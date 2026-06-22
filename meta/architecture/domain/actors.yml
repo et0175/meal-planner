@@ -1,0 +1,38 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+actors:
+  - id: ACT-001
+    name: User
+    type: human
+    description: >
+      Authenticated individual who browses products, builds weekly meal plans,
+      manages personal product catalog entries, generates shopping lists, and
+      exports PDFs. Full access to all MVP1 features.
+
+  # validator-override: domain.py
+  # reason: ACT-002 (Nutritionist) issues no distinct commands in MVP1 by design — CON-006
+  # and US-007 explicitly state both roles are identical in MVP1. The role is stored on the
+  # account for future use; distinguishing at the domain level now would be premature.
+  - id: ACT-002
+    name: Nutritionist
+    type: human
+    description: >
+      Professional user who curates products and annotations. Identical to User
+      in MVP1 — same permissions, role stored on account but no UI differentiation.
+
+  - id: ACT-003
+    name: System
+    type: system
+    description: >
+      Internal automated actor responsible for nutrition aggregation, shopping
+      list derivation, and staleness detection when the meal plan changes.
+
+  - id: ACT-004
+    name: Scheduler
+    type: scheduler
+    description: >
+      Time-driven actor that fires the weekly flag rollover every Monday —
+      promoting "Next week" product flags to "This week" and surfacing those
+      products in the current week's planner summary.

@@ -1,0 +1,640 @@
+# generated_by: forge:architect-synthesis
+# generated_at: 2026-06-22
+# tier: large
+#
+# Trace matrix: FR/NFR/CON -> capabilities -> contexts -> components -> ADRs -> tests
+# Tests are planned (executable AC test names from requirements.yml). status: partial
+# until the implementing team writes them green. CONs are satisfied by design -> covered.
+#
+# COMP inventory (see c4/components-identity.puml for the canonical list):
+#   CTX-001 Identity:        COMP-001..005
+#   CTX-002 Nav Shell (FE):  COMP-006, COMP-007
+#   CTX-003 Product Catalog: COMP-008..012
+#   CTX-004 Meal Planning:   COMP-013..019
+#   CTX-005 Shopping List:   COMP-020..023
+#   CTX-006 Meal Tracking:   COMP-024 (stub table only)
+
+links:
+
+  # ── Identity (CTX-001 / CAP-001) ────────────────────────────────────────────
+  - req: FR-001
+    description: "Register account with email + password, grant access"
+    capabilities: [CAP-001]
+    contexts: [CTX-001]
+    components: [COMP-001, COMP-005]
+    adrs: []
+    tests: [TestRegisterAccount_Persists, TestRegisterAccount_RejectsDuplicateEmail, TestRegisterAccount_RejectsEmptyPassword, TestRegisterAccount_RejectsMalformedEmail, TestRegisterAccount_RoleIsValidEnum]
+    status: partial
+
+  - req: FR-002
+    description: "Sign in, create persistent tab session"
+    capabilities: [CAP-001]
+    contexts: [CTX-001]
+    components: [COMP-002, COMP-005]
+    adrs: []
+    tests: [TestSignIn_CreatesSession, TestSignIn_RejectsWrongPassword, TestSignIn_RejectsUnknownEmail, TestSession_PersistsAcrossNavigation]
+    status: partial
+
+  - req: FR-003
+    description: "Rate-limit sign-in after configurable failed attempts"
+    capabilities: [CAP-001]
+    contexts: [CTX-001]
+    components: [COMP-002]
+    adrs: [ADR-0006]
+    tests: [TestSignIn_RateLimitsAfterThreshold, TestSignIn_AllowsAfterCooldown]
+    status: partial
+
+  - req: FR-004
+    description: "Sign out, invalidate session"
+    capabilities: [CAP-001]
+    contexts: [CTX-001]
+    components: [COMP-002, COMP-005]
+    adrs: []
+    tests: [TestSignOut_InvalidatesSession, TestSignOut_InvalidatedTokenRejected]
+    status: partial
+
+  - req: FR-005
+    description: "Request password-reset link by email; single-use token"
+    capabilities: [CAP-001]
+    contexts: [CTX-001]
+    components: [COMP-003, COMP-004, COMP-005]
+    adrs: [ADR-0005]
+    tests: [TestRequestPasswordReset_SendsEmail, TestResetPassword_UpdatesPassword, TestResetPassword_RejectsUsedToken, TestResetPassword_RejectsExpiredToken, TestRequestPasswordReset_NoEnumeration]
+    status: partial
+
+  - req: FR-006
+    description: "All modules require auth; anonymous redirected to sign-in"
+    capabilities: [CAP-001]
+    contexts: [CTX-001, CTX-002]
+    components: [COMP-002, COMP-006]
+    adrs: []
+    tests: [TestAuthGuard_RedirectsAnonymous, TestAuthGuard_RedirectsExpiredSession]
+    status: partial
+
+  # ── Navigation Shell (CTX-002 / CAP-002) ────────────────────────────────────
+  - req: FR-007
+    description: "Sidebar shows all modules with active-state highlight"
+    capabilities: [CAP-002]
+    contexts: [CTX-002]
+    components: [COMP-006]
+    adrs: []
+    tests: [TestSidebar_ShowsAllModulesWithActiveState, TestSidebar_NotRenderedForAnonymous]
+    status: partial
+
+  - req: FR-008
+    description: "Land on Meal Planner after sign-in and at app root"
+    capabilities: [CAP-002]
+    contexts: [CTX-002]
+    components: [COMP-006]
+    adrs: []
+    tests: [TestRootRoute_RedirectsToPlanner, TestRootRoute_RedirectsAnonymousToSignIn]
+    status: partial
+
+  - req: FR-009
+    description: "Topbar shows module name + current-week plan stats in Planner"
+    capabilities: [CAP-002]
+    contexts: [CTX-002, CTX-004]
+    components: [COMP-007, COMP-017]
+    adrs: [ADR-0004]
+    tests: [TestTopbar_ShowsModuleName, TestTopbar_ShowsPlannerWeekSummary, TestTopbar_ZeroStatePlannerStats]
+    status: partial
+
+  # ── Product Catalog (CTX-003 / CAP-003) ─────────────────────────────────────
+  - req: FR-010
+    description: "Browse products: card/list views, category navigation, nutrition"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-008, COMP-012]
+    adrs: []
+    tests: [TestProducts_CategoryCardNavigation, TestProducts_ListViewShowsNutrition, TestProducts_EmptyState]
+    status: partial
+
+  - req: FR-011
+    description: "Filter by category/diet tag, search by name/tag, sort by column"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-008, COMP-012]
+    adrs: []
+    tests: [TestProducts_FilterByCategory, TestProducts_FilterByDietTag, TestProducts_SearchByName, TestProducts_SearchNoResults, TestProducts_SortByColumn]
+    status: partial
+
+  - req: FR-012
+    description: "Product detail card: macro pie chart + unit-conversion table"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-008]
+    adrs: []
+    tests: [TestProductDetail_ShowsPieChartAndUnitTable, TestProductDetail_SingleUnitNoError]
+    status: partial
+
+  - req: FR-013
+    description: "Add user product: name, category, nutrition/100g, up to 10 units"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-009, COMP-012]
+    adrs: []
+    tests: [TestAddProduct_Persists, TestAddProduct_RejectsNegativeNutrition, TestAddProduct_RejectsEmptyName, TestAddProduct_RejectsLimitExceeded, TestAddProduct_RejectsTooManyUnits, TestAddProduct_DeniesAnonymous]
+    status: partial
+
+  - req: FR-014
+    description: "Edit/delete only own products; deny others' and global"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-009, COMP-012]
+    adrs: []
+    tests: [TestEditProduct_UpdatesOwn, TestEditProduct_DeniesOther, TestDeleteProduct_RemovesOwn, TestDeleteProduct_DeniesGlobalProduct]
+    status: partial
+
+  - req: FR-015
+    description: "Mark product This/Next week; This-week surfaces in planner"
+    capabilities: [CAP-003]
+    contexts: [CTX-003, CTX-004]
+    components: [COMP-010, COMP-011, COMP-015]
+    adrs: [ADR-0002, ADR-0009]
+    tests: [TestSetWeekFlag_ThisWeekAppearsInPlanner, TestSetWeekFlag_ClearRemovesFromPlanner, TestPromoteNextWeekFlags_FiresOnMonday, TestSetWeekFlag_NextWeekNotShownMidWeek]
+    status: partial
+
+  # ── Meal Planning (CTX-004 / CAP-004) ───────────────────────────────────────
+  - req: FR-016
+    description: "Navigate weeks; switch Week Summary / Calendar tabs"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013]
+    adrs: []
+    tests: [TestPlanner_NavigateForward, TestPlanner_JumpToCurrentWeek, TestPlanner_CurrentWeekActiveState]
+    status: partial
+
+  - req: FR-017
+    description: "Week Summary grid: add/remove rows, toggle servings/grams"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013, COMP-019]
+    adrs: []
+    tests: [TestWeekSummary_RendersGrid, TestWeekSummary_AddRow, TestWeekSummary_RemoveRow, TestWeekSummary_ToggleUnitMode, TestPlanAssignment_RejectsZeroQuantity, TestPlanAssignment_NotVisibleToOtherUser]
+    status: partial
+
+  - req: FR-018
+    description: "This-week flagged products auto-appear in Week Summary"
+    capabilities: [CAP-004]
+    contexts: [CTX-004, CTX-003]
+    components: [COMP-015, COMP-013]
+    adrs: [ADR-0002]
+    tests: [TestWeekSummary_ShowsThisWeekFlaggedProducts, TestWeekSummary_NextWeekFlagNotShownThisWeek]
+    status: partial
+
+  - req: FR-019
+    description: "Calendar tab: meal slots, add/remove/adjust, drag between slots/days"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013, COMP-019]
+    adrs: []
+    tests: [TestCalendar_ShowsMealSlots, TestCalendar_AddItem, TestCalendar_DragMoveItem, TestCalendar_UpdateServings, TestCalendar_RejectsZeroServings]
+    status: partial
+
+  - req: FR-020
+    description: "Calendar week/4-day/single-day layouts + compact week grid"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013]
+    adrs: []
+    tests: [TestCalendar_SwitchToSingleDay, TestCalendar_EmptyDayInSingleLayout]
+    status: partial
+
+  - req: FR-021
+    description: "Plan Summary Panel above grid; add item to slot from panel"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013]
+    adrs: []
+    tests: [TestCalendar_SummaryPanelRendered, TestCalendar_AddItemViaSummaryPanel, TestCalendar_SummaryPanelEmptyState]
+    status: partial
+
+  - req: FR-022
+    description: "Show active diet label in planner header when set"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013]
+    adrs: []
+    tests: [TestPlanner_ShowsDietLabel, TestPlanner_NoDietLabelWhenUnset]
+    status: partial
+
+  - req: FR-023
+    description: "Item-search suggestions: recent, then owned, then alphabetical"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013]
+    adrs: []
+    tests: [TestItemSearch_SortOrder, TestItemSearch_AlphabeticalFallback]
+    status: partial
+
+  - req: FR-024
+    description: "Per-day nutrition indicators vs target corridor by macro"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-014, COMP-019]
+    adrs: []
+    tests: [TestPlanner_NutritionIndicators, TestPlanner_NoIndicatorsWithoutTarget, TestNutritionTarget_RejectsNegativeCalories, TestNutritionTarget_NotVisibleToOtherUser]
+    status: partial
+
+  - req: FR-025
+    description: "Log day/week/single item from plan -> Meal Tracking entries"
+    capabilities: [CAP-004]
+    contexts: [CTX-004, CTX-006]
+    components: [COMP-016, COMP-024]
+    adrs: [ADR-0001]
+    tests: [TestLogDay_CreatesTrackingEntries, TestLogWeek_CreatesTrackingEntries, TestLogSingleItem_CreatesTrackingEntry, TestLogDay_HandlesEmptyDay]
+    status: partial
+
+  - req: FR-026
+    description: "Download current week's Meal Plan as PDF"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-018]
+    adrs: []
+    tests: [TestExportMealPlanPdf_OpensDialog, TestExportMealPlanPdf_EmptyWeek]
+    status: partial
+
+  # ── Shopping List (CTX-005 / CAP-005) ───────────────────────────────────────
+  - req: FR-027
+    description: "Auto-generate shopping list on navigation"
+    capabilities: [CAP-005]
+    contexts: [CTX-005]
+    components: [COMP-020, COMP-023]
+    adrs: [ADR-0007]
+    tests: [TestShoppingList_AutoGeneratesOnNavigate, TestShoppingList_EmptyOnNoAssignments]
+    status: partial
+
+  - req: FR-028
+    description: "Custom from-to date range for shopping list"
+    capabilities: [CAP-005]
+    contexts: [CTX-005]
+    components: [COMP-020]
+    adrs: []
+    tests: [TestShoppingList_DateRangeFilters, TestShoppingList_RejectsInvalidDateRange]
+    status: partial
+
+  - req: FR-029
+    description: "Aggregate planned items in range, group by category"
+    capabilities: [CAP-005]
+    contexts: [CTX-005, CTX-004]
+    components: [COMP-020, COMP-023]
+    adrs: []
+    tests: [TestShoppingList_AggregatesAndGroups, TestShoppingList_EmptyForEmptyPlan]
+    status: partial
+
+  - req: FR-030
+    description: "Mark list stale on plan change; manual refresh"
+    capabilities: [CAP-005]
+    contexts: [CTX-005, CTX-004]
+    components: [COMP-021, COMP-020, COMP-023]
+    adrs: [ADR-0003]
+    tests: [TestShoppingList_MarkedStaleOnPlanChange, TestShoppingList_RefreshRegenerates, TestShoppingList_MarkedStaleOnAssignmentUpdate, TestShoppingList_MarkedStaleOnAssignmentRemoval, TestShoppingList_MarkedStaleOnAssignmentMove]
+    status: partial
+
+  - req: FR-031
+    description: "Download shopping list as PDF"
+    capabilities: [CAP-005]
+    contexts: [CTX-005]
+    components: [COMP-022]
+    adrs: []
+    tests: [TestShoppingListPdf_OpensDialog, TestShoppingListPdf_EmptyList]
+    status: partial
+
+  # ── Data limits / scheduler / log (CAP-003, CAP-004) ────────────────────────
+  - req: FR-032
+    description: "At most 10 units per product, each gram-factor > 0"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-009, COMP-012]
+    adrs: []
+    tests: [TestProduct_RejectsEleventhUnit]
+    status: partial
+
+  - req: FR-033
+    description: "Cap user MealPlan assignments at 10,000 all-time"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013, COMP-019]
+    adrs: []
+    tests: [TestPlanAssignment_RejectsLimitExceeded]
+    status: partial
+
+  - req: FR-034
+    description: "Monday: promote Next-week flags to This-week for all users"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-011, COMP-012]
+    adrs: [ADR-0009]
+    tests: [TestPromoteFlags_PromotesNextToThisOnMonday, TestPromoteFlags_HandlesEmptySet]
+    status: partial
+
+  - req: FR-035
+    description: "Log-from-plan creates pre-filled tracking entries; independent stores"
+    capabilities: [CAP-004]
+    contexts: [CTX-004, CTX-006]
+    components: [COMP-016, COMP-024]
+    adrs: [ADR-0001]
+    tests: [TestLogDay_CreatesAdditionalEntries]
+    status: partial
+
+  - req: FR-036
+    description: "User products visible to all; editable only by creator"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-008, COMP-009, COMP-012]
+    adrs: []
+    tests: [TestUserProduct_VisibleToAllUsers, TestUserProduct_DeniesEditByOther]
+    status: partial
+
+  # ── Non-functional ──────────────────────────────────────────────────────────
+  - req: NFR-001
+    description: "p95 initial page load <= 2s (cold, 10 Mbps)"
+    capabilities: [CAP-002]
+    contexts: [CTX-002]
+    components: [COMP-006]
+    adrs: []
+    tests: [BenchPageLoad_Cold10Mbps_p95]
+    status: partial
+
+  - req: NFR-002
+    description: "p95 search/filter <= 200ms at 10k products"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-008, COMP-012]
+    adrs: [ADR-0002]
+    tests: [BenchSearchFilter_10kProducts_p95]
+    status: partial
+
+  - req: NFR-003
+    description: "p95 shopping-list generation <= 500ms over 31 days"
+    capabilities: [CAP-005]
+    contexts: [CTX-005]
+    components: [COMP-020]
+    adrs: [ADR-0003]
+    tests: [BenchShoppingListGeneration_31Days_p95]
+    status: partial
+
+  - req: NFR-004
+    description: "PDF print dialog opens within 3s p95"
+    capabilities: [CAP-004, CAP-005]
+    contexts: [CTX-004, CTX-005]
+    components: [COMP-018, COMP-022]
+    adrs: []
+    tests: [BenchPdfExport_DialogOpen_p95]
+    status: partial
+
+  - req: NFR-005
+    description: "Live nutrition recalc within 100ms p95 per input change"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-009]
+    adrs: []
+    tests: [BenchLiveNutritionRecalc_p95]
+    status: partial
+
+  - req: NFR-006
+    description: "WCAG 2.1 AA conformance across all views"
+    capabilities: [CAP-002]
+    contexts: [CTX-002]
+    components: [COMP-006, COMP-007]
+    adrs: [ADR-0010]
+    tests: [AccessibilityAudit_AllViews_WCAG21AA]
+    status: partial
+
+  - req: NFR-007
+    description: "100% keyboard navigation coverage of interactive controls"
+    capabilities: [CAP-002]
+    contexts: [CTX-002]
+    components: [COMP-006]
+    adrs: []
+    tests: [KeyboardNav_AllInteractiveControls]
+    status: partial
+
+  - req: NFR-008
+    description: "Normal text contrast >= 4.5:1"
+    capabilities: [CAP-002]
+    contexts: [CTX-002]
+    components: [COMP-006]
+    adrs: [ADR-0010]
+    tests: [ContrastCheck_NormalText]
+    status: partial
+
+  - req: NFR-009
+    description: "Colour-coded indicators include non-colour label/icon"
+    capabilities: [CAP-002, CAP-004]
+    contexts: [CTX-002, CTX-004]
+    components: [COMP-006, COMP-014]
+    adrs: []
+    tests: [ColourIndicators_HaveNonColourLabel]
+    status: partial
+
+  - req: NFR-010
+    description: "Global catalogue scales to 10,000 products w/o perf loss"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-008, COMP-012]
+    adrs: []
+    tests: [ScaleTest_10kProducts_SearchFilter]
+    status: partial
+
+  - req: NFR-011
+    description: "<=500 user-added products per account"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-009, COMP-012]
+    adrs: []
+    tests: [ScaleTest_UserProducts_LimitEnforced]
+    status: partial
+
+  - req: NFR-012
+    description: "<=10,000 meal-plan assignments per user (all time)"
+    capabilities: [CAP-004]
+    contexts: [CTX-004]
+    components: [COMP-013, COMP-019]
+    adrs: []
+    tests: [ScaleTest_PlanAssignments_LimitEnforced]
+    status: partial
+
+  - req: NFR-013
+    description: "<=3,650 tracking log entries per account"
+    capabilities: [CAP-004]
+    contexts: [CTX-006]
+    components: [COMP-024]
+    adrs: [ADR-0001]
+    tests: [ScaleTest_TrackingEntries_LimitEnforced]
+    status: partial
+
+  - req: NFR-014
+    description: "Support last 2 major versions of target browsers"
+    capabilities: [CAP-002]
+    contexts: [CTX-002]
+    components: [COMP-006]
+    adrs: []
+    tests: [CrossBrowserSmoke_SupportedBrowsers]
+    status: partial
+
+  - req: NFR-015
+    description: "Zero PII exposed to other users across all endpoints"
+    capabilities: [CAP-004]
+    contexts: [CTX-004, CTX-001, CTX-005]
+    components: [COMP-002, COMP-013, COMP-014, COMP-020]
+    adrs: []
+    tests: [TestPiiIsolation_PlanNotVisibleToOtherUser]
+    status: partial
+
+  # ── Constraints (satisfied by design) ───────────────────────────────────────
+  - req: CON-001
+    description: "Frontend Next.js (TypeScript), separate deployment unit"
+    capabilities: []
+    contexts: [CTX-002]
+    components: [COMP-006, COMP-007]
+    adrs: []
+    tests: []
+    status: covered
+
+  - req: CON-002
+    description: "Backend Python REST, separate deployment unit"
+    capabilities: []
+    contexts: [CTX-001, CTX-003, CTX-004, CTX-005]
+    components: [COMP-001, COMP-008, COMP-013, COMP-020]
+    adrs: []
+    tests: []
+    status: covered
+
+  - req: CON-003
+    description: "Session-based auth, email+password only; no OAuth/SSO"
+    capabilities: []
+    contexts: [CTX-001]
+    components: [COMP-002, COMP-005]
+    adrs: []
+    tests: []
+    status: covered
+
+  - req: CON-004
+    description: "Units: metric + US customary only"
+    capabilities: []
+    contexts: [CTX-003]
+    components: [COMP-009, COMP-012]
+    adrs: []
+    tests: []
+    status: covered
+
+  - req: CON-005
+    description: "12 hardcoded diet patterns; no admin management"
+    capabilities: []
+    contexts: [CTX-003]
+    components: [COMP-008]
+    adrs: []
+    tests: []
+    status: covered
+
+  - req: CON-006
+    description: "Nutritionist role identical to User in MVP1"
+    capabilities: []
+    contexts: [CTX-001]
+    components: [COMP-001, COMP-005]
+    adrs: []
+    tests: []
+    status: covered
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Component -> planned code mapping (greenfield: planned globs, no _meta.as_built,
+# so missing code is INFO not ERROR until built).
+# ─────────────────────────────────────────────────────────────────────────────
+components:
+  - id: COMP-001
+    name: Account Service
+    context: CTX-001
+    code: ["backend/identity/account/**.py"]
+  - id: COMP-002
+    name: Session & Auth Guard
+    context: CTX-001
+    code: ["backend/identity/session/**.py"]
+  - id: COMP-003
+    name: Password Reset
+    context: CTX-001
+    code: ["backend/identity/reset/**.py"]
+  - id: COMP-004
+    name: Email Adapter
+    context: CTX-001
+    code: ["backend/identity/email/**.py"]
+  - id: COMP-005
+    name: Identity DB
+    context: CTX-001
+    code: ["backend/identity/db/**.py", "backend/identity/migrations/**.sql"]
+  - id: COMP-006
+    name: Navigation Shell
+    context: CTX-002
+    code: ["frontend/src/shell/**.tsx"]
+  - id: COMP-007
+    name: Week-Stats Widget
+    context: CTX-002
+    code: ["frontend/src/shell/week-stats/**.tsx"]
+  - id: COMP-008
+    name: Catalog Query
+    context: CTX-003
+    code: ["backend/catalog/query/**.py"]
+  - id: COMP-009
+    name: Product Authoring
+    context: CTX-003
+    code: ["backend/catalog/authoring/**.py"]
+  - id: COMP-010
+    name: WeekFlag Manager
+    context: CTX-003
+    code: ["backend/catalog/weekflag/**.py"]
+  - id: COMP-011
+    name: Rollover Scheduler
+    context: CTX-003
+    code: ["backend/catalog/scheduler/**.py"]
+  - id: COMP-012
+    name: Catalog DB
+    context: CTX-003
+    code: ["backend/catalog/db/**.py", "backend/catalog/migrations/**.sql"]
+  - id: COMP-013
+    name: MealPlan Service
+    context: CTX-004
+    code: ["backend/planning/mealplan/**.py"]
+  - id: COMP-014
+    name: NutritionTarget Service
+    context: CTX-004
+    code: ["backend/planning/target/**.py"]
+  - id: COMP-015
+    name: WeekFlag Reader
+    context: CTX-004
+    code: ["backend/planning/weekflag_reader/**.py"]
+  - id: COMP-016
+    name: Log-from-Plan Handler
+    context: CTX-004
+    code: ["backend/planning/logging/**.py"]
+  - id: COMP-017
+    name: Plan Summary Endpoint
+    context: CTX-004
+    code: ["backend/planning/summary/**.py"]
+  - id: COMP-018
+    name: Plan PDF Export
+    context: CTX-004
+    code: ["frontend/src/planner/pdf/**.tsx"]
+  - id: COMP-019
+    name: Meal Planning DB
+    context: CTX-004
+    code: ["backend/planning/db/**.py", "backend/planning/migrations/**.sql"]
+  - id: COMP-020
+    name: List Generator
+    context: CTX-005
+    code: ["backend/shopping/generator/**.py"]
+  - id: COMP-021
+    name: Staleness Checker
+    context: CTX-005
+    code: ["backend/shopping/staleness/**.py"]
+  - id: COMP-022
+    name: Shopping PDF Export
+    context: CTX-005
+    code: ["frontend/src/shopping/pdf/**.tsx"]
+  - id: COMP-023
+    name: Shopping List DB
+    context: CTX-005
+    code: ["backend/shopping/db/**.py", "backend/shopping/migrations/**.sql"]
+  - id: COMP-024
+    name: TrackingEntry Stub
+    context: CTX-006
+    code: ["backend/tracking_stub/**.py", "backend/tracking_stub/migrations/**.sql"]

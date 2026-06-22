@@ -1,0 +1,203 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+terms:
+  - id: TERM-001
+    term: Product
+    definition: >
+      A food item in the catalog. Can be a global (system-provided) product
+      accessible to all users, or a user-added product created by a specific
+      registered user. Carries nutrition facts (per 100 g), category, unit
+      definitions, and a week-flag status.
+    context: CTX-003
+    aliases: [food item, catalog item]
+    source: [US-013, US-017, US-018, US-019, US-022, US-024]
+
+  - id: TERM-002
+    term: GlobalProduct
+    definition: >
+      A Product that is part of the system-wide catalog, visible to all users.
+      Global products are read-only for regular users — only the system can
+      create or modify them.
+    context: CTX-003
+    aliases: [system product, default product]
+    source: [US-013, US-017]
+
+  - id: TERM-003
+    term: UserProduct
+    definition: >
+      A Product created by a specific registered user. Visible to all users
+      (browseable in the catalog) but editable and deletable only by its
+      creator.
+    context: CTX-003
+    aliases: [custom product, user-added product, personal product]
+    source: [US-017, US-018]
+
+  - id: TERM-004
+    term: Category
+    definition: >
+      A food-group classification for products (e.g. Dairy, Meat, Vegetables).
+      Used for category-card browsing in the Products Database and for grouping
+      items in the Shopping List.  Canonical meaning lives in CTX-003; CTX-005
+      uses it as an opaque grouping key inherited from the product data.
+    context: CTX-003
+    aliases: [food group, product category]
+    source: [US-014, US-021, US-051]
+
+  - id: TERM-005
+    term: DietTag
+    definition: >
+      One of 12 hardcoded diet patterns (e.g. Vegan, Keto, Paleo) that can be
+      associated with a product or used as a filter in the Products Database.
+      Diet definitions are static in MVP1 — no admin management.
+    context: CTX-003
+    aliases: [diet pattern, diet definition, diet label]
+    source: [US-014, US-015, US-039]
+
+  - id: TERM-006
+    term: WeekFlag
+    definition: >
+      A per-user marker on a product indicating whether it is planned for
+      "This week", "Next week", or neither (none). Products flagged "This week"
+      automatically surface in the planner summary for the current week.
+      Every Monday, "Next week" flags auto-promote to "This week".
+      Owned by CTX-003 (Product Catalog); read cross-context by CTX-004
+      (Meal Planning) — see DEC-008 for integration mechanism.
+    context: CTX-003
+    aliases: [week marker, weekly flag, TW/NW flag]
+    source: [US-019, US-030]
+
+  - id: TERM-007
+    term: MealSlot
+    definition: >
+      One of four fixed time-based slots within a day: Breakfast, Lunch,
+      Dinner, and Snacks. Each calendar day in the Meal Planner is divided
+      into these four slots.
+    context: CTX-004
+    aliases: [meal time, meal category]
+    source: [US-031, US-032, US-042]
+
+  - id: TERM-008
+    term: PlanAssignment
+    definition: >
+      A single row in the Meal Planner: the combination of (user, week, day,
+      meal slot, product, quantity, unit). Represents one food item planned
+      for a specific meal slot on a specific day.
+    context: CTX-004
+    aliases: [planner row, plan item, assignment]
+    source: [US-027, US-028, US-032, US-033, US-034]
+
+  - id: TERM-009
+    term: WeekSummary
+    definition: >
+      A spreadsheet-style grid view in the Meal Planner showing all
+      PlanAssignments for the current week, organised by meal slot, with one
+      row per item and columns for each day. Formerly called "Planner Summary".
+    context: CTX-004
+    aliases: [planner summary, week grid, summary tab]
+    source: [US-026, US-027, US-028, US-029]
+
+  - id: TERM-010
+    term: CalendarView
+    definition: >
+      A tab in the Meal Planner that renders days (week, 4-day, or single-day
+      layout) as a calendar with meals grouped by MealSlot. Supports drag-
+      and-drop reordering of PlanAssignments.
+    context: CTX-004
+    aliases: [calendar tab, calendar grid]
+    source: [US-026, US-031, US-034, US-036, US-041]
+
+  - id: TERM-011
+    term: NutritionTarget
+    definition: >
+      A user's personal daily macro and calorie corridor: target values for
+      calories, protein, fat, and carbohydrates. Displayed as percentage-
+      consumed indicators per planned day in the Meal Planner.
+    context: CTX-004
+    aliases: [calorie corridor, macro target, nutrition goal]
+    source: [US-043]
+
+  - id: TERM-012
+    term: ShoppingList
+    definition: >
+      A date-range-scoped, category-grouped list of all ingredients and
+      standalone products derived from the user's Meal Plan assignments.
+      Automatically generated on navigation to the Shopping List screen.
+      Becomes stale when the underlying Meal Plan changes.
+    context: CTX-005
+    aliases: [grocery list]
+    source: [US-048, US-049, US-050, US-051, US-052, US-053, US-054]
+
+  - id: TERM-013
+    term: TrackingEntry
+    definition: >
+      A Meal tracking log entry recording what the user actually ate, pre-filled
+      from a PlanAssignment when using "Log from plan". Stored in the Personal
+      Cabinet module (deferred to v1.1). Data store is independent from the
+      Meal Plan.  Canonical context: CTX-006 (Meal Tracking, stub/deferred).
+    context: CTX-006
+    aliases: [log entry, meal log, tracking log]
+    source: [US-040, US-045]
+
+  - id: TERM-014
+    term: Unit
+    definition: >
+      A measurement unit for a product quantity. Products support a base unit
+      plus up to 9 alternative units (10 total), each with a gram-conversion
+      factor. Supported unit systems in MVP1: metric (g, kg, ml, l) and US
+      customary (oz, lb, fl oz, cups, tbsp, tsp).
+    context: CTX-003
+    aliases: [measurement unit, serving unit]
+    source: [US-024, US-029]
+
+  - id: TERM-015
+    term: PdfExport
+    definition: >
+      A downloadable PDF representation of either the current week's Meal Plan
+      or the Shopping List, produced via the browser print dialog or a client-
+      side PDF library.  Term is shared across CTX-004 and CTX-005 — both
+      export to EXT-002 (BrowserPrintDialog).
+    context: CTX-004   # canonical; also used in CTX-005
+    aliases: [PDF download, print export]
+    source: [US-046, US-054]
+
+  - id: TERM-016
+    term: Session
+    definition: >
+      An active authenticated session for a registered user, persisted while
+      the browser tab is open. Created on sign-in; invalidated on sign-out.
+      Session-based auth (email + password); no OAuth/SSO in MVP1.
+    context: CTX-001
+    aliases: [user session, auth session]
+    source: [US-002, US-003, US-005]
+
+  - id: TERM-017
+    term: PasswordResetToken
+    definition: >
+      A single-use, time-limited token sent by email to allow a user to set a
+      new password without their current credentials. Expires after a defined
+      window; consumed on successful use and cannot be reused.
+    context: CTX-001
+    aliases: [reset link, reset token]
+    source: [US-004]
+
+  - id: TERM-018
+    term: UserRole
+    definition: >
+      A classification of a registered user as either "user" or "nutritionist".
+      In MVP1 both roles have identical permissions; the role is stored on the
+      account for future differentiation.
+    context: CTX-001
+    aliases: [role, account role]
+    source: [US-007]
+
+  - id: TERM-019
+    term: PlanSummaryPanel
+    definition: >
+      A panel in the Calendar tab that shows all PlanAssignments for the current
+      week organised by MealSlot, sitting above the calendar grid. Used to
+      quickly assign items to specific days without leaving the Calendar tab.
+    context: CTX-004
+    aliases: [summary panel, calendar summary]
+    source: [US-042, US-047]

@@ -1,0 +1,302 @@
+# generated_by: forge:architect-context-mapping
+# generated_at: 2026-06-21
+# tier: large
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Bounded Contexts
+#
+# Five functional contexts own domain aggregates.  One thin frontend-only
+# context (Navigation Shell) owns no aggregates but is the deployment unit
+# boundary for pure UI chrome — it exists so the context map can capture its
+# dependency on Identity for auth-guard and on every other context for sidebar
+# active-state reads.  One stub context (Meal Tracking) captures the v1.1
+# boundary surfaced by DEC-007.
+# ─────────────────────────────────────────────────────────────────────────────
+
+contexts:
+
+  # ── Identity ────────────────────────────────────────────────────────────────
+  # Owns everything about who the user is and whether they are authenticated.
+  # The ubiquitous language here ("Session", "Role", "PasswordResetToken") has
+  # no meaning in any other context — downstream contexts receive only user_id.
+
+  - id: CTX-001
+    name: Identity
+    description: >
+      Handles user registration, sign-in, sign-out, and password reset.
+      Owns the UserAccount aggregate including session tokens and role.
+      All other contexts treat user_id as an opaque foreign key; they do
+      not share the account model.  Auth guard (route protection) is a
+      concern of this context surfaced through the session-validation API.
+    capabilities: [CAP-001]
+    aggregates: [AGG-001]
+    ubiquitous_language: [TERM-016, TERM-017, TERM-018]
+    deployment_unit: backend   # Python REST service + session store
+
+  # ── Navigation Shell ────────────────────────────────────────────────────────
+  # Pure frontend concern: sidebar, topbar, default landing page, week-stats
+  # widget.  No aggregates; no backend of its own.  Listed as a context so the
+  # context map can record that it depends on Identity for auth-guard and reads
+  # summary data from Meal Planning for the topbar widget.
+
+  - id: CTX-002
+    name: Navigation Shell
+    description: >
+      The persistent Chrome wrapping all modules: sidebar navigation,
+      topbar (current module name), and the at-a-glance week-stats widget
+      that reads summary data from Meal Planning.  Purely a frontend
+      concern — no domain events, no commands, no aggregates.  Co-deployed
+      with the Next.js frontend.
+    capabilities: [CAP-002]
+    aggregates: []
+    ubiquitous_language: []
+    deployment_unit: frontend  # Next.js only; no backend resource
+
+  # ── Product Catalog ──────────────────────────────────────────────────────────
+  # Owns Product master data.  The WeekFlag sub-concept lives on AGG-002 and is
+  # read cross-context by Meal Planning (see context_map CTX-003 → CTX-004).
+  # The term "Product" has one canonical meaning here; Meal Planning refers to
+  # products only by product_id (a reference, not a shared model).
+
+  - id: CTX-003
+    name: Product Catalog
+    description: >
+      Manages the lifecycle of food products: global (system-provided) and
+      user-added products, with nutrition facts, units, categories, and
+      diet tags.  Also owns the WeekFlag per-user marker and the Monday
+      scheduler that promotes next-week flags to this-week.  The canonical
+      source of truth for all product data; other contexts reference
+      products by ID only.
+    capabilities: [CAP-003]
+    aggregates: [AGG-002]
+    ubiquitous_language: [TERM-001, TERM-002, TERM-003, TERM-004, TERM-005,
+                          TERM-006, TERM-014]
+    deployment_unit: backend   # Python REST service
+
+  # ── Meal Planning ────────────────────────────────────────────────────────────
+  # Core weekly planning context.  Owns MealPlan (weekly assignments) and
+  # NutritionTarget (macro corridor used exclusively to render per-day
+  # indicators inside the planner).  Reads Product week-flags from CTX-003
+  # as a cross-context dependency (see DEC-008).  Emits log events consumed
+  # by Meal Tracking (CTX-006, deferred).  PDF export triggers EXT-002.
+
+  - id: CTX-004
+    name: Meal Planning
+    description: >
+      The core weekly planning experience: MealPlan assignments keyed by
+      (user, week, day, meal_slot, product), Calendar and Week Summary
+      views, drag-and-drop, NutritionTarget management and per-day macro
+      indicators, "This week" product surfacing (reads WeekFlag from
+      Product Catalog), log-from-plan actions that create TrackingEntries
+      in the Meal Tracking context, and PDF export via the browser.
+    capabilities: [CAP-004]
+    aggregates: [AGG-003, AGG-005]
+    ubiquitous_language: [TERM-007, TERM-008, TERM-009, TERM-010, TERM-011,
+                          TERM-013, TERM-015, TERM-019]
+    deployment_unit: backend   # Python REST service + frontend Next.js views
+
+  # ── Shopping List ────────────────────────────────────────────────────────────
+  # Derived context: ShoppingList is computed from MealPlan assignments.
+  # Different lifecycle (on-demand derivation, stale/refresh cycle) from the
+  # plan itself.  Reads plan data from Meal Planning context; decision on
+  # integration mechanism surfaced in DEC-009.
+
+  - id: CTX-005
+    name: Shopping List
+    description: >
+      Derives and manages the user's grocery list: auto-generation from
+      MealPlan assignments within a date range, category grouping,
+      staleness detection when the plan changes, user-triggered refresh,
+      and PDF export.  Reads MealPlan data from Meal Planning; owns no
+      planning data itself.
+    capabilities: [CAP-005]
+    aggregates: [AGG-004]
+    ubiquitous_language: [TERM-012, TERM-015]
+    deployment_unit: backend   # Python REST service + frontend Next.js views
+
+  # ── Meal Tracking (stub / deferred) ─────────────────────────────────────────
+  # TrackingEntry is emitted by Meal Planning log-from-plan commands (EVT-015,
+  # EVT-016, EVT-017).  Personal Cabinet module is explicitly deferred to v1.1
+  # (DEC-007).  Modelled as a stub context so the context map captures the
+  # boundary and DEC-007 is traceable to it.
+
+  - id: CTX-006
+    name: Meal Tracking
+    description: >
+      Stores TrackingEntry records created when the user logs a plan day,
+      week, or single item.  Corresponds to the Personal Cabinet module
+      deferred to v1.1.  In MVP1 the data store exists only as a stub;
+      the full read/analysis surface is out of scope.  See DEC-007 for
+      how MVP1 log-from-plan commands should behave against this stub.
+    capabilities: []            # Personal Cabinet deferred; no CAP assigned yet
+    aggregates: []              # AGG for TrackingEntry belongs to v1.1 domain extraction
+    ubiquitous_language: [TERM-013]
+    deployment_unit: backend    # stub table / 501 endpoint per DEC-007
+    status: stub                # deferred to v1.1; present for context-map traceability
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Context Map
+#
+# Relationship patterns used:
+#   customer_supplier  — upstream sets the terms; downstream adapts
+#   open_host_service  — upstream publishes a stable protocol for consumers
+#   conformist         — downstream adopts upstream model completely
+#
+# Integration mechanisms:
+#   sync_api           — synchronous REST call
+#   events             — async domain event (in-process or message bus)
+# ─────────────────────────────────────────────────────────────────────────────
+
+context_map:
+
+  # ── Identity → downstream contexts (auth token validation) ──────────────────
+
+  - id: CTXREL-001
+    from: CTX-001
+    to: CTX-003
+    relationship: customer_supplier
+    integration: sync_api
+    description: >
+      Product Catalog validates the caller's session token with Identity on
+      every write command (AddProduct, EditProduct, DeleteProduct,
+      SetProductWeekFlag) to enforce INV-006 (only creator may mutate).
+      Read operations may be unauthenticated for global products; the
+      decision is downstream's to make.  Identity is the upstream supplier;
+      Product Catalog is the customer.
+    decision: null   # standard auth pattern; no separate DEC needed
+
+  - id: CTXREL-002
+    from: CTX-001
+    to: CTX-004
+    relationship: customer_supplier
+    integration: sync_api
+    description: >
+      Meal Planning validates the caller's session token with Identity on
+      every command to enforce INV-009 (plan belongs to exactly one user).
+      user_id is carried as a foreign key on every MealPlan assignment and
+      NutritionTarget record; it is not a shared model.
+    decision: null
+
+  - id: CTXREL-003
+    from: CTX-001
+    to: CTX-005
+    relationship: customer_supplier
+    integration: sync_api
+    description: >
+      Shopping List validates session tokens with Identity to enforce
+      INV-011 (list belongs to exactly one user).  user_id is a foreign
+      key on ShoppingList; no account model shared.
+    decision: null
+
+  - id: CTXREL-004
+    from: CTX-001
+    to: CTX-002
+    relationship: customer_supplier
+    integration: sync_api
+    description: >
+      Navigation Shell enforces auth-guard on every protected route by
+      checking session validity with Identity.  If the session is invalid,
+      the shell redirects to the sign-in page.  Entirely a frontend-to-
+      backend call; no shared model.
+    decision: null
+
+  # ── Identity → external: email delivery ─────────────────────────────────────
+
+  - id: CTXREL-005
+    from: CTX-001
+    to: EXT-001
+    relationship: conformist
+    integration: sync_api
+    description: >
+      Identity calls the EmailDeliveryService to dispatch password-reset
+      links after CMD-004 produces EVT-004 (PasswordResetRequested).
+      Identity conforms to the provider's API (no ACL layer in MVP1 given
+      there is only one email integration point and no complex model
+      translation needed).
+    decision: null
+
+  # ── Product Catalog → Meal Planning (WeekFlag cross-context read) ────────────
+
+  - id: CTXREL-006
+    from: CTX-003
+    to: CTX-004
+    relationship: customer_supplier
+    integration: sync_api
+    description: >
+      Meal Planning reads the "This week" WeekFlag from Product Catalog to
+      surface flagged products automatically in the planner summary panel
+      (CAP-004, US-030).  Product Catalog is the upstream supplier of
+      WeekFlag truth; Meal Planning is the customer that queries it.  The
+      integration mechanism choice (sync query vs. event-sourced cache) is
+      an open decision — see DEC-008.
+    decision: DEC-008
+
+  # ── Meal Planning → Shopping List (plan-change staleness) ───────────────────
+
+  - id: CTXREL-007
+    from: CTX-004
+    to: CTX-005
+    relationship: customer_supplier
+    integration: events
+    description: >
+      When MealPlan assignments change (EVT-011, EVT-012, EVT-013,
+      EVT-014), the Shopping List must detect the change and mark itself
+      stale (CMD-023 / EVT-023) before the user's next view.  Meal
+      Planning is the upstream supplier of plan data; Shopping List is the
+      customer.  Whether this is an async event subscription or a sync
+      API dependency is captured in DEC-009.
+    decision: DEC-009
+
+  # ── Meal Planning → Meal Tracking (log-from-plan boundary) ──────────────────
+
+  - id: CTXREL-008
+    from: CTX-004
+    to: CTX-006
+    relationship: customer_supplier
+    integration: sync_api
+    description: >
+      Log-from-plan commands (CMD-015, CMD-016, CMD-017) in Meal Planning
+      create TrackingEntries owned by the Meal Tracking context.  In MVP1
+      this crosses into a stub/deferred context.  See DEC-007 for the
+      MVP1 handling choice (stub table vs. 501 vs. hidden UI).
+    decision: DEC-007
+
+  # ── PDF export → browser print dialog (both contexts) ───────────────────────
+
+  - id: CTXREL-009
+    from: CTX-004
+    to: EXT-002
+    relationship: conformist
+    integration: sync_api
+    description: >
+      Meal Planning triggers the browser's native print/PDF facility
+      (EXT-002) when CMD-018 (ExportMealPlanPdf) is executed client-side.
+      The application conforms to the browser API (window.print() or
+      client PDF library); no protocol negotiation.
+    decision: null
+
+  - id: CTXREL-010
+    from: CTX-005
+    to: EXT-002
+    relationship: conformist
+    integration: sync_api
+    description: >
+      Shopping List triggers the browser print/PDF facility when CMD-022
+      (ExportShoppingListPdf) is executed.  Same conformist pattern as
+      CTXREL-009.
+    decision: null
+
+  # ── Navigation Shell reads Meal Planning summary ─────────────────────────────
+
+  - id: CTXREL-011
+    from: CTX-002
+    to: CTX-004
+    relationship: customer_supplier
+    integration: sync_api
+    description: >
+      The topbar week-stats widget in the Navigation Shell reads
+      at-a-glance aggregate nutrition and assignment counts for the current
+      week from Meal Planning.  Navigation Shell is the downstream
+      customer; Meal Planning is the upstream supplier.  This is a
+      read-only query; no commands flow from shell to Meal Planning.
+    decision: DEC-010

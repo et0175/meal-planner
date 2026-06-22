@@ -1,0 +1,115 @@
+# generated_by: forge:architect-capability-mapping
+# generated_at: 2026-06-21
+# tier: large
+
+capabilities:
+
+  # ── Account Management ───────────────────────────────────────────────────────
+  # AGG-001 (UserAccount): registration, sign-in, sign-out, password reset.
+  # Session persistence (US-005), auth guard (US-006), and role parity (US-007)
+  # produce no domain events but are functional requirements owned here.
+
+  - id: CAP-001
+    name: Account management
+    description: >
+      Everything a user does to establish and maintain their identity: registering
+      an account, signing in and out, resetting a forgotten password, and the
+      system-level concerns of session persistence, route authentication guards,
+      and role infrastructure (User vs. Nutritionist stored for future use).
+    events: [EVT-001, EVT-002, EVT-003, EVT-004, EVT-005]
+    commands: [CMD-001, CMD-002, CMD-003, CMD-004, CMD-005]
+    aggregates: [AGG-001]
+    stories: [US-001, US-002, US-003, US-004, US-005, US-006, US-007]
+    requirements: [FR-001, FR-002, FR-003, FR-004, FR-005, FR-006]
+
+  # ── Navigation Shell ─────────────────────────────────────────────────────────
+  # No domain events — purely read/render behaviour.
+  # Sidebar, default landing page, topbar module name, and week-stats summary.
+
+  - id: CAP-002
+    name: Navigation shell
+    description: >
+      The persistent chrome that wraps all modules: the sidebar with all
+      module links (active state highlighted), the topbar showing the current
+      module name, and the Meal Planner topbar widget showing at-a-glance
+      stats for the current week. Landing the user on the Planner after sign-in
+      is also owned here.
+    events: []
+    commands: []
+    aggregates: []
+    stories: [US-008, US-009, US-010, US-011, US-012]
+    requirements: [FR-007, FR-008, FR-009]
+
+  # ── Product Catalog ──────────────────────────────────────────────────────────
+  # AGG-002 (Product): full CRUD for user-added products, read access to global
+  # catalog, view modes (card / list), search/filter/sort, detail card with pie
+  # chart, week-flag management, and the Monday rollover scheduler.
+
+  - id: CAP-003
+    name: Product catalog
+    description: >
+      The full lifecycle of food products: browsing (card and list views),
+      searching, filtering by category or diet tag, sorting by any column,
+      viewing a detailed product card with a macro pie chart and unit-conversion
+      table, adding and editing user-owned products with custom units and
+      nutrition facts, and marking products for "This week" or "Next week" so
+      they surface automatically in the planner summary. Includes the Monday
+      scheduler that promotes next-week flags to this-week.
+    events: [EVT-006, EVT-007, EVT-008, EVT-009, EVT-010]
+    commands: [CMD-006, CMD-007, CMD-008, CMD-009, CMD-010]
+    aggregates: [AGG-002]
+    stories:
+      [US-013, US-014, US-015, US-016, US-017, US-018, US-019, US-020, US-021,
+       US-022, US-023, US-024]
+    requirements: [FR-010, FR-011, FR-012, FR-013, FR-014, FR-015, FR-032,
+                   FR-034, FR-036]
+
+  # ── Meal Planning ────────────────────────────────────────────────────────────
+  # AGG-003 (MealPlan) + AGG-005 (NutritionTarget).
+  # Core planning grid (Week Summary and Calendar tabs), drag-and-drop, layout
+  # toggles, plan-summary panel, nutrition target and per-day indicators, diet
+  # label display, item-search ordering, log-from-plan actions, and PDF export.
+
+  - id: CAP-004
+    name: Meal planning
+    description: >
+      The core weekly planning experience: navigating between weeks, editing
+      the spreadsheet-style Week Summary grid (add/remove rows, toggle units),
+      managing items in the Calendar tab per meal slot (add, remove, update,
+      drag-and-drop between slots and days), switching Calendar layout
+      (week / 4-day / single-day), viewing the plan-summary panel and adding
+      items from it, surfacing "This week" flagged products automatically,
+      showing the user's active diet label, prioritised item-search suggestions,
+      per-day nutrition indicators against the user's macro targets, logging a
+      day/week/single-item to Meal Tracking in one action, and exporting the
+      current week's plan as a PDF.
+    events: [EVT-011, EVT-012, EVT-013, EVT-014, EVT-015, EVT-016, EVT-017,
+             EVT-018, EVT-019]
+    commands: [CMD-011, CMD-012, CMD-013, CMD-014, CMD-015, CMD-016, CMD-017,
+               CMD-018, CMD-019]
+    aggregates: [AGG-003, AGG-005]
+    stories:
+      [US-025, US-026, US-027, US-028, US-029, US-030, US-031, US-032, US-033,
+       US-034, US-035, US-036, US-037, US-038, US-039, US-040, US-041, US-042,
+       US-043, US-044, US-045, US-046, US-047]
+    requirements: [FR-016, FR-017, FR-018, FR-019, FR-020, FR-021, FR-022,
+                   FR-023, FR-024, FR-025, FR-026, FR-033, FR-035]
+
+  # ── Shopping List ────────────────────────────────────────────────────────────
+  # AGG-004 (ShoppingList): auto-generation on navigation, date-range selection,
+  # aggregation and category-grouping, staleness detection and refresh, PDF export.
+
+  - id: CAP-005
+    name: Shopping list
+    description: >
+      Deriving a categorised grocery list from the user's meal plan: automatic
+      generation when the user navigates to the screen, custom date-range
+      selection, aggregating all planned items (summing quantities per product)
+      and grouping by category, detecting when the underlying plan changes and
+      marking the list stale, allowing the user to refresh on demand, and
+      exporting the list as a PDF.
+    events: [EVT-020, EVT-021, EVT-022, EVT-023]
+    commands: [CMD-020, CMD-021, CMD-022, CMD-023]
+    aggregates: [AGG-004]
+    stories: [US-048, US-049, US-050, US-051, US-052, US-053, US-054]
+    requirements: [FR-027, FR-028, FR-029, FR-030, FR-031]

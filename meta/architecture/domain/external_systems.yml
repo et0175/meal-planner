@@ -1,0 +1,27 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+external_systems:
+  - id: EXT-001
+    name: EmailDeliveryService
+    direction: outbound
+    protocol: rest
+    description: >
+      Transactional email provider used to deliver password-reset links to
+      users. Called when CMD-004 (RequestPasswordReset) succeeds and a
+      PasswordResetRequested event is emitted. No external email integration
+      exists beyond this in MVP1.
+
+  - id: EXT-002
+    name: BrowserPrintDialog
+    direction: outbound
+    protocol: other
+    description: >
+      The host browser's native print / save-as-PDF facility, triggered
+      client-side when the user requests a PDF export of a meal plan
+      (CMD-018) or shopping list (CMD-022). Not a REST API; interaction is
+      via the browser's window.print() mechanism or a client-side PDF
+      library. Listed as an external system because it is not owned by the
+      application and its behaviour cannot be controlled programmatically
+      beyond invocation.

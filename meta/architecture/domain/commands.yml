@@ -1,0 +1,196 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+commands:
+  # ── Authentication ──────────────────────────────────────────────────────────
+
+  - id: CMD-001
+    name: RegisterAccount
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: [INV-001]
+    produces: [EVT-001]
+    source: [US-001]
+
+  - id: CMD-002
+    name: SignIn
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: []
+    produces: [EVT-002]
+    source: [US-002]
+
+  - id: CMD-003
+    name: SignOut
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: []
+    produces: [EVT-003]
+    source: [US-003]
+
+  - id: CMD-004
+    name: RequestPasswordReset
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: []
+    produces: [EVT-004]
+    source: [US-004]
+
+  - id: CMD-005
+    name: ResetPassword
+    actor: ACT-001
+    target_aggregate: AGG-001
+    preconditions: [INV-002]
+    produces: [EVT-005]
+    source: [US-004]
+
+  # ── Products Database ───────────────────────────────────────────────────────
+
+  - id: CMD-006
+    name: AddProduct
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: [INV-004, INV-005, INV-007]
+    produces: [EVT-006]
+    source: [US-017]
+
+  - id: CMD-007
+    name: EditProduct
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: [INV-006]
+    produces: [EVT-007]
+    source: [US-018]
+
+  - id: CMD-008
+    name: DeleteProduct
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: [INV-006]
+    produces: [EVT-008]
+    source: [US-018]
+
+  - id: CMD-009
+    name: SetProductWeekFlag
+    actor: ACT-001
+    target_aggregate: AGG-002
+    preconditions: []
+    produces: [EVT-009]
+    source: [US-019]
+
+  - id: CMD-010
+    name: PromoteNextWeekFlags
+    actor: ACT-004
+    target_aggregate: AGG-002
+    preconditions: []
+    produces: [EVT-010]
+    source: [US-019]
+
+  # ── Meal Planner ────────────────────────────────────────────────────────────
+
+  - id: CMD-011
+    name: AddPlanAssignment
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: [INV-008, INV-009, INV-010]
+    produces: [EVT-011]
+    source: [US-027, US-028, US-032, US-037, US-047]
+
+  - id: CMD-012
+    name: UpdatePlanAssignment
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: [INV-008]
+    produces: [EVT-012]
+    source: [US-027, US-029, US-033]
+
+  - id: CMD-013
+    name: RemovePlanAssignment
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: []
+    produces: [EVT-013]
+    source: [US-028, US-032, US-037]
+
+  - id: CMD-014
+    name: MovePlanAssignment
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: [INV-008, INV-009]
+    produces: [EVT-014]
+    source: [US-034, US-038]
+
+  - id: CMD-015
+    name: LogDayFromPlan
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: []
+    produces: [EVT-015]
+    source: [US-040]
+
+  - id: CMD-016
+    name: LogWeekFromPlan
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: []
+    produces: [EVT-016]
+    source: [US-040]
+
+  - id: CMD-017
+    name: LogSingleItemFromCalendar
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: []
+    produces: [EVT-017]
+    source: [US-045]
+
+  - id: CMD-018
+    name: ExportMealPlanPdf
+    actor: ACT-001
+    target_aggregate: AGG-003
+    preconditions: []
+    produces: [EVT-018]
+    source: [US-046]
+
+  - id: CMD-019
+    name: SetNutritionTarget
+    actor: ACT-001
+    target_aggregate: AGG-005
+    preconditions: [INV-013, INV-014]
+    produces: [EVT-019]
+    source: [US-043]
+
+  # ── Shopping List ───────────────────────────────────────────────────────────
+
+  - id: CMD-020
+    name: GenerateShoppingList
+    actor: ACT-003
+    target_aggregate: AGG-004
+    preconditions: [INV-011]
+    produces: [EVT-020]
+    source: [US-049, US-053]
+
+  - id: CMD-021
+    name: RefreshShoppingList
+    actor: ACT-001
+    target_aggregate: AGG-004
+    preconditions: [INV-011]
+    produces: [EVT-021]
+    source: [US-052]
+
+  - id: CMD-022
+    name: ExportShoppingListPdf
+    actor: ACT-001
+    target_aggregate: AGG-004
+    preconditions: []
+    produces: [EVT-022]
+    source: [US-054]
+
+  - id: CMD-023
+    name: MarkShoppingListStale
+    actor: ACT-003
+    target_aggregate: AGG-004
+    preconditions: []
+    produces: [EVT-023]
+    source: [US-052]

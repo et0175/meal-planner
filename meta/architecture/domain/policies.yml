@@ -1,0 +1,57 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+policies:
+  - id: POL-001
+    name: PromoteNextWeekFlagsOnMonday
+    when: "Every Monday at 00:00 (system time)"
+    then: CMD-010
+    rationale: >
+      Products flagged as "Next week" must automatically become "This week" at
+      the start of the new week so they surface in the current week's planner
+      summary without any user action. Source: US-PA-007, raw-requirements.md.
+
+  - id: POL-002
+    name: MarkShoppingListStaleOnPlanChange
+    when: EVT-011
+    then: CMD-023
+    rationale: >
+      Adding a plan assignment changes the meals within a date range that an
+      existing shopping list may cover. The list must be marked stale so the
+      user knows to refresh it. Source: US-052, US-SL-005.
+
+  - id: POL-003
+    name: MarkShoppingListStaleOnPlanUpdate
+    when: EVT-012
+    then: CMD-023
+    rationale: >
+      Updating (quantity / unit change) a plan assignment may alter ingredient
+      totals in an existing shopping list. The list must be marked stale.
+      Source: US-052.
+
+  - id: POL-004
+    name: MarkShoppingListStaleOnPlanRemoval
+    when: EVT-013
+    then: CMD-023
+    rationale: >
+      Removing a plan assignment reduces the shopping list quantities. The list
+      must be marked stale. Source: US-052.
+
+  - id: POL-005
+    name: MarkShoppingListStaleOnPlanMove
+    when: EVT-014
+    then: CMD-023
+    rationale: >
+      Moving a plan assignment between days may shift items across the shopping
+      list date-range boundary. The list must be marked stale. Source: US-052.
+
+  - id: POL-006
+    name: AutoGenerateShoppingListOnNavigate
+    when: "User navigates to Shopping List screen"
+    then: CMD-020
+    rationale: >
+      The shopping list must be generated immediately on navigation without
+      any extra user action. If no list exists for the user's current default
+      date range it is created; if a fresh list already exists it is surfaced
+      as-is. Source: US-053, US-SL-006.

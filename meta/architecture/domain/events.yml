@@ -1,0 +1,173 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+events:
+  # ── Authentication ──────────────────────────────────────────────────────────
+
+  - id: EVT-001
+    name: AccountRegistered
+    triggered_by: CMD-001
+    aggregate: AGG-001
+    source: [US-001]
+    payload_summary: user_id, email, role, created_at
+
+  - id: EVT-002
+    name: UserSignedIn
+    triggered_by: CMD-002
+    aggregate: AGG-001
+    source: [US-002]
+    payload_summary: user_id, session_token, signed_in_at
+
+  - id: EVT-003
+    name: UserSignedOut
+    triggered_by: CMD-003
+    aggregate: AGG-001
+    source: [US-003]
+    payload_summary: user_id, session_token, signed_out_at
+
+  - id: EVT-004
+    name: PasswordResetRequested
+    triggered_by: CMD-004
+    aggregate: AGG-001
+    source: [US-004]
+    payload_summary: user_id, reset_token, expires_at
+
+  - id: EVT-005
+    name: PasswordReset
+    triggered_by: CMD-005
+    aggregate: AGG-001
+    source: [US-004]
+    payload_summary: user_id, reset_at
+
+  # ── Products Database ───────────────────────────────────────────────────────
+
+  - id: EVT-006
+    name: ProductAdded
+    triggered_by: CMD-006
+    aggregate: AGG-002
+    source: [US-017]
+    payload_summary: product_id, owner_user_id, name, category, nutrition_per_100g, units
+
+  - id: EVT-007
+    name: ProductEdited
+    triggered_by: CMD-007
+    aggregate: AGG-002
+    source: [US-018]
+    payload_summary: product_id, changed_fields, edited_at
+
+  - id: EVT-008
+    name: ProductDeleted
+    triggered_by: CMD-008
+    aggregate: AGG-002
+    source: [US-018]
+    payload_summary: product_id, deleted_at
+
+  - id: EVT-009
+    name: ProductWeekFlagSet
+    triggered_by: CMD-009
+    aggregate: AGG-002
+    source: [US-019]
+    payload_summary: product_id, user_id, flag (none|this_week|next_week), set_at
+
+  - id: EVT-010
+    name: NextWeekFlagsPromoted
+    triggered_by: CMD-010
+    aggregate: AGG-002
+    source: [US-019]
+    payload_summary: promoted_product_ids, promoted_at
+
+  # ── Meal Planner ────────────────────────────────────────────────────────────
+
+  - id: EVT-011
+    name: PlanAssignmentAdded
+    triggered_by: CMD-011
+    aggregate: AGG-003
+    source: [US-027, US-028, US-032, US-037, US-047]
+    payload_summary: user_id, week_start_date, day, meal_slot, product_id, quantity, unit
+
+  - id: EVT-012
+    name: PlanAssignmentUpdated
+    triggered_by: CMD-012
+    aggregate: AGG-003
+    source: [US-027, US-029, US-033]
+    payload_summary: assignment_id, user_id, quantity, unit, updated_at
+
+  - id: EVT-013
+    name: PlanAssignmentRemoved
+    triggered_by: CMD-013
+    aggregate: AGG-003
+    source: [US-028, US-032, US-037]
+    payload_summary: assignment_id, user_id, removed_at
+
+  - id: EVT-014
+    name: PlanAssignmentMoved
+    triggered_by: CMD-014
+    aggregate: AGG-003
+    source: [US-034, US-038]
+    payload_summary: assignment_id, user_id, from_day, from_meal_slot, to_day, to_meal_slot, moved_at
+
+  - id: EVT-015
+    name: DayLoggedFromPlan
+    triggered_by: CMD-015
+    aggregate: AGG-003
+    source: [US-040]
+    payload_summary: user_id, date, tracking_entry_ids_created
+
+  - id: EVT-016
+    name: WeekLoggedFromPlan
+    triggered_by: CMD-016
+    aggregate: AGG-003
+    source: [US-040]
+    payload_summary: user_id, week_start_date, tracking_entry_ids_created
+
+  - id: EVT-017
+    name: SingleItemLoggedFromCalendar
+    triggered_by: CMD-017
+    aggregate: AGG-003
+    source: [US-045]
+    payload_summary: user_id, assignment_id, tracking_entry_id_created
+
+  - id: EVT-018
+    name: MealPlanPdfExported
+    triggered_by: CMD-018
+    aggregate: AGG-003
+    source: [US-046]
+    payload_summary: user_id, week_start_date, exported_at
+
+  - id: EVT-019
+    name: NutritionTargetSet
+    triggered_by: CMD-019
+    aggregate: AGG-005
+    source: [US-043]
+    payload_summary: user_id, calories, protein_g, fat_g, carbohydrates_g, set_at
+
+  # ── Shopping List ───────────────────────────────────────────────────────────
+
+  - id: EVT-020
+    name: ShoppingListGenerated
+    triggered_by: CMD-020
+    aggregate: AGG-004
+    source: [US-049, US-053]
+    payload_summary: user_id, from_date, to_date, item_count, generated_at
+
+  - id: EVT-021
+    name: ShoppingListRefreshed
+    triggered_by: CMD-021
+    aggregate: AGG-004
+    source: [US-052]
+    payload_summary: user_id, from_date, to_date, item_count, refreshed_at
+
+  - id: EVT-022
+    name: ShoppingListPdfExported
+    triggered_by: CMD-022
+    aggregate: AGG-004
+    source: [US-054]
+    payload_summary: user_id, from_date, to_date, exported_at
+
+  - id: EVT-023
+    name: ShoppingListMarkedStale
+    triggered_by: CMD-023
+    aggregate: AGG-004
+    source: [US-052]
+    payload_summary: user_id, stale_reason, marked_at

@@ -1,0 +1,275 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+open:
+  - id: DEC-001
+    question: >
+      What is the expiry window for password-reset tokens? The requirement states
+      they are "single-use and expire after a defined time window" but no duration
+      is specified. Suggest 1 hour as a typical default; needs confirmation.
+    surfaced_from:
+      kind: invariant
+      ref: [INV-002, FR-005]
+    alternatives:
+      - label: 1_hour
+        summary: Token expires 60 minutes after issuance.
+        pros: [Standard industry practice, short enough to limit exposure window]
+        cons: [Users on slow email delivery may miss the window]
+      - label: 24_hours
+        summary: Token expires 24 hours after issuance.
+        pros: [Plenty of time for email delivery, user-friendly]
+        cons: [Longer attack window if email is intercepted]
+    criteria_refs: [FR-005]
+    status: resolved
+    resolved_by: ADR-0005
+    blocks: none
+
+  - id: DEC-002
+    question: >
+      What is the rate-limit threshold and cooldown window for sign-in attempts?
+      FR-003 requires rate-limiting after a "configurable number of failed attempts"
+      but no concrete threshold or cooldown duration is specified. Suggest 5
+      attempts per 15-minute window; needs confirmation.
+    surfaced_from:
+      kind: nfr
+      ref: [FR-003]
+    alternatives:
+      - label: 5_attempts_15min_window
+        summary: Lock for 15 minutes after 5 consecutive failed sign-in attempts.
+        pros: [Blocks brute-force, common industry default]
+        cons: [May frustrate legitimate users who mistype]
+      - label: 10_attempts_1h_lockout
+        summary: Lock for 1 hour after 10 consecutive failures.
+        pros: [Less disruptive for typo-prone users]
+        cons: [Wider brute-force window]
+    criteria_refs: [FR-003]
+    status: resolved
+    resolved_by: ADR-0006
+    blocks: none
+
+  - id: DEC-003
+    question: >
+      What is the default date range used for auto-generating the shopping list
+      on navigation (POL-006 / FR-027)? The requirement states generation is
+      immediate on navigate but does not define the default date window (e.g.
+      "current week Mon–Sun", "next 7 days from today", "current week + next week").
+      This affects what the user sees before they change the range.
+    surfaced_from:
+      kind: ambiguity
+      ref: [FR-027, POL-006]
+    alternatives:
+      - label: current_iso_week
+        summary: Auto-generate for the current ISO week (Mon–Sun).
+        pros: [Consistent with Meal Planner week navigation, predictable]
+        cons: [If today is Saturday, list covers mostly past meals]
+      - label: next_7_days_from_today
+        summary: Auto-generate for today through today+6.
+        pros: [Always forward-looking, most useful for shopping]
+        cons: [Boundary shifts daily, inconsistent with week planner view]
+      - label: current_plus_next_week
+        summary: Auto-generate for current week + next week (14 days).
+        pros: [Covers bulk shopping trips]
+        cons: [May include future meals not yet planned, creates noise]
+    criteria_refs: [FR-027, FR-028]
+    status: resolved
+    resolved_by: ADR-0007
+    blocks: none
+
+  - id: DEC-004
+    question: >
+      Should the ShoppingList aggregate track a single "current" list per user
+      or maintain a history of generated lists per date range? Currently modelled
+      as a single derived artifact per user+date_range, but the staleness/refresh
+      flow implies at most one active list per user. Clarify whether past
+      lists should be persisted for history or always overwritten on refresh.
+    surfaced_from:
+      kind: invariant
+      ref: [AGG-004, INV-011, INV-012]
+    alternatives:
+      - label: single_active_list_overwrite
+        summary: One list per user; refresh always overwrites.
+        pros: [Simple, low storage, matches UI showing one list]
+        cons: [No history, user cannot compare past lists]
+      - label: append_history_per_date_range
+        summary: Each (user, from_date, to_date) has its own persisted list; latest is "active".
+        pros: [Audit trail, re-viewable past lists]
+        cons: [More complex storage, out-of-scope for MVP1]
+    criteria_refs: [FR-027, FR-028, FR-030]
+    status: resolved
+    resolved_by: ADR-0008
+    blocks: none
+
+  - id: DEC-005
+    question: >
+      When the PromoteNextWeekFlags scheduler (POL-001) fires every Monday, it
+      promotes flags globally for all users. What happens to a product's "This week"
+      flag from the previous week — is it cleared automatically (so the slate is
+      clean) or left in place (user must clear manually)? This affects both the
+      data model and the user experience.
+    surfaced_from:
+      kind: ambiguity
+      ref: [POL-001, EVT-010, AGG-002]
+    alternatives:
+      - label: auto_clear_old_this_week
+        summary: On promotion, clear all "This week" flags from the prior week before setting the new ones.
+        pros: [Clean slate each week, planner summary always accurate]
+        cons: [Users who want carry-over must re-flag manually each week]
+      - label: carry_over_this_week
+        summary: >
+          This-week flags remain until the user clears them; only next-week flags are promoted.
+        pros: [Useful for staple items planned every week]
+        cons: [Planner summary accumulates stale items unless user housekeeps]
+    criteria_refs: [FR-015, FR-034, POL-001]
+    status: resolved
+    resolved_by: ADR-0009
+    blocks: none
+
+  - id: DEC-006
+    question: >
+      NFR-008 specifies 4.5:1 contrast for normal text but does not specify the
+      threshold for large text. WCAG 2.1 AA requires 3:1 for large text (18pt+ or
+      14pt+ bold). Should this be added as a separate NFR metric, or is the WCAG
+      reference in NFR-006 considered sufficient?
+    surfaced_from:
+      kind: nfr
+      ref: [NFR-006, NFR-008]
+    alternatives:
+      - label: separate_nfr_large_text
+        summary: Add NFR with metric contrast_ratio_large_text and threshold 3:1.
+        pros: [Machine-checkable, explicit, feeds automated contrast tests]
+        cons: [Minor duplication with the WCAG reference]
+      - label: covered_by_wcag_nfr
+        summary: Consider it covered by NFR-006 (WCAG 2.1 AA).
+        pros: [No duplication]
+        cons: [Not machine-checkable without its own metric/threshold]
+    criteria_refs: [NFR-006, NFR-008]
+    status: resolved
+    resolved_by: ADR-0010
+    blocks: none
+
+  - id: DEC-007
+    question: >
+      "Log from plan" (FR-025, FR-035) creates TrackingEntries in the Personal
+      Cabinet module, which is explicitly deferred to v1.1. How should the MVP1
+      backend handle log-from-plan calls — write to a stub store, reject with a
+      501, or silently no-op? The front-end stories (US-040, US-045) include these
+      actions in the MVP1 UI. Clarify expected behaviour before synthesis.
+    surfaced_from:
+      kind: ambiguity
+      ref: [FR-025, FR-035, US-040, US-045]
+    alternatives:
+      - label: stub_store
+        summary: >
+          Write tracking entries to a minimal stub table now; Personal Cabinet
+          reads it in v1.1 without migration.
+        pros: [Data not lost, full story works end-to-end in MVP1]
+        cons: [Creates a partially-owned data store outside the modelled domain]
+      - label: reject_501
+        summary: Backend returns 501 Not Implemented; UI shows "coming in v1.1" message.
+        pros: [Honest, no stub debt]
+        cons: [US-040/045 are in MVP1 stories — this breaks their acceptance criteria]
+      - label: hide_ui_actions
+        summary: Remove the log actions from MVP1 UI; defer entirely to v1.1.
+        pros: [Clean scope boundary]
+        cons: [Stories US-040/045 are in the current story set — requires story update]
+    criteria_refs: [FR-025, FR-035]
+    status: resolved
+    resolved_by: ADR-0001
+    blocks: synthesis
+
+  - id: DEC-008
+    question: >
+      How should Meal Planning read the "This week" WeekFlag from Product Catalog
+      (CTXREL-006)?  The planner summary panel must surface all products flagged
+      "This week" for the current user (US-030).  The WeekFlag is owned by
+      AGG-002 in CTX-003; Meal Planning (CTX-004) needs it at render time.
+      Two viable approaches: synchronous REST query per page load, or an
+      event-sourced local cache in CTX-004 updated when EVT-009/EVT-010 fire.
+    surfaced_from:
+      kind: context_boundary
+      ref: [CTX-003, CTX-004]
+    alternatives:
+      - label: sync_query_at_render
+        summary: >
+          Meal Planning calls Product Catalog REST API to fetch "This week"
+          flagged products for the user when the planner summary panel loads.
+        pros: [Always consistent, no local cache to maintain, simple]
+        cons: [Cross-context synchronous coupling, latency on every planner load,
+               Meal Planning unavailable if Product Catalog is down]
+      - label: event_sourced_cache
+        summary: >
+          Meal Planning subscribes to EVT-009 (ProductWeekFlagSet) and
+          EVT-010 (NextWeekFlagsPromoted); maintains a local projection of
+          flagged products within CTX-004.
+        pros: [Decoupled, resilient, fast reads from local store]
+        cons: [Eventual consistency, projection must be bootstrapped on first deploy,
+               added complexity for an MVP1 system]
+    criteria_refs: [FR-034, NFR-002]
+    status: resolved
+    resolved_by: ADR-0002
+    blocks: synthesis
+
+  - id: DEC-009
+    question: >
+      How should the Shopping List detect that the underlying MealPlan has changed
+      and mark itself stale (CTXREL-007)?  CMD-023 / EVT-023 must fire when
+      plan assignments change (EVT-011–014) so the user sees the stale indicator.
+      Two approaches: async event subscription or synchronous staleness check on
+      every Shopping List read.
+    surfaced_from:
+      kind: context_boundary
+      ref: [CTX-004, CTX-005]
+    alternatives:
+      - label: async_event_subscription
+        summary: >
+          Shopping List subscribes to EVT-011, EVT-012, EVT-013, EVT-014
+          and runs CMD-023 internally to mark the list stale.
+        pros: [Decoupled, Shopping List is notified immediately when plan changes,
+               scales if many plan mutations occur]
+        cons: [Requires reliable event delivery; if event is missed list stays
+               showing as fresh — data quality risk]
+      - label: check_on_read
+        summary: >
+          When the user opens the Shopping List screen, the backend compares
+          the list's generated_at timestamp against the plan's last_modified
+          timestamp and marks stale if plan is newer.
+        pros: [Simpler — no event infrastructure, always correct at read time]
+        cons: [Staleness only visible on navigation, not in real-time;
+               requires plan's last_modified to be a cheap queryable field]
+    criteria_refs: [FR-030, NFR-002]
+    status: resolved
+    resolved_by: ADR-0003
+    blocks: synthesis
+
+  - id: DEC-010
+    question: >
+      The Navigation Shell topbar widget shows at-a-glance week stats for the
+      current week (US-011, US-012), reading summary data from Meal Planning
+      (CTXREL-011).  Should this be a dedicated summary endpoint on the Meal
+      Planning API, or should the shell query a general Meal Planning endpoint
+      and compute the summary client-side?
+    surfaced_from:
+      kind: context_boundary
+      ref: [CTX-002, CTX-004]
+    alternatives:
+      - label: dedicated_summary_endpoint
+        summary: >
+          Meal Planning exposes a lightweight GET /plan/summary?week=ISO_WEEK
+          endpoint returning pre-aggregated stats (total kcal, macro totals,
+          number of planned meals) — consumed by the shell widget.
+        pros: [Cheap network payload, backend controls aggregation logic,
+               easy to cache with short TTL]
+        cons: [Adds one more endpoint to maintain; Meal Planning must know what
+               the shell widget needs]
+      - label: client_side_aggregation
+        summary: >
+          Shell fetches the full week's assignments from Meal Planning and
+          aggregates stats client-side in the topbar widget.
+        pros: [No additional endpoint, reuses existing data shape]
+        cons: [Larger payload on every page load, aggregation logic duplicated
+               in frontend, harder to cache]
+    criteria_refs: [FR-009, NFR-002]
+    status: resolved
+    resolved_by: ADR-0004
+    blocks: synthesis

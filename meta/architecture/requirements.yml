@@ -1,0 +1,1219 @@
+# generated_by: forge:architect-domain-extraction
+# generated_at: 2026-06-21
+# tier: large
+
+functional:
+
+  # ── Authentication ──────────────────────────────────────────────────────────
+
+  - id: FR-001
+    statement: >
+      The system must allow a new visitor to register an account with email and
+      password, store the identity, and grant access to all MVP1 features.
+    source: [US-001]
+    acceptance:
+      - id: AC-001
+        given: a new visitor providing email "alice@example.com" and a valid password
+        when: they submit the registration form
+        then: account is persisted and the user is redirected to the Planner screen
+        kind: happy
+        test: TestRegisterAccount_Persists
+      - id: AC-002
+        given: an account with email "alice@example.com" already exists
+        when: a second registration uses the same email
+        then: returns 409 and no second account is persisted
+        kind: negative
+        invariant: INV-001
+        test: TestRegisterAccount_RejectsDuplicateEmail
+      - id: AC-003
+        given: a registration payload with an empty password
+        when: the form is submitted
+        then: returns 422 and no account is persisted
+        kind: negative
+        test: TestRegisterAccount_RejectsEmptyPassword
+      - id: AC-004
+        given: a registration payload with a malformed email address
+        when: the form is submitted
+        then: returns 422 and no account is persisted
+        kind: negative
+        test: TestRegisterAccount_RejectsMalformedEmail
+      - id: AC-100
+        given: a newly registered account
+        when: the account record is inspected
+        then: the role field is either "user" or "nutritionist" and no other value is stored
+        kind: boundary
+        invariant: INV-003
+        test: TestRegisterAccount_RoleIsValidEnum
+
+  - id: FR-002
+    statement: >
+      The system must allow a registered user to sign in with email and password,
+      creating a persistent session for the duration of the browser tab session.
+    source: [US-002, US-005]
+    acceptance:
+      - id: AC-005
+        given: a registered user with valid credentials
+        when: they submit the sign-in form
+        then: a session token is created and the user is redirected to the Planner
+        kind: happy
+        test: TestSignIn_CreatesSession
+      - id: AC-006
+        given: a registered user submitting an incorrect password
+        when: the sign-in form is submitted
+        then: returns 401 and no session is created
+        kind: negative
+        test: TestSignIn_RejectsWrongPassword
+      - id: AC-007
+        given: a user with no registered account submitting any credentials
+        when: the sign-in form is submitted
+        then: returns 401 and no session is created
+        kind: negative
+        test: TestSignIn_RejectsUnknownEmail
+      - id: AC-008
+        given: a user who has signed in and navigates between pages without closing the tab
+        when: they visit any authenticated route
+        then: they remain signed in without being prompted to sign in again
+        kind: happy
+        test: TestSession_PersistsAcrossNavigation
+
+  - id: FR-003
+    statement: >
+      The system must enforce rate-limiting on sign-in after a configurable
+      number of consecutive failed attempts.
+    source: [US-002]
+    acceptance:
+      - id: AC-009
+        given: a user who has submitted 5 consecutive failed sign-in attempts
+        when: they attempt a 6th sign-in within the rate-limit window
+        then: the attempt is rejected with 429 and a retry-after indicator is shown
+        kind: negative
+        test: TestSignIn_RateLimitsAfterThreshold
+      - id: AC-010
+        given: a user who hit the rate limit and waits for the cooldown to expire
+        when: they attempt sign-in again with correct credentials
+        then: the sign-in succeeds and a session is created
+        kind: happy
+        test: TestSignIn_AllowsAfterCooldown
+
+  - id: FR-004
+    statement: >
+      The system must allow a signed-in user to sign out, invalidating the session.
+    source: [US-003]
+    acceptance:
+      - id: AC-011
+        given: a user with an active session
+        when: they click sign out
+        then: the session token is invalidated and the user is redirected to the sign-in screen
+        kind: happy
+        test: TestSignOut_InvalidatesSession
+      - id: AC-012
+        given: a request using an invalidated session token
+        when: any authenticated endpoint is accessed
+        then: returns 401
+        kind: negative
+        test: TestSignOut_InvalidatedTokenRejected
+
+  - id: FR-005
+    statement: >
+      The system must allow a user who has forgotten their password to request
+      a password-reset link sent to their registered email address.
+    source: [US-004]
+    acceptance:
+      - id: AC-013
+        given: a registered email address entered in the password-reset form
+        when: the form is submitted
+        then: a single-use reset link is sent to that email and EVT-004 is emitted
+        kind: happy
+        test: TestRequestPasswordReset_SendsEmail
+      - id: AC-014
+        given: a valid, unexpired reset token
+        when: the user sets a new password via the reset link
+        then: the password is updated and EVT-005 is emitted
+        kind: happy
+        test: TestResetPassword_UpdatesPassword
+      - id: AC-015
+        given: a reset token that has already been used once
+        when: it is submitted again
+        then: returns 410 and the password is not changed
+        kind: negative
+        invariant: INV-002
+        test: TestResetPassword_RejectsUsedToken
+      - id: AC-016
+        given: a reset token whose expiry time has elapsed
+        when: it is submitted
+        then: returns 410 and the password is not changed
+        kind: negative
+        invariant: INV-002
+        test: TestResetPassword_RejectsExpiredToken
+      - id: AC-017
+        given: an unregistered email address entered in the password-reset form
+        when: the form is submitted
+        then: the response is 200 (no enumeration) and no email is sent
+        kind: negative
+        test: TestRequestPasswordReset_NoEnumeration
+
+  - id: FR-006
+    statement: >
+      All application modules must require authentication; unauthenticated requests
+      must be redirected to the sign-in screen.
+    source: [US-006]
+    acceptance:
+      - id: AC-018
+        given: a request to any authenticated route with no session token
+        when: the route is accessed
+        then: the response redirects to the sign-in screen (302) or returns 401
+        kind: authz
+        test: TestAuthGuard_RedirectsAnonymous
+      - id: AC-019
+        given: a request to any authenticated route with an expired session token
+        when: the route is accessed
+        then: the session is invalidated and the user is redirected to sign-in
+        kind: authz
+        test: TestAuthGuard_RedirectsExpiredSession
+
+  # ── Navigation ──────────────────────────────────────────────────────────────
+
+  - id: FR-007
+    statement: >
+      The sidebar must display all application modules at all times, with the
+      active module visually highlighted, so that users can navigate to any
+      section in one click.
+    source: [US-008, US-010]
+    acceptance:
+      - id: AC-020
+        given: an authenticated user on any screen
+        when: the page renders
+        then: sidebar shows all modules and the current module link is visually active
+        kind: happy
+        test: TestSidebar_ShowsAllModulesWithActiveState
+      - id: AC-108
+        given: an unauthenticated request to any module route
+        when: the page is accessed
+        then: the sidebar is not rendered and the user sees the sign-in screen
+        kind: authz
+        test: TestSidebar_NotRenderedForAnonymous
+
+  - id: FR-008
+    statement: >
+      The app must land the user on the Meal Planner screen after sign-in and
+      whenever the app root is accessed.
+    source: [US-009]
+    acceptance:
+      - id: AC-021
+        given: an authenticated user who navigates to the app root "/"
+        when: the page loads
+        then: the Meal Planner screen is rendered
+        kind: happy
+        test: TestRootRoute_RedirectsToPlanner
+      - id: AC-109
+        given: an unauthenticated visitor who navigates to the app root "/"
+        when: the page loads
+        then: they are redirected to the sign-in screen
+        kind: authz
+        test: TestRootRoute_RedirectsAnonymousToSignIn
+
+  - id: FR-009
+    statement: >
+      The topbar must display the name of the current module, and when in the
+      Planner, also show a brief summary of the current week's plan stats.
+    source: [US-011, US-012]
+    acceptance:
+      - id: AC-022
+        given: an authenticated user in any module
+        when: the topbar renders
+        then: the topbar shows the current module name
+        kind: happy
+        test: TestTopbar_ShowsModuleName
+      - id: AC-023
+        given: an authenticated user in the Meal Planner
+        when: the topbar renders
+        then: the topbar shows at-a-glance stats for the current week's plan
+        kind: happy
+        test: TestTopbar_ShowsPlannerWeekSummary
+      - id: AC-110
+        given: an authenticated user in the Meal Planner with no assignments for the current week
+        when: the topbar renders
+        then: the topbar shows zero-state plan stats (no error)
+        kind: boundary
+        test: TestTopbar_ZeroStatePlannerStats
+
+  # ── Products Database ───────────────────────────────────────────────────────
+
+  - id: FR-010
+    statement: >
+      The Products Database must allow users to browse all products with nutrition
+      breakdown per item, toggle between category-card view and list/table view,
+      and navigate into a category to see its products.
+    source: [US-013, US-020, US-021]
+    acceptance:
+      - id: AC-024
+        given: a catalog with products in multiple categories
+        when: the user opens the Products Database in card view
+        then: category cards are shown; clicking a card reveals that category's products
+        kind: happy
+        test: TestProducts_CategoryCardNavigation
+      - id: AC-025
+        given: a catalog with products in multiple categories
+        when: the user switches to list view
+        then: a table of all products with nutrition columns is shown
+        kind: happy
+        test: TestProducts_ListViewShowsNutrition
+      - id: AC-026
+        given: no products exist in the catalog
+        when: the user opens the Products Database
+        then: an empty state is shown (no error)
+        kind: boundary
+        test: TestProducts_EmptyState
+
+  - id: FR-011
+    statement: >
+      The Products Database must allow users to filter products by category and
+      diet tag, search by product name or diet tag, and sort the list by any
+      column — all in a unified single-screen experience.
+    source: [US-014, US-015, US-016, US-023]
+    acceptance:
+      - id: AC-027
+        given: a catalog of 50 products in mixed categories
+        when: the user filters by category "Dairy"
+        then: only Dairy products are shown in the list
+        kind: happy
+        test: TestProducts_FilterByCategory
+      - id: AC-028
+        given: a catalog of 50 products with diet tags
+        when: the user filters by diet tag "Vegan"
+        then: only products tagged Vegan are shown
+        kind: happy
+        test: TestProducts_FilterByDietTag
+      - id: AC-029
+        given: a search term "chick" is entered
+        when: the user performs the search
+        then: only products whose name contains "chick" (case-insensitive) are listed
+        kind: happy
+        test: TestProducts_SearchByName
+      - id: AC-030
+        given: a non-existent search term "zzz"
+        when: the user performs the search
+        then: the list is empty (no results) without an error
+        kind: boundary
+        test: TestProducts_SearchNoResults
+      - id: AC-031
+        given: a list of products
+        when: the user sorts by "Protein" column descending
+        then: products are ordered from highest protein to lowest
+        kind: happy
+        test: TestProducts_SortByColumn
+
+  - id: FR-012
+    statement: >
+      The user must be able to view a detailed product card showing a macro
+      pie chart and a unit-conversion table.
+    source: [US-022]
+    acceptance:
+      - id: AC-032
+        given: a product with nutrition data and multiple units
+        when: the user opens the product detail card
+        then: a macro pie chart and a unit conversion table are displayed
+        kind: happy
+        test: TestProductDetail_ShowsPieChartAndUnitTable
+      - id: AC-111
+        given: a product with only a base unit and no alternative units
+        when: the user opens the product detail card
+        then: a macro pie chart is shown and the unit table shows one row (no error)
+        kind: boundary
+        test: TestProductDetail_SingleUnitNoError
+
+  - id: FR-013
+    statement: >
+      The system must allow an authenticated user to add a product not in the
+      default database, defining name, category, nutrition values per 100 g,
+      and up to 10 alternative units with gram-conversion factors.
+    source: [US-017, US-024]
+    acceptance:
+      - id: AC-033
+        given: >
+          an authenticated user submitting a product with name "Home Oats",
+          category "Grains", calories 380, protein 13 g, fat 7 g, carbs 67 g per 100 g,
+          and one alternative unit "cup = 90 g"
+        when: the add-product form is submitted
+        then: the product is persisted, EVT-006 is emitted, and it appears in the catalog
+        kind: happy
+        test: TestAddProduct_Persists
+      - id: AC-034
+        given: a product payload with calories set to -10
+        when: the form is submitted
+        then: returns 422 and nothing is persisted
+        kind: negative
+        invariant: INV-005
+        test: TestAddProduct_RejectsNegativeNutrition
+      - id: AC-035
+        given: a product payload with an empty name
+        when: the form is submitted
+        then: returns 422 and nothing is persisted
+        kind: negative
+        test: TestAddProduct_RejectsEmptyName
+      - id: AC-036
+        given: an authenticated user who already has 500 user-added products
+        when: they attempt to add a 501st product
+        then: returns 409 and nothing is persisted
+        kind: boundary
+        invariant: INV-007
+        test: TestAddProduct_RejectsLimitExceeded
+      - id: AC-037
+        given: a product payload with 11 alternative units
+        when: the form is submitted
+        then: returns 422 and nothing is persisted
+        kind: boundary
+        invariant: INV-004
+        test: TestAddProduct_RejectsTooManyUnits
+      - id: AC-038
+        given: an unauthenticated request to add a product
+        when: the endpoint is called
+        then: returns 401 and nothing is persisted
+        kind: authz
+        test: TestAddProduct_DeniesAnonymous
+
+  - id: FR-014
+    statement: >
+      An authenticated user must be able to edit or delete only the products
+      they created; attempts to edit or delete other users' products must be
+      denied.
+    source: [US-018]
+    acceptance:
+      - id: AC-039
+        given: a user editing their own product with a valid updated name
+        when: the edit form is submitted
+        then: the product is updated and EVT-007 is emitted
+        kind: happy
+        test: TestEditProduct_UpdatesOwn
+      - id: AC-040
+        given: a user attempting to edit a product created by another user
+        when: the edit is submitted
+        then: returns 403 and the product is unchanged
+        kind: authz
+        invariant: INV-006
+        test: TestEditProduct_DeniesOther
+      - id: AC-041
+        given: a user deleting their own product
+        when: the delete is submitted
+        then: the product is soft-deleted (or removed) and EVT-008 is emitted
+        kind: happy
+        test: TestDeleteProduct_RemovesOwn
+      - id: AC-042
+        given: a user attempting to delete a global product
+        when: the delete is submitted
+        then: returns 403 and the product is unchanged
+        kind: authz
+        invariant: INV-006
+        test: TestDeleteProduct_DeniesGlobalProduct
+
+  - id: FR-015
+    statement: >
+      A user must be able to mark a product as planned for "This week" or
+      "Next week" (or clear the flag). Products flagged "This week" must surface
+      automatically in the planner summary for the current week.
+    source: [US-019, US-030]
+    acceptance:
+      - id: AC-043
+        given: a product with no week flag
+        when: the user sets the flag to "This week"
+        then: EVT-009 is emitted and the product appears in the current week's planner
+        kind: happy
+        test: TestSetWeekFlag_ThisWeekAppearsInPlanner
+      - id: AC-044
+        given: a product flagged "This week"
+        when: the user clears the flag
+        then: EVT-009 is emitted and the product no longer appears in the planner summary
+        kind: happy
+        test: TestSetWeekFlag_ClearRemovesFromPlanner
+      - id: AC-045
+        given: it is Monday 00:00
+        when: the PromoteNextWeekFlags scheduler fires
+        then: all products flagged "Next week" are re-flagged "This week" and EVT-010 is emitted
+        kind: happy
+        policy: POL-001
+        test: TestPromoteNextWeekFlags_FiresOnMonday
+      - id: AC-112
+        given: a product flagged "Next week" by user Alice and it is Tuesday (not Monday)
+        when: Alice opens the current week's planner summary
+        then: the next-week product is not shown in the current week's summary
+        kind: boundary
+        test: TestSetWeekFlag_NextWeekNotShownMidWeek
+
+  # ── Meal Planner ────────────────────────────────────────────────────────────
+
+  - id: FR-016
+    statement: >
+      The Meal Planner must allow users to navigate between calendar weeks
+      (forward, backward, jump to current week) and switch between a Week
+      Summary tab and a Calendar tab.
+    source: [US-025, US-026]
+    acceptance:
+      - id: AC-046
+        given: a user on the Meal Planner for the current week
+        when: they click "Next week"
+        then: the planner loads the following week's assignments
+        kind: happy
+        test: TestPlanner_NavigateForward
+      - id: AC-047
+        given: a user viewing a past week
+        when: they click "Today"
+        then: the planner returns to the current week
+        kind: happy
+        test: TestPlanner_JumpToCurrentWeek
+      - id: AC-113
+        given: a user already viewing the current week
+        when: the planner renders
+        then: the "Today" / current week button is active/highlighted and the current week is shown
+        kind: boundary
+        test: TestPlanner_CurrentWeekActiveState
+
+  - id: FR-017
+    statement: >
+      The Week Summary tab must display a spreadsheet-style grid of all planned
+      items for the week (one row per item, columns for each day), and allow
+      adding new rows, removing rows, and toggling each row between servings
+      mode and grams mode.
+    source: [US-027, US-028, US-029]
+    acceptance:
+      - id: AC-048
+        given: a user with 3 plan assignments for Monday Breakfast
+        when: they open the Week Summary tab
+        then: a grid shows all 3 items with quantity cells for each day
+        kind: happy
+        test: TestWeekSummary_RendersGrid
+      - id: AC-049
+        given: a user in Week Summary tab
+        when: they add a new product row to Lunch with quantity 2 servings
+        then: EVT-011 is emitted and the row appears in the grid
+        kind: happy
+        test: TestWeekSummary_AddRow
+      - id: AC-050
+        given: a user in Week Summary tab with an existing row
+        when: they remove that row
+        then: EVT-013 is emitted and the row is gone from the grid
+        kind: happy
+        test: TestWeekSummary_RemoveRow
+      - id: AC-051
+        given: a row in servings mode showing quantity 2
+        when: the user toggles the unit selector to grams
+        then: the row switches to grams mode and EVT-012 is emitted
+        kind: happy
+        test: TestWeekSummary_ToggleUnitMode
+      - id: AC-101
+        given: a user submitting a plan assignment with quantity 0
+        when: the add-assignment command is issued
+        then: returns 422 and no assignment is persisted
+        kind: negative
+        invariant: INV-008
+        test: TestPlanAssignment_RejectsZeroQuantity
+      - id: AC-102
+        given: a plan assignment created by user Alice
+        when: user Bob queries any endpoint for plan assignments
+        then: Alice's assignment is not returned
+        kind: authz
+        invariant: INV-009
+        test: TestPlanAssignment_NotVisibleToOtherUser
+
+  - id: FR-018
+    statement: >
+      Products flagged "This week" by the user must automatically appear in the
+      Week Summary planner without manual addition.
+    source: [US-030]
+    acceptance:
+      - id: AC-052
+        given: a product with the user's "This week" flag set
+        when: the user opens the Week Summary for the current week
+        then: that product appears in the summary grid without the user adding it
+        kind: happy
+        test: TestWeekSummary_ShowsThisWeekFlaggedProducts
+      - id: AC-114
+        given: a product with the user's "Next week" flag set (not "This week")
+        when: the user opens the Week Summary for the current week
+        then: that product does not appear in the current week summary grid
+        kind: boundary
+        test: TestWeekSummary_NextWeekFlagNotShownThisWeek
+
+  - id: FR-019
+    statement: >
+      The Calendar tab must show each day divided by Breakfast, Lunch, Dinner,
+      and Snacks, allow adding and removing items per meal slot, adjusting
+      servings, and dragging items between meal slots or days.
+    source: [US-031, US-032, US-033, US-034, US-037, US-038]
+    acceptance:
+      - id: AC-053
+        given: a user with assignments across multiple meal slots for Monday
+        when: they open the Calendar tab
+        then: Monday shows items organised under Breakfast, Lunch, Dinner, Snacks
+        kind: happy
+        test: TestCalendar_ShowsMealSlots
+      - id: AC-054
+        given: a user in the Calendar tab
+        when: they add a product to Tuesday Dinner
+        then: EVT-011 is emitted and the item appears in Tuesday Dinner
+        kind: happy
+        test: TestCalendar_AddItem
+      - id: AC-055
+        given: an item in Monday Lunch
+        when: the user drags it to Wednesday Dinner
+        then: EVT-014 is emitted and the item is now in Wednesday Dinner
+        kind: happy
+        test: TestCalendar_DragMoveItem
+      - id: AC-056
+        given: a user increasing servings of a Calendar item from 1 to 3
+        when: the stepper is incremented
+        then: EVT-012 is emitted and the item shows quantity 3
+        kind: happy
+        test: TestCalendar_UpdateServings
+      - id: AC-115
+        given: a user attempting to set servings to 0 for a Calendar item
+        when: the quantity is submitted
+        then: returns 422 and the quantity remains unchanged
+        kind: negative
+        invariant: INV-008
+        test: TestCalendar_RejectsZeroServings
+
+  - id: FR-020
+    statement: >
+      The Calendar tab must support week, 4-day, and single-day layout toggles,
+      and include a compact week grid for quick sense-checking.
+    source: [US-035, US-036, US-041]
+    acceptance:
+      - id: AC-057
+        given: a user in the Calendar tab in week layout
+        when: they switch to single-day layout
+        then: only the selected day's meals are shown in detail
+        kind: happy
+        test: TestCalendar_SwitchToSingleDay
+      - id: AC-116
+        given: a user in single-day layout with no assignments for that day
+        when: the day renders
+        then: an empty state is shown per meal slot (no error)
+        kind: boundary
+        test: TestCalendar_EmptyDayInSingleLayout
+
+  - id: FR-021
+    statement: >
+      The Calendar tab must show a Plan Summary Panel above the calendar grid
+      with all planned items for the week organised by meal slot, and allow
+      adding an item to a specific meal slot from within that panel.
+    source: [US-042, US-047]
+    acceptance:
+      - id: AC-058
+        given: a user with plan assignments across multiple meal slots
+        when: they open the Calendar tab
+        then: a summary panel above the grid shows all items grouped by meal slot
+        kind: happy
+        test: TestCalendar_SummaryPanelRendered
+      - id: AC-059
+        given: a user clicking "Add item" in the Lunch section of the summary panel
+        when: they select a product and confirm
+        then: EVT-011 is emitted and the item appears in the Lunch summary section
+        kind: happy
+        test: TestCalendar_AddItemViaSummaryPanel
+      - id: AC-117
+        given: a user in the Calendar tab with no plan assignments
+        when: the summary panel renders
+        then: the panel shows empty meal slot sections (no error)
+        kind: boundary
+        test: TestCalendar_SummaryPanelEmptyState
+
+  - id: FR-022
+    statement: >
+      The Meal Planner must show the user's active diet label in the planner
+      header when the user has a diet preference set.
+    source: [US-039]
+    acceptance:
+      - id: AC-060
+        given: a user whose account has diet preference "Keto" set
+        when: the Meal Planner header renders
+        then: the "Keto" diet label is displayed in the header
+        kind: happy
+        test: TestPlanner_ShowsDietLabel
+      - id: AC-061
+        given: a user with no diet preference set
+        when: the Meal Planner header renders
+        then: no diet label is shown (no error)
+        kind: boundary
+        test: TestPlanner_NoDietLabelWhenUnset
+
+  - id: FR-023
+    statement: >
+      The Meal Planner must show item-search suggestions sorted by recently
+      used first, then user-owned products, then alphabetical.
+    source: [US-044]
+    acceptance:
+      - id: AC-062
+        given: >
+          a user who recently used Oats and owns a custom product Home Oats
+        when: they type "oa" in the item search
+        then: >
+          Oats appears first, Home Oats appears second, other matches are alphabetical
+        kind: happy
+        test: TestItemSearch_SortOrder
+      - id: AC-121
+        given: a user with no usage history and no custom products
+        when: they type a search term that matches 3 catalog products
+        then: the 3 results are shown in alphabetical order
+        kind: boundary
+        test: TestItemSearch_AlphabeticalFallback
+
+  - id: FR-024
+    statement: >
+      The Meal Planner must show per-day nutrition indicators: percentage of the
+      user's daily target corridor consumed for each planned day, broken down
+      by macro.
+    source: [US-043]
+    acceptance:
+      - id: AC-063
+        given: a user with a NutritionTarget of 2000 kcal and 100 g protein, with assignments totalling 1600 kcal and 80 g protein on Tuesday
+        when: the planner renders Tuesday
+        then: Tuesday shows 80% calorie and 80% protein indicators
+        kind: happy
+        test: TestPlanner_NutritionIndicators
+      - id: AC-064
+        given: a user with no NutritionTarget set
+        when: the planner renders
+        then: no per-day percentage indicators are shown (no error)
+        kind: boundary
+        test: TestPlanner_NoIndicatorsWithoutTarget
+      - id: AC-106
+        given: a user submitting a NutritionTarget with calories set to -100
+        when: the set-target command is issued
+        then: returns 422 and the target is not persisted
+        kind: negative
+        invariant: INV-013
+        test: TestNutritionTarget_RejectsNegativeCalories
+      - id: AC-107
+        given: a NutritionTarget created by user Alice
+        when: user Bob queries any endpoint for nutrition targets
+        then: Alice's target is not returned
+        kind: authz
+        invariant: INV-014
+        test: TestNutritionTarget_NotVisibleToOtherUser
+
+  - id: FR-025
+    statement: >
+      A user must be able to log a single day or an entire week from the
+      planner in one action, creating Meal Tracking entries pre-filled from the
+      plan assignments. A user must also be able to log a single item directly
+      from the Calendar.
+    source: [US-040, US-045]
+    acceptance:
+      - id: AC-065
+        given: a user with 5 assignments on Tuesday
+        when: they click "Log this day" for Tuesday
+        then: EVT-015 is emitted and 5 TrackingEntries are created pre-filled from the assignments
+        kind: happy
+        test: TestLogDay_CreatesTrackingEntries
+      - id: AC-066
+        given: a user with 20 assignments across a week
+        when: they click "Log this week"
+        then: EVT-016 is emitted and 20 TrackingEntries are created
+        kind: happy
+        test: TestLogWeek_CreatesTrackingEntries
+      - id: AC-067
+        given: a user clicking the log icon on a single Calendar item
+        when: the log action is confirmed
+        then: EVT-017 is emitted and 1 TrackingEntry is created for that item
+        kind: happy
+        test: TestLogSingleItem_CreatesTrackingEntry
+      - id: AC-118
+        given: a user clicking "Log this day" for a day with no plan assignments
+        when: the log action is submitted
+        then: EVT-015 is emitted and zero TrackingEntries are created (no error)
+        kind: boundary
+        test: TestLogDay_HandlesEmptyDay
+
+  - id: FR-026
+    statement: >
+      A user must be able to download the current week's Meal Plan as a PDF.
+    source: [US-046]
+    acceptance:
+      - id: AC-068
+        given: a user with assignments in the current week
+        when: they click "Export PDF"
+        then: EVT-018 is emitted and the browser print dialog opens within 3 s
+        kind: happy
+        test: TestExportMealPlanPdf_OpensDialog
+      - id: AC-069
+        given: a user with an empty week (no assignments)
+        when: they click "Export PDF"
+        then: EVT-018 is emitted and an empty-plan PDF is generated (no error)
+        kind: boundary
+        test: TestExportMealPlanPdf_EmptyWeek
+
+  # ── Shopping List ───────────────────────────────────────────────────────────
+
+  - id: FR-027
+    statement: >
+      The Shopping List must be automatically generated when the user navigates
+      to the Shopping List screen, without any extra user action.
+    source: [US-048, US-053]
+    acceptance:
+      - id: AC-070
+        given: a user navigating to the Shopping List screen with plan assignments in the default date range
+        when: the screen loads
+        then: EVT-020 is emitted and a shopping list is displayed immediately
+        kind: happy
+        policy: POL-006
+        test: TestShoppingList_AutoGeneratesOnNavigate
+      - id: AC-071
+        given: a user navigating to the Shopping List screen with no plan assignments
+        when: the screen loads
+        then: an empty shopping list is shown (no error)
+        kind: boundary
+        test: TestShoppingList_EmptyOnNoAssignments
+
+  - id: FR-028
+    statement: >
+      The user must be able to select a custom from–to date range for the
+      shopping list so it covers exactly the desired days.
+    source: [US-049]
+    acceptance:
+      - id: AC-072
+        given: a user setting a date range of 2026-07-01 to 2026-07-07
+        when: they confirm the date range
+        then: CMD-020 is issued with those dates and the list reflects only that range
+        kind: happy
+        test: TestShoppingList_DateRangeFilters
+      - id: AC-073
+        given: a user entering a from_date after to_date
+        when: they confirm the date range
+        then: returns 422 and no list is generated
+        kind: negative
+        invariant: INV-011
+        test: TestShoppingList_RejectsInvalidDateRange
+
+  - id: FR-029
+    statement: >
+      The shopping list must aggregate all planned items (recipe ingredients and
+      standalone products) within the selected date range and group them by
+      product category.
+    source: [US-050, US-051]
+    acceptance:
+      - id: AC-074
+        given: a plan with Oats (100 g) on Monday Breakfast and Oats (50 g) on Tuesday Breakfast
+        when: the shopping list is generated for Mon–Tue
+        then: Oats appears once with total 150 g under the Grains category
+        kind: happy
+        test: TestShoppingList_AggregatesAndGroups
+      - id: AC-119
+        given: a plan with no assignments for a given date range
+        when: the shopping list is generated for that range
+        then: the list is empty (no items, no error)
+        kind: boundary
+        test: TestShoppingList_EmptyForEmptyPlan
+
+  - id: FR-030
+    statement: >
+      The shopping list must be marked stale and allow a manual refresh when
+      the underlying meal plan changes after the list was last generated.
+    source: [US-052]
+    acceptance:
+      - id: AC-075
+        given: a generated shopping list and a subsequent plan assignment change
+        when: the assignment change event is emitted
+        then: the list is marked stale and a "Refresh" indicator is shown
+        kind: happy
+        policy: POL-002
+        test: TestShoppingList_MarkedStaleOnPlanChange
+      - id: AC-076
+        given: a stale shopping list
+        when: the user clicks "Refresh"
+        then: EVT-021 is emitted and the list is regenerated from the current plan
+        kind: happy
+        test: TestShoppingList_RefreshRegenerates
+      - id: AC-103
+        given: a shopping list for date range 2026-07-01 to 2026-07-07; a plan assignment on 2026-07-05 is then updated
+        when: EVT-012 (PlanAssignmentUpdated) is emitted
+        then: the shopping list is marked stale (EVT-023 emitted)
+        kind: negative
+        policy: POL-003
+        invariant: INV-012
+        test: TestShoppingList_MarkedStaleOnAssignmentUpdate
+      - id: AC-104
+        given: a shopping list for date range 2026-07-01 to 2026-07-07; a plan assignment on 2026-07-05 is removed
+        when: EVT-013 (PlanAssignmentRemoved) is emitted
+        then: the shopping list is marked stale (EVT-023 emitted)
+        kind: negative
+        policy: POL-004
+        test: TestShoppingList_MarkedStaleOnAssignmentRemoval
+      - id: AC-105
+        given: a shopping list for date range 2026-07-01 to 2026-07-07; a plan assignment is moved from 2026-07-04 to 2026-07-08 (outside the range)
+        when: EVT-014 (PlanAssignmentMoved) is emitted
+        then: the shopping list is marked stale (EVT-023 emitted)
+        kind: negative
+        policy: POL-005
+        test: TestShoppingList_MarkedStaleOnAssignmentMove
+
+  - id: FR-031
+    statement: >
+      The user must be able to download the shopping list as a PDF.
+    source: [US-054]
+    acceptance:
+      - id: AC-077
+        given: a user with a generated shopping list
+        when: they click "Download PDF"
+        then: EVT-022 is emitted and the browser print dialog opens within 3 s
+        kind: happy
+        test: TestShoppingListPdf_OpensDialog
+      - id: AC-120
+        given: a user with an empty shopping list (no items)
+        when: they click "Download PDF"
+        then: EVT-022 is emitted and an empty-list PDF is generated (no error)
+        kind: boundary
+        test: TestShoppingListPdf_EmptyList
+
+  # ── Data limits ─────────────────────────────────────────────────────────────
+
+  - id: FR-032
+    statement: >
+      Each product must support at most 10 alternative units (including the
+      base unit), each with a valid gram-conversion factor > 0.
+    source: [US-024]
+    acceptance:
+      - id: AC-078
+        given: a product already having 10 unit definitions
+        when: the user attempts to add an 11th unit
+        then: returns 422 and the 11th unit is not persisted
+        kind: boundary
+        invariant: INV-004
+        test: TestProduct_RejectsEleventhUnit
+
+  - id: FR-033
+    statement: >
+      The system must prevent a user's total MealPlan assignments from
+      exceeding 10,000 across all time.
+    source: [US-027]
+    acceptance:
+      - id: AC-079
+        given: a user who already has 10,000 total plan assignments
+        when: they attempt to add a new assignment
+        then: returns 409 and no assignment is persisted
+        kind: boundary
+        invariant: INV-010
+        test: TestPlanAssignment_RejectsLimitExceeded
+
+  # ── Week flag rollover ──────────────────────────────────────────────────────
+
+  - id: FR-034
+    statement: >
+      Every Monday, all products flagged "Next week" by any user must be
+      automatically promoted to "This week", causing them to surface in the
+      current week's planner summary.
+    source: [US-019]
+    acceptance:
+      - id: AC-080
+        given: Monday 00:00 arrives and 3 products have a "Next week" flag for user Alice
+        when: the PromoteNextWeekFlags scheduler job runs
+        then: those 3 products are re-flagged "This week" and EVT-010 is emitted
+        kind: happy
+        policy: POL-001
+        test: TestPromoteFlags_PromotesNextToThisOnMonday
+      - id: AC-081
+        given: Monday 00:00 arrives and no products have a "Next week" flag
+        when: the scheduler job runs
+        then: EVT-010 is emitted with an empty promoted list (no error)
+        kind: boundary
+        test: TestPromoteFlags_HandlesEmptySet
+
+  # ── Log from plan ───────────────────────────────────────────────────────────
+
+  - id: FR-035
+    statement: >
+      "Log this day" and "Log this week" actions must create Meal Tracking
+      entries pre-filled from planner assignments. Entries are editable in
+      Personal Cabinet (v1.1). Data stores remain independent.
+    source: [US-040]
+    acceptance:
+      - id: AC-082
+        given: a user with plan assignments on Tuesday; entries from a prior "Log this day" already exist for Tuesday
+        when: the user clicks "Log this day" for Tuesday again
+        then: EVT-015 is emitted and new tracking entries are created (independent of prior entries)
+        kind: idempotency
+        test: TestLogDay_CreatesAdditionalEntries
+
+  - id: FR-036
+    statement: >
+      User-added products must be visible to all users in the catalog (browseable),
+      but only the creator may edit or delete their own user-added products.
+    source: [US-017, US-018]
+    acceptance:
+      - id: AC-083
+        given: user Alice adds a product called Alice Special Oats
+        when: user Bob browses the catalog
+        then: Alice Special Oats appears in Bob's product list
+        kind: happy
+        test: TestUserProduct_VisibleToAllUsers
+      - id: AC-084
+        given: user Bob attempts to edit Alice Special Oats
+        when: the edit is submitted
+        then: returns 403 and the product is unchanged
+        kind: authz
+        invariant: INV-006
+        test: TestUserProduct_DeniesEditByOther
+
+
+non_functional:
+
+  - id: NFR-001
+    category: performance
+    metric: initial_page_load_time
+    threshold: 2s
+    condition: cold load on a 10 Mbps connection, p95
+    rationale: Users open the app on Sunday to plan their week — a slow load creates friction.
+    acceptance:
+      - id: AC-085
+        given: a cold browser cache on a simulated 10 Mbps connection
+        when: the app root is loaded
+        then: p95 time-to-interactive <= 2s
+        kind: boundary
+        test: BenchPageLoad_Cold10Mbps_p95
+
+  - id: NFR-002
+    category: performance
+    metric: search_filter_response_time
+    threshold: 200ms
+    condition: catalogue of up to 10,000 products, p95
+    rationale: >
+      Users filter while browsing; latency over 200 ms causes perceived lag and
+      workflow interruption.
+    acceptance:
+      - id: AC-086
+        given: a catalogue of 10,000 products
+        when: a search/filter query is submitted
+        then: p95 response time <= 200ms
+        kind: boundary
+        test: BenchSearchFilter_10kProducts_p95
+
+  - id: NFR-003
+    category: performance
+    metric: shopping_list_generation_time
+    threshold: 500ms
+    condition: up to 31 days of plan assignments, p95
+    rationale: Shopping list is auto-generated on navigation; delays break the flow.
+    acceptance:
+      - id: AC-087
+        given: a meal plan with assignments across 31 days
+        when: the shopping list is generated
+        then: p95 response time <= 500ms
+        kind: boundary
+        test: BenchShoppingListGeneration_31Days_p95
+
+  - id: NFR-004
+    category: performance
+    metric: pdf_generation_time
+    threshold: 3s
+    condition: print dialog open trigger, p95
+    rationale: PDF export is a user-initiated action; users expect near-instant response.
+    acceptance:
+      - id: AC-088
+        given: a meal plan or shopping list of typical size
+        when: the export PDF action is triggered
+        then: the browser print dialog opens within 3s
+        kind: boundary
+        test: BenchPdfExport_DialogOpen_p95
+
+  - id: NFR-005
+    category: performance
+    metric: live_nutrition_recalc_time
+    threshold: 100ms
+    condition: each input change in the Products Analyser (per-100g form), p95
+    rationale: >
+      Real-time feedback on nutrition values requires sub-perceptible latency.
+      Note: Products Analyser is listed as out-of-scope for MVP1 but the NFR
+      is retained as a constraint for any live-calc feature in scope.
+    acceptance:
+      - id: AC-089
+        given: a product form with live nutrition recalculation active
+        when: the user changes one input field
+        then: the nutrition totals update within 100ms p95
+        kind: boundary
+        test: BenchLiveNutritionRecalc_p95
+
+  - id: NFR-006
+    category: compliance
+    metric: wcag_conformance_level
+    threshold: WCAG 2.1 Level AA
+    condition: across all views
+    rationale: Required for inclusive design and regulatory compliance.
+    acceptance:
+      - id: AC-090
+        given: any rendered view in the application
+        when: an automated WCAG 2.1 AA audit tool runs
+        then: zero critical or serious WCAG AA violations are reported
+        kind: boundary
+        test: AccessibilityAudit_AllViews_WCAG21AA
+
+  - id: NFR-007
+    category: compliance
+    metric: keyboard_navigation_coverage
+    threshold: 100% of interactive controls
+    condition: all views
+    rationale: Required by WCAG 2.1 AA and essential for users who do not use a mouse.
+    acceptance:
+      - id: AC-091
+        given: any interactive control in the application
+        when: a keyboard-only navigation test is run
+        then: every control is reachable and operable via keyboard alone
+        kind: boundary
+        test: KeyboardNav_AllInteractiveControls
+
+  - id: NFR-008
+    category: compliance
+    metric: colour_contrast_ratio_normal_text
+    threshold: "4.5:1"
+    condition: normal-weight text on any background
+    rationale: WCAG 2.1 AA requirement; 4.5:1 for normal text.
+    acceptance:
+      - id: AC-092
+        given: any text element in the application
+        when: a contrast ratio check is run
+        then: normal text contrast ratio >= 4.5:1
+        kind: boundary
+        test: ContrastCheck_NormalText
+
+  - id: NFR-009
+    category: compliance
+    metric: colour_indicator_non_colour_label
+    threshold: "all colour-coded indicators include a non-colour label or icon"
+    condition: all views
+    rationale: Required for colour-blind users (WCAG 1.4.1 Use of Colour).
+    acceptance:
+      - id: AC-093
+        given: any colour-coded indicator in the application
+        when: a visual audit is run
+        then: every colour-coded indicator has an accompanying non-colour label or icon
+        kind: boundary
+        test: ColourIndicators_HaveNonColourLabel
+
+  - id: NFR-010
+    category: scalability
+    metric: global_catalogue_size
+    threshold: 10000 products
+    condition: without degradation in search/filter performance
+    rationale: Projected upper bound for global product catalog in MVP1.
+    acceptance:
+      - id: AC-094
+        given: the global catalogue loaded with 10,000 products
+        when: search/filter queries are run at normal usage rate
+        then: p95 response time remains <= 200ms (NFR-002 holds)
+        kind: boundary
+        test: ScaleTest_10kProducts_SearchFilter
+
+  - id: NFR-011
+    category: scalability
+    metric: user_added_products_per_account
+    threshold: "500 products"
+    condition: per user account
+    rationale: Data limit per account to constrain storage and query scope.
+    acceptance:
+      - id: AC-095
+        given: a user account at exactly 500 user-added products
+        when: they attempt to add a 501st product
+        then: the system rejects the addition with 409
+        kind: boundary
+        invariant: INV-007
+        test: ScaleTest_UserProducts_LimitEnforced
+
+  - id: NFR-012
+    category: scalability
+    metric: meal_plan_assignments_per_user
+    threshold: "10000 assignments"
+    condition: total across all time per user account
+    rationale: Per-account data cap to bound storage growth.
+    acceptance:
+      - id: AC-096
+        given: a user account at exactly 10,000 plan assignments
+        when: they attempt to add a new assignment
+        then: the system rejects with 409
+        kind: boundary
+        invariant: INV-010
+        test: ScaleTest_PlanAssignments_LimitEnforced
+
+  - id: NFR-013
+    category: scalability
+    metric: meal_tracking_log_entries_per_account
+    threshold: "3650 entries"
+    condition: per user account (all time)
+    rationale: Approximately 10 years of daily log entries; bounds storage per account.
+    acceptance:
+      - id: AC-097
+        given: a user account at exactly 3,650 tracking log entries
+        when: the user attempts to log another day
+        then: the system rejects with 409
+        kind: boundary
+        test: ScaleTest_TrackingEntries_LimitEnforced
+
+  - id: NFR-014
+    category: compliance
+    metric: browser_support
+    threshold: last 2 major versions of Chrome, Firefox, Safari (macOS + iOS), Edge, Chrome for Android, Safari for iOS
+    condition: all application views and interactions
+    rationale: Covers the primary browser population of the target user base.
+    acceptance:
+      - id: AC-098
+        given: the application loaded in the latest 2 major versions of each supported browser
+        when: core user flows are exercised
+        then: no functional regressions or rendering failures are observed
+        kind: boundary
+        test: CrossBrowserSmoke_SupportedBrowsers
+
+  - id: NFR-015
+    category: security
+    metric: pii_isolation
+    threshold: "zero PII (meal plans, tracking logs, profile info) exposed to other users"
+    condition: all API endpoints and views
+    rationale: User data must be private by default; exposure to other accounts is a data breach.
+    acceptance:
+      - id: AC-099
+        given: user Alice's meal plan assignments
+        when: user Bob queries any API endpoint
+        then: Alice's data is not present in any response
+        kind: authz
+        test: TestPiiIsolation_PlanNotVisibleToOtherUser
+
+
+constraints:
+
+  - id: CON-001
+    type: technical
+    statement: >
+      The frontend must be implemented in Next.js (TypeScript) and deployed as
+      a separate unit from the backend.
+    source: "brainstorm, 2026-06-21"
+
+  - id: CON-002
+    type: technical
+    statement: >
+      The backend must be a Python service exposing a REST API, deployed as a
+      separate unit from the frontend.
+    source: "brainstorm, 2026-06-21"
+
+  - id: CON-003
+    type: technical
+    statement: >
+      Authentication must be session-based with email + password only. No
+      OAuth, SSO, or other identity providers in MVP1.
+    source: "brainstorm, 2026-06-21"
+
+  - id: CON-004
+    type: technical
+    statement: >
+      Supported measurement units are metric (g, kg, ml, l) and US customary
+      (oz, lb, fl oz, cups, tbsp, tsp). No other measurement systems in MVP1.
+    source: "OQ-007 resolved, 2026-06-21"
+
+  - id: CON-005
+    type: technical
+    statement: >
+      Diet definitions consist of exactly 12 hardcoded patterns. No admin
+      management of diet definitions in MVP1.
+    source: "OQ-002 resolved, 2026-06-21"
+
+  - id: CON-006
+    type: technical
+    statement: >
+      The Nutritionist role is stored on the account but has identical
+      permissions to the User role in MVP1; no UI differentiation.
+    source: "OQ-005 resolved, 2026-06-21"

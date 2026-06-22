@@ -1,0 +1,60 @@
+resolved:
+  - id: DEC-007
+    question: "Log-from-plan TrackingEntry handling with deferred Personal Cabinet"
+    resolved_by: ADR-0001
+    resolution_label: stub_store
+    date: 2026-06-22
+
+  - id: DEC-008
+    question: "WeekFlag cross-context read strategy between Product Catalog and Meal Planning"
+    resolved_by: ADR-0002
+    resolution_label: sync_query_at_render
+    date: 2026-06-22
+
+  - id: DEC-009
+    question: "Shopping List staleness detection strategy"
+    resolved_by: ADR-0003
+    resolution_label: check_on_read
+    date: 2026-06-22
+
+  - id: DEC-010
+    question: "Topbar week-stats widget endpoint design"
+    resolved_by: ADR-0004
+    resolution_label: dedicated_summary_endpoint
+    date: 2026-06-22
+
+  - id: DEC-001
+    question: "Password reset token expiry window"
+    resolved_by: ADR-0005
+    resolution_label: 1_hour
+    date: 2026-06-22
+
+  - id: DEC-002
+    question: "Sign-in rate-limit threshold and lockout window"
+    resolved_by: ADR-0006
+    resolution_label: 10_attempts_1h_lockout
+    date: 2026-06-22
+
+  - id: DEC-003
+    question: "Shopping list default date range on auto-generation"
+    resolved_by: ADR-0007
+    resolution_label: current_iso_week
+    date: 2026-06-22
+
+  - id: DEC-004
+    question: "ShoppingList persistence model — single active list vs. history per date range"
+    resolved_by: ADR-0008
+    resolution_label: single_active_list_overwrite
+    date: 2026-06-22
+
+  - id: DEC-005
+    question: "WeekFlag rollover clear policy on Monday promotion"
+    resolved_by: ADR-0009
+    resolution_label: auto_clear_old_this_week
+    date: 2026-06-22
+
+  - id: DEC-006
+    question: "WCAG large-text contrast as explicit NFR vs. covered by WCAG reference"
+    resolved_by: ADR-0010
+    resolution_label: separate_nfr_large_text
+    date: 2026-06-22
