@@ -1,0 +1,118 @@
+services:
+
+  # ── Databases ────────────────────────────────────────────────────────────────
+
+  db-identity:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: identity
+      POSTGRES_USER: identity
+      POSTGRES_PASSWORD: identity
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-identity-data:/var/lib/postgresql/data
+
+  db-catalog:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: catalog
+      POSTGRES_USER: catalog
+      POSTGRES_PASSWORD: catalog
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-catalog-data:/var/lib/postgresql/data
+
+  db-planning:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: planning
+      POSTGRES_USER: planning
+      POSTGRES_PASSWORD: planning
+    ports:
+      - "5434:5432"
+    volumes:
+      - db-planning-data:/var/lib/postgresql/data
+
+  db-shopping:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: shopping
+      POSTGRES_USER: shopping
+      POSTGRES_PASSWORD: shopping
+    ports:
+      - "5435:5432"
+    volumes:
+      - db-shopping-data:/var/lib/postgresql/data
+
+  # ── Backend services ─────────────────────────────────────────────────────────
+
+  identity:
+    build: ./backend/identity
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://identity:identity@db-identity:5432/identity
+    depends_on:
+      - db-identity
+
+  catalog:
+    build: ./backend/catalog
+    ports:
+      - "8002:8000"
+    environment:
+      DATABASE_URL: postgresql://catalog:catalog@db-catalog:5432/catalog
+      IDENTITY_SERVICE_URL: http://identity:8000
+    depends_on:
+      - db-catalog
+      - identity
+
+  planning:
+    build: ./backend/planning
+    ports:
+      - "8003:8000"
+    environment:
+      DATABASE_URL: postgresql://planning:planning@db-planning:5432/planning
+      IDENTITY_SERVICE_URL: http://identity:8000
+      CATALOG_SERVICE_URL: http://catalog:8000
+    depends_on:
+      - db-planning
+      - identity
+      - catalog
+
+  shopping:
+    build: ./backend/shopping
+    ports:
+      - "8004:8000"
+    environment:
+      DATABASE_URL: postgresql://shopping:shopping@db-shopping:5432/shopping
+      IDENTITY_SERVICE_URL: http://identity:8000
+      PLANNING_SERVICE_URL: http://planning:8000
+    depends_on:
+      - db-shopping
+      - identity
+      - planning
+
+  # ── Frontend ─────────────────────────────────────────────────────────────────
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_IDENTITY_URL: http://localhost:8001
+      NEXT_PUBLIC_CATALOG_URL: http://localhost:8002
+      NEXT_PUBLIC_PLANNING_URL: http://localhost:8003
+      NEXT_PUBLIC_SHOPPING_URL: http://localhost:8004
+    depends_on:
+      - identity
+      - catalog
+      - planning
+      - shopping
+
+volumes:
+  db-identity-data:
+  db-catalog-data:
+  db-planning-data:
+  db-shopping-data:
