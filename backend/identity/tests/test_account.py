@@ -7,9 +7,13 @@ Trace: TestRegisterAccount_*, TestSignIn_*, TestSignOut_*, TestAuthGuard_*
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime, timedelta
 
 import pytest
+from db.models import Account
 from httpx import AsyncClient
+from sqlalchemy import update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 class TestRegisterAccount:
@@ -51,30 +55,27 @@ class TestRegisterAccount:
         assert resp.status_code == 422
 
     async def test_register_account_role_is_valid_enum(self, client: AsyncClient) -> None:
-        """AC-100: role field only accepts 'user' or 'nutritionist'."""
-        # Valid roles
+        """AC-100: role is always 'user' at registration — not caller-controlled.
+
+        Callers cannot elevate themselves to 'nutritionist' or any other role at sign-up.
+        The role field in the request body is ignored (extra fields are silently dropped).
+        """
+        # Providing role: "user" is fine (ignored but harmless)
         resp_user = await client.post(
             "/auth/register",
-            json={"email": "user1@example.com", "password": "s3cure!Pass", "role": "user"},
+            json={"email": "user1@example.com", "password": "s3cure!Pass"},
         )
         assert resp_user.status_code == 201
+        assert resp_user.json()["role"] == "user"
 
-        resp_nutritionist = await client.post(
+        # Attempting privilege escalation via role: "nutritionist" is silently rejected —
+        # the account is still created with role "user".
+        resp_attempt = await client.post(
             "/auth/register",
-            json={
-                "email": "nutr@example.com",
-                "password": "s3cure!Pass",
-                "role": "nutritionist",
-            },
+            json={"email": "nutr@example.com", "password": "s3cure!Pass", "role": "nutritionist"},
         )
-        assert resp_nutritionist.status_code == 201
-
-        # Invalid role
-        resp_invalid = await client.post(
-            "/auth/register",
-            json={"email": "admin@example.com", "password": "s3cure!Pass", "role": "admin"},
-        )
-        assert resp_invalid.status_code == 422
+        assert resp_attempt.status_code == 201
+        assert resp_attempt.json()["role"] == "user", "Role escalation must not be possible at registration"
 
 
 class TestSignIn:
@@ -143,38 +144,44 @@ class TestRateLimiting:
         assert resp.status_code == 429
         assert "Retry-After" in resp.headers
 
-    async def test_sign_in_allows_after_cooldown(self, client: AsyncClient) -> None:
-        """AC-010: after lockout expires, sign-in succeeds with correct credentials.
-
-        We simulate expiry by directly updating the database record.
-        """
-
-
-
-        # Register and lock the account
+    async def test_sign_in_allows_after_cooldown(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """AC-010: after lockout expires, sign-in succeeds with correct credentials."""
         await client.post(
             "/auth/register",
             json={"email": "victim2@example.com", "password": "correct!Pass"},
         )
 
-        # Set locked_until to the past via DB
-
-        # Access the DB through the client's override
-        # We can't easily get the DB session here, so let's use the service layer
-
         os.environ["RATE_LIMIT_MAX_ATTEMPTS"] = "1"
         try:
-            # Trigger lockout with 1 attempt
+            # Trigger lockout with a wrong password (1 attempt = immediate lockout)
             await client.post(
                 "/auth/sign-in",
                 json={"email": "victim2@example.com", "password": "wrong"},
             )
-            # Verify locked
             resp_locked = await client.post(
                 "/auth/sign-in",
-                json={"email": "victim2@example.com", "password": "wrong"},
+                json={"email": "victim2@example.com", "password": "correct!Pass"},
             )
             assert resp_locked.status_code == 429
+
+            # Simulate lockout expiry by setting locked_until to the past in the DB
+            past = datetime.now(tz=UTC) - timedelta(hours=2)
+            await db.execute(
+                update(Account)
+                .where(Account.email == "victim2@example.com")
+                .values(locked_until=past)
+            )
+            await db.commit()
+
+            # Now sign-in with correct credentials should succeed
+            resp_ok = await client.post(
+                "/auth/sign-in",
+                json={"email": "victim2@example.com", "password": "correct!Pass"},
+            )
+            assert resp_ok.status_code == 200
+            assert "token" in resp_ok.json()
         finally:
             del os.environ["RATE_LIMIT_MAX_ATTEMPTS"]
 
