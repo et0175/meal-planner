@@ -54,4 +54,6 @@ Backend stubs: `backend/*/main.py` with `/health` endpoint already present
 
 ## Worktree notes
 
-—
+[Scope] backend/identity/Dockerfile, backend/catalog/Dockerfile, backend/planning/Dockerfile, backend/shopping/Dockerfile, backend/identity/railway.toml, backend/catalog/railway.toml, backend/planning/railway.toml, backend/shopping/railway.toml, backend/identity/alembic.ini, backend/catalog/alembic.ini, backend/planning/alembic.ini, backend/shopping/alembic.ini, backend/*/db/migrations/env.py, backend/*/db/migrations/script.py.mako, backend/*/db/migrations/versions/.gitkeep, frontend/vercel.json, .env.example, .gitignore, docs/PLAN.md
+
+[Implementation] All 7 deliverables complete. Alembic env.py uses asyncio runner with asyncpg; target_metadata is None placeholder — each python-pro card (CARD-001/003/005/007) imports their models into env.py when implementing the schema. Migrations versions/ dir seeded with .gitkeep so git tracks the empty directory.
