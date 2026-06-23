@@ -77,6 +77,9 @@ Gate: unauthenticated requests to any protected endpoint return 401; session per
 
 ## Worktree notes
 
+[Build gate] PASSED — 19/19 tests green (python3 -m pytest tests/)
+[Scope] backend/identity/account/router.py, backend/identity/account/schemas.py, backend/identity/account/service.py, backend/identity/alembic.ini, backend/identity/db/engine.py, backend/identity/db/migrations/env.py, backend/identity/db/migrations/script.py.mako, backend/identity/db/migrations/versions/0001_initial_schema.py, backend/identity/db/models.py, backend/identity/email_adapter/__init__.py, backend/identity/email_adapter/sender.py, backend/identity/main.py, backend/identity/pytest.ini, backend/identity/requirements.txt, backend/identity/reset/router.py, backend/identity/reset/schemas.py, backend/identity/reset/service.py, backend/identity/session/router.py, backend/identity/session/service.py, backend/identity/tests/conftest.py, backend/identity/tests/test_account.py, backend/identity/tests/test_reset.py, backend/shared/auth_middleware.py, docs/PLAN.md
+
 Implementation complete on branch `card/001-identity-service`.
 
 **Files created:**
