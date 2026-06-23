@@ -16,10 +16,8 @@ from account.schemas import (
 )
 from account.service import LockoutError, register_account, sign_in, sign_out
 from db.engine import get_db
-from db.models import Account
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -46,7 +44,7 @@ async def sign_in_route(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> SignInResponse:
     try:
-        session = await sign_in(body.email, body.password, db)
+        session, role = await sign_in(body.email, body.password, db)
     except LockoutError as exc:
         response.headers["Retry-After"] = str(exc.retry_after)
         raise HTTPException(
@@ -60,11 +58,7 @@ async def sign_in_route(
             detail="Invalid credentials",
         ) from exc
 
-    stmt = select(Account.role).where(Account.id == session.account_id).limit(1)
-    result = await db.execute(stmt)
-    role_row = result.one()
-
-    return SignInResponse(token=session.token, account_id=session.account_id, role=role_row.role)
+    return SignInResponse(token=session.token, account_id=session.account_id, role=role)
 
 
 @router.post("/sign-out", response_model=SignOutResponse)

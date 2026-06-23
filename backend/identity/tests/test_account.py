@@ -6,13 +6,13 @@ Trace: TestRegisterAccount_*, TestSignIn_*, TestSignOut_*, TestAuthGuard_*
 
 from __future__ import annotations
 
-import os
+import secrets
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from db.models import Account
+from db.models import Account, ResetToken
 from httpx import AsyncClient
-from sqlalchemy import update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -145,45 +145,42 @@ class TestRateLimiting:
         assert "Retry-After" in resp.headers
 
     async def test_sign_in_allows_after_cooldown(
-        self, client: AsyncClient, db: AsyncSession
+        self, client: AsyncClient, db: AsyncSession, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         """AC-010: after lockout expires, sign-in succeeds with correct credentials."""
+        monkeypatch.setenv("RATE_LIMIT_MAX_ATTEMPTS", "1")
         await client.post(
             "/auth/register",
             json={"email": "victim2@example.com", "password": "correct!Pass"},
         )
 
-        os.environ["RATE_LIMIT_MAX_ATTEMPTS"] = "1"
-        try:
-            # Trigger lockout with a wrong password (1 attempt = immediate lockout)
-            await client.post(
-                "/auth/sign-in",
-                json={"email": "victim2@example.com", "password": "wrong"},
-            )
-            resp_locked = await client.post(
-                "/auth/sign-in",
-                json={"email": "victim2@example.com", "password": "correct!Pass"},
-            )
-            assert resp_locked.status_code == 429
+        # Trigger lockout with a wrong password (1 attempt = immediate lockout)
+        await client.post(
+            "/auth/sign-in",
+            json={"email": "victim2@example.com", "password": "wrong"},
+        )
+        resp_locked = await client.post(
+            "/auth/sign-in",
+            json={"email": "victim2@example.com", "password": "correct!Pass"},
+        )
+        assert resp_locked.status_code == 429
 
-            # Simulate lockout expiry by setting locked_until to the past in the DB
-            past = datetime.now(tz=UTC) - timedelta(hours=2)
-            await db.execute(
-                update(Account)
-                .where(Account.email == "victim2@example.com")
-                .values(locked_until=past)
-            )
-            await db.commit()
+        # Simulate lockout expiry by setting locked_until to the past in the DB
+        past = datetime.now(tz=UTC) - timedelta(hours=2)
+        await db.execute(
+            update(Account)
+            .where(Account.email == "victim2@example.com")
+            .values(locked_until=past)
+        )
+        await db.commit()
 
-            # Now sign-in with correct credentials should succeed
-            resp_ok = await client.post(
-                "/auth/sign-in",
-                json={"email": "victim2@example.com", "password": "correct!Pass"},
-            )
-            assert resp_ok.status_code == 200
-            assert "token" in resp_ok.json()
-        finally:
-            del os.environ["RATE_LIMIT_MAX_ATTEMPTS"]
+        # Now sign-in with correct credentials should succeed
+        resp_ok = await client.post(
+            "/auth/sign-in",
+            json={"email": "victim2@example.com", "password": "correct!Pass"},
+        )
+        assert resp_ok.status_code == 200
+        assert "token" in resp_ok.json()
 
 
 class TestSignOut:
@@ -250,3 +247,56 @@ class TestAuthGuard:
             headers={"Authorization": "Bearer invalid_fake_token_xyz"},
         )
         assert resp.status_code == 401
+
+
+class TestSessionInvalidation:
+    """Session invalidation after password reset (regression for cycle-1 security fix)."""
+
+    async def test_sessions_invalidated_after_password_reset(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """Active sessions must be rejected after a successful password reset (AC-016)."""
+        await client.post(
+            "/auth/register",
+            json={"email": "resetme@example.com", "password": "OldPass!1"},
+        )
+        sign_in_resp = await client.post(
+            "/auth/sign-in",
+            json={"email": "resetme@example.com", "password": "OldPass!1"},
+        )
+        old_token = sign_in_resp.json()["token"]
+
+        # Confirm the token is currently valid
+        check = await client.get(
+            "/auth/session", headers={"Authorization": f"Bearer {old_token}"}
+        )
+        assert check.status_code == 200
+
+        # Insert a reset token directly — avoids email infrastructure in tests
+        stmt = select(Account.id).where(Account.email == "resetme@example.com")
+        result = await db.execute(stmt)
+        account_id = result.scalar_one()
+
+        reset_value = secrets.token_urlsafe(32)
+        db.add(
+            ResetToken(
+                account_id=account_id,
+                token=reset_value,
+                is_used=False,
+                expires_at=datetime.now(tz=UTC) + timedelta(hours=1),
+            )
+        )
+        await db.commit()
+
+        # Confirm the password reset
+        confirm_resp = await client.post(
+            "/auth/reset-confirm",
+            json={"token": reset_value, "new_password": "NewPass!2"},
+        )
+        assert confirm_resp.status_code == 200
+
+        # Old session token must now be rejected
+        rejected = await client.get(
+            "/auth/session", headers={"Authorization": f"Bearer {old_token}"}
+        )
+        assert rejected.status_code == 401

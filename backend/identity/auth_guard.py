@@ -1,7 +1,8 @@
-"""Shared auth middleware — verify_token FastAPI dependency.
+"""Identity-internal auth dependency — verify_token for protected routes within this service.
 
-Import this in any service's protected router:
-    from shared.auth_middleware import verify_token
+Import only inside backend/identity/. Other services must call GET /auth/session
+via the pattern in backend/shared/auth_middleware.py — this guard uses the identity
+DB directly and cannot be imported by other services.
 """
 
 from __future__ import annotations

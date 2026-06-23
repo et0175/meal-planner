@@ -63,7 +63,7 @@ async def sign_in(
     email: str,
     password: str,
     db: AsyncSession,
-) -> Session:
+) -> tuple[Session, RoleEnum]:
     """Authenticate credentials and return a new Session.
 
     Raises PermissionError on bad credentials.
@@ -128,7 +128,7 @@ async def sign_in(
     db.add(session)
     await db.commit()
     await db.refresh(session)
-    return session
+    return session, row.role
 
 
 async def sign_out(token: str, db: AsyncSession) -> bool:
