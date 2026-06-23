@@ -53,7 +53,7 @@ services:
     ports:
       - "8001:8000"
     environment:
-      DATABASE_URL: postgresql://identity:identity@db-identity:5432/identity
+      DATABASE_URL: postgresql+asyncpg://identity:identity@db-identity:5432/identity
     depends_on:
       - db-identity
 
@@ -62,7 +62,7 @@ services:
     ports:
       - "8002:8000"
     environment:
-      DATABASE_URL: postgresql://catalog:catalog@db-catalog:5432/catalog
+      DATABASE_URL: postgresql+asyncpg://catalog:catalog@db-catalog:5432/catalog
       IDENTITY_SERVICE_URL: http://identity:8000
     depends_on:
       - db-catalog
@@ -73,7 +73,7 @@ services:
     ports:
       - "8003:8000"
     environment:
-      DATABASE_URL: postgresql://planning:planning@db-planning:5432/planning
+      DATABASE_URL: postgresql+asyncpg://planning:planning@db-planning:5432/planning
       IDENTITY_SERVICE_URL: http://identity:8000
       CATALOG_SERVICE_URL: http://catalog:8000
     depends_on:
@@ -86,7 +86,7 @@ services:
     ports:
       - "8004:8000"
     environment:
-      DATABASE_URL: postgresql://shopping:shopping@db-shopping:5432/shopping
+      DATABASE_URL: postgresql+asyncpg://shopping:shopping@db-shopping:5432/shopping
       IDENTITY_SERVICE_URL: http://identity:8000
       PLANNING_SERVICE_URL: http://planning:8000
     depends_on:
