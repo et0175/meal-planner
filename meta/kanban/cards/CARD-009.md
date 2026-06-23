@@ -1,6 +1,6 @@
 # CARD-009: Set up Railway services and Vercel project
 
-**Status:** ready
+**Status:** in_progress
 **Priority:** P2
 **Category:** enabler
 **Estimate:** 1d
@@ -8,11 +8,11 @@
 **Skill:** devops
 **TDD:** false
 **Branch:** card/009-railway-vercel-setup
-**Worktree:** —
+**Worktree:** ../project-CARD-009
 **Source:** quick
 **Depends on:** —
 **Review score:** —
-**Started:** —
+**Started:** 2026-06-22T00:00:00Z
 **Closed:** —
 **Actual:** —
 **Merge commit:** —
