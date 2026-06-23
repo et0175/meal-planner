@@ -1,6 +1,6 @@
 # CARD-001: Identity service (Python)
 
-**Status:** in_progress
+**Status:** done
 **Priority:** P1
 **Category:** compliance
 **Estimate:** 5d
@@ -8,14 +8,14 @@
 **Skill:** python-pro
 **TDD:** —
 **Branch:** card/001-identity-service
-**Worktree:** ../project-CARD-001
+**Worktree:** —
 **Source:** meta/architecture/handoff.md#increment-1
 **Depends on:** —
-**Review score:** —
+**Review score:** 9
 **Started:** 2026-06-22T00:00:00Z
-**Closed:** —
-**Actual:** —
-**Merge commit:** —
+**Closed:** 2026-06-23T00:00:00Z
+**Actual:** 1.0d
+**Merge commit:** b3f19e1338312c368bd4bdac8c433685a9653e44
 **Blocked by:** —
 
 ## What to implement
