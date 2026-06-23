@@ -3,19 +3,20 @@
 from __future__ import annotations
 
 from db.models import RoleEnum
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator  # RoleEnum used in response models
 
 
 class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
-    role: RoleEnum = RoleEnum.user
 
     @field_validator("password")
     @classmethod
-    def password_not_empty(cls, v: str) -> str:
+    def password_valid(cls, v: str) -> str:
         if not v.strip():
             raise ValueError("password must not be empty")
+        if len(v) < 8:
+            raise ValueError("password must be at least 8 characters")
         return v
 
 
