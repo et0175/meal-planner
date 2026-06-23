@@ -40,6 +40,8 @@ async def _run_async_migrations() -> None:
 
 
 def run_migrations_online() -> None:
+    # asyncio.run() is correct here: alembic is always invoked from the CLI
+    # (never from inside a running event loop), so there is no loop conflict.
     asyncio.run(_run_async_migrations())
 
 
