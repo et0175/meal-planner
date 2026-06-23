@@ -12,6 +12,11 @@ services:
       - "5432:5432"
     volumes:
       - db-identity-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U identity -d identity"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   db-catalog:
     image: postgres:16-alpine
@@ -23,6 +28,11 @@ services:
       - "5433:5432"
     volumes:
       - db-catalog-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catalog -d catalog"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   db-planning:
     image: postgres:16-alpine
@@ -34,6 +44,11 @@ services:
       - "5434:5432"
     volumes:
       - db-planning-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U planning -d planning"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   db-shopping:
     image: postgres:16-alpine
@@ -45,6 +60,11 @@ services:
       - "5435:5432"
     volumes:
       - db-shopping-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shopping -d shopping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   # ── Backend services ─────────────────────────────────────────────────────────
 
@@ -53,46 +73,55 @@ services:
     ports:
       - "8001:8000"
     environment:
-      DATABASE_URL: postgresql://identity:identity@db-identity:5432/identity
+      DATABASE_URL: postgresql+asyncpg://identity:identity@db-identity:5432/identity
     depends_on:
-      - db-identity
+      db-identity:
+        condition: service_healthy
 
   catalog:
     build: ./backend/catalog
     ports:
       - "8002:8000"
     environment:
-      DATABASE_URL: postgresql://catalog:catalog@db-catalog:5432/catalog
+      DATABASE_URL: postgresql+asyncpg://catalog:catalog@db-catalog:5432/catalog
       IDENTITY_SERVICE_URL: http://identity:8000
     depends_on:
-      - db-catalog
-      - identity
+      db-catalog:
+        condition: service_healthy
+      identity:
+        condition: service_started
 
   planning:
     build: ./backend/planning
     ports:
       - "8003:8000"
     environment:
-      DATABASE_URL: postgresql://planning:planning@db-planning:5432/planning
+      DATABASE_URL: postgresql+asyncpg://planning:planning@db-planning:5432/planning
       IDENTITY_SERVICE_URL: http://identity:8000
       CATALOG_SERVICE_URL: http://catalog:8000
     depends_on:
-      - db-planning
-      - identity
-      - catalog
+      db-planning:
+        condition: service_healthy
+      identity:
+        condition: service_started
+      catalog:
+        condition: service_started
 
   shopping:
     build: ./backend/shopping
     ports:
       - "8004:8000"
     environment:
-      DATABASE_URL: postgresql://shopping:shopping@db-shopping:5432/shopping
+      DATABASE_URL: postgresql+asyncpg://shopping:shopping@db-shopping:5432/shopping
       IDENTITY_SERVICE_URL: http://identity:8000
       PLANNING_SERVICE_URL: http://planning:8000
     depends_on:
-      - db-shopping
-      - identity
-      - planning
+      db-shopping:
+        condition: service_healthy
+      identity:
+        condition: service_started
+      planning:
+        condition: service_started
 
   # ── Frontend ─────────────────────────────────────────────────────────────────
 
@@ -101,15 +130,26 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # Server-side vars (RSC / route handlers / middleware — never sent to browser):
+      IDENTITY_URL: http://identity:8000
+      CATALOG_URL: http://catalog:8000
+      PLANNING_URL: http://planning:8000
+      SHOPPING_URL: http://shopping:8000
+      # NEXT_PUBLIC_* vars are baked into the client bundle at build time; they must
+      # use localhost:800x so the user's browser can reach the host-mapped ports.
       NEXT_PUBLIC_IDENTITY_URL: http://localhost:8001
       NEXT_PUBLIC_CATALOG_URL: http://localhost:8002
       NEXT_PUBLIC_PLANNING_URL: http://localhost:8003
       NEXT_PUBLIC_SHOPPING_URL: http://localhost:8004
     depends_on:
-      - identity
-      - catalog
-      - planning
-      - shopping
+      identity:
+        condition: service_started
+      catalog:
+        condition: service_started
+      planning:
+        condition: service_started
+      shopping:
+        condition: service_started
 
 volumes:
   db-identity-data:
