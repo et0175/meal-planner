@@ -258,6 +258,25 @@ frontend/.env.local
 .DS_Store
 ```
 
+# Last step before the card is complete
+Write two documentation files covering the infrastructure delivered:
+
+1. **`CLAUDE.md`** at the repo root (create or update) — project-wide context for future Claude sessions:
+   - Project structure overview
+   - Services, ports, and their current implementation status
+   - Deployment topology summary
+   - Cross-service auth pattern
+   - How to run locally
+
+2. **`README.md`** at the repo root (create or update) — human-readable project docs:
+   - What the project is and what it does
+   - Quick start with Docker Compose
+   - Service list with ports
+   - Deployment instructions for Vercel and Railway
+   - Environment variables reference (link to `.env.example`)
+
+Commit both files alongside the implementation. Do not skip this step — it is checked at card review.
+
 # What not to do
 - Do not commit `.env` files or any file containing real credentials.
 - Do not push to `main` without CI passing.

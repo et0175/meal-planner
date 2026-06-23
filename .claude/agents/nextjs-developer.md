@@ -76,6 +76,24 @@ frontend/src/
 - Sidebar is always visible at ≥ 1280px — no hamburger menu required for MVP.
 - Test at 1280px, 1440px, and 1920px before marking a card done.
 
+# Last step before the card is complete
+Write two documentation files for the UI module:
+
+1. **`frontend/CLAUDE.md`** (create or update) — context for future Claude sessions on the frontend:
+   - What has been implemented so far (route groups, components, hooks)
+   - Key decisions: state management choices, auth flow, component breakdown
+   - How to run linting and the dev server
+   - Any non-obvious patterns or constraints specific to this project
+
+2. **`frontend/README.md`** (create or update) — human-readable frontend docs:
+   - What the frontend is and what it implements
+   - How to start the dev server and run linting
+   - Route map: each page/layout and what it renders
+   - How auth and API calls work
+   - Environment variables
+
+Commit both files alongside the implementation. Do not skip this step — it is checked at card review.
+
 # What not to do
 - Do not use `pages/` router — App Router only.
 - Do not call backend services directly from Server Components using internal Docker hostnames — use `NEXT_PUBLIC_*` URLs.
