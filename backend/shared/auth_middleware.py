@@ -1,37 +1,30 @@
-"""Shared auth middleware — verify_token FastAPI dependency.
+"""Cross-service auth middleware — HTTP-based token validation.
 
-Import this in any service's protected router:
-    from shared.auth_middleware import verify_token
+Other services (catalog, planning, shopping) should NOT import from identity's
+internal modules. Instead, call GET /auth/session on the Identity service:
+
+    import httpx, os
+    from fastapi import Depends, HTTPException, status
+    from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+    _bearer = HTTPBearer()
+    _identity_url = os.environ["IDENTITY_SERVICE_URL"]
+
+    async def verify_token(
+        credentials: HTTPAuthorizationCredentials = Depends(_bearer),
+    ) -> dict:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"{_identity_url}/auth/session",
+                headers={"Authorization": f"Bearer {credentials.credentials}"},
+                timeout=5.0,
+            )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                                detail="Invalid or expired session token",
+                                headers={"WWW-Authenticate": "Bearer"})
+        return resp.json()   # {"account_id": int, "email": str, "role": str}
+
+The Identity service itself uses backend/identity/auth_guard.py (DB-direct) —
+that file must NOT be used by other bounded contexts.
 """
-
-from __future__ import annotations
-
-from typing import Annotated
-
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-
-from db.engine import get_db
-from db.models import Account
-from session.service import validate_token
-from sqlalchemy.ext.asyncio import AsyncSession
-
-_bearer = HTTPBearer()
-
-
-async def verify_token(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(_bearer)],
-    db: Annotated[AsyncSession, Depends(get_db)],
-) -> Account:
-    """FastAPI dependency that validates a Bearer token and returns the Account.
-
-    Raises 401 if the token is missing, invalid, or expired.
-    """
-    account = await validate_token(credentials.credentials, db)
-    if account is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired session token",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return account

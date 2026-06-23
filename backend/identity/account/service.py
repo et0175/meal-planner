@@ -12,8 +12,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# NFR-006: bcrypt min 10 rounds
-_BCRYPT_ROUNDS: int = 10
+_BCRYPT_ROUNDS: int = 10  # bcrypt work factor — min 10 per security requirements
 
 # Dummy hash used for constant-time comparison when email is not found (AC-007)
 _DUMMY_HASH: bytes = bcrypt.hashpw(b"dummy", bcrypt.gensalt(rounds=10))
@@ -42,15 +41,14 @@ def verify_password(plain: str, hashed: str) -> bool:
 async def register_account(
     email: str,
     password: str,
-    role: RoleEnum,
     db: AsyncSession,
 ) -> Account:
-    """Create a new account.
+    """Create a new account. Role is always RoleEnum.user — not caller-controlled.
 
     Raises ValueError on duplicate email (INV-001).
     """
     hashed = hash_password(password)
-    account = Account(email=email.lower(), password_hash=hashed, role=role)
+    account = Account(email=email.lower(), password_hash=hashed, role=RoleEnum.user)
     db.add(account)
     try:
         await db.commit()
@@ -125,7 +123,7 @@ async def sign_in(
         .values(failed_sign_in_count=0, locked_until=None)
     )
 
-    token = secrets.token_urlsafe(32)  # 32 bytes = 256 bits > NFR-007 128-bit minimum
+    token = secrets.token_urlsafe(32)  # 32 bytes = 256 bits entropy (well above 128-bit minimum)
     session = Session(account_id=row.id, token=token, is_valid=True)
     db.add(session)
     await db.commit()

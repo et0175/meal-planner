@@ -7,12 +7,10 @@ import secrets
 from datetime import UTC, datetime, timedelta
 
 from account.service import hash_password
-from db.models import Account, ResetToken
+from db.models import Account, ResetToken, Session
 from email_adapter.sender import send_password_reset_email
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-
-_TOKEN_EXPIRY_MINUTES: int = int(os.environ.get("RESET_TOKEN_EXPIRY_MINUTES", "60"))
 
 
 def _expiry_minutes() -> int:
@@ -45,7 +43,7 @@ async def request_password_reset(email: str, db: AsyncSession) -> None:
         # No enumeration: silently return
         return
 
-    token_value = secrets.token_urlsafe(32)  # 32 bytes = 256 bits > NFR-007 128-bit minimum
+    token_value = secrets.token_urlsafe(32)  # 32 bytes = 256 bits entropy (well above 128-bit minimum)
     expires_at = datetime.now(tz=UTC) + timedelta(minutes=_expiry_minutes())
     reset_token = ResetToken(
         account_id=row.id,
@@ -90,13 +88,26 @@ async def confirm_password_reset(token_value: str, new_password: str, db: AsyncS
     if datetime.now(tz=UTC) > expires_at:
         raise TokenExpiredError("Reset token has expired")
 
+    # Atomically mark the token used — rowcount=0 means a concurrent request got there first.
+    mark_used = await db.execute(
+        update(ResetToken)
+        .where(ResetToken.id == row.id, ResetToken.is_used == False)  # noqa: E712
+        .values(is_used=True)
+    )
+    if mark_used.rowcount == 0:
+        raise TokenUsedError("Reset token has already been used")
+
     new_hash = hash_password(new_password)
     await db.execute(
         update(Account)
         .where(Account.id == row.account_id)
         .values(password_hash=new_hash, failed_sign_in_count=0, locked_until=None)
     )
+    # Invalidate all active sessions for this account (security: existing sessions
+    # must not remain valid after a password change).
     await db.execute(
-        update(ResetToken).where(ResetToken.id == row.id).values(is_used=True)
+        update(Session)
+        .where(Session.account_id == row.account_id, Session.is_valid == True)  # noqa: E712
+        .values(is_valid=False)
     )
     await db.commit()

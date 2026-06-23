@@ -33,7 +33,7 @@ async def register(
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> RegisterResponse:
     try:
-        account = await register_account(body.email, body.password, body.role, db)
+        account = await register_account(body.email, body.password, db)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     return RegisterResponse(id=account.id, email=account.email, role=account.role)
