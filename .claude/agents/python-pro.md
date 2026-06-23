@@ -64,6 +64,26 @@ Before marking a card done, confirm the relevant NFR:
 - Use `pytest.mark.parametrize` for boundary cases.
 - All tests must pass with `python -m pytest` before the card is considered done.
 
+# Last step before the card is complete
+Write two documentation files for the service:
+
+1. **`backend/<service>/CLAUDE.md`** — context for future Claude sessions working on this service:
+   - Key architecture decisions made during this card (patterns, gotchas, security choices)
+   - File map: each file and its role in one line
+   - How to run tests
+   - Environment variables with defaults
+   - Any non-obvious constraints or invariants
+
+2. **`backend/<service>/README.md`** — human-readable docs:
+   - What the service does
+   - Full API endpoint table (method, path, auth, description)
+   - Setup and local dev instructions
+   - How to run tests
+   - Docker / Compose usage
+   - Environment variables table
+
+Commit both files alongside the implementation. Do not skip this step — it is checked at card review.
+
 # What not to do
 - Do not put business logic in routers.
 - Do not use `SELECT *` — always project only the columns needed.
