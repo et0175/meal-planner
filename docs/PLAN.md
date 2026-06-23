@@ -1,30 +1,39 @@
-# CARD-009: Railway + Vercel Deployment Setup
+# Identity Service — Implementation Plan (CARD-001)
 
-## Implementation checklist
+## Layers (ordered)
 
-- [ ] Dockerfile for each of 4 Python services (identity, catalog, planning, shopping)
-- [ ] railway.toml for each service (build + deploy + healthcheck)
-- [ ] alembic.ini for each service (reads DATABASE_URL from env, no hard-coded strings)
-- [ ] Alembic migrations bootstrap (versions/ dir + env.py placeholder)
-- [ ] frontend/vercel.json (framework: nextjs, root: frontend/)
-- [ ] .env.example at repo root (all env vars documented)
-- [ ] .gitignore additions
-
-## Order
-
-1. Dockerfiles (each service independently buildable)
-2. railway.toml per service (depends on Dockerfile)
-3. alembic.ini + migrations bootstrap per service
-4. frontend/vercel.json
-5. .env.example
-6. .gitignore
-7. Commit
+- [x] Read card + ADRs
+- [ ] DB models (`db/models.py`) — accounts, sessions, reset_tokens
+- [ ] Alembic migration — initial schema
+- [ ] Pydantic schemas — account, session, reset
+- [ ] Email sender stub (`email/sender.py`)
+- [ ] Account service + router (register, sign-in, sign-out)
+- [ ] Reset service + router (reset-request, reset-confirm)
+- [ ] Session service (token validation, verify_token dependency)
+- [ ] shared auth_middleware (`shared/auth_middleware.py`)
+- [ ] main.py — register routers, lifespan
+- [ ] requirements.txt — finalize deps
+- [ ] Tests — all AC-* covered
+- [ ] ruff + mypy clean
+- [ ] Commit
 
 ## Key decisions
 
-- Alembic startCommand: `alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT`
-  (migrations run before server start; Alembic is idempotent so safe on redeploy)
-- DATABASE_URL uses asyncpg driver (`postgresql+asyncpg://`) in app code;
-  alembic.ini reads the same env var and the async env.py handles the asyncio runner
-- env.py is a placeholder — each python-pro card (CARD-001/003/005/007) fills in
-  `target_metadata` from their service models
+- Passwords: bcrypt via passlib, rounds=10 (NFR-006)
+- Session tokens: `secrets.token_urlsafe(32)` stored in DB (not JWT); validated via `GET /auth/session` pattern
+- Reset tokens: `secrets.token_urlsafe(32)`, 60-min expiry (ADR-0005, NFR-007)
+- Rate limit: configurable threshold via env `RATE_LIMIT_MAX_ATTEMPTS` (default 10 per ADR-0006), lockout 1 hour; reset on success
+- AC-009 tests 5 failures → test overrides env var to 5
+- 410 for expired/used reset tokens (ADR-0005)
+- 429 + Retry-After header on lockout (ADR-0006)
+- No enumeration on reset-request: always 200
+- Role enum: "user" | "nutritionist" (INV-003)
+- Email backend: stdout print by default (`EMAIL_BACKEND=stdout`)
+- AsyncSession + asyncpg driver; DATABASE_URL from env
+- Migration: single initial migration covering all 3 tables
+
+## Risks
+
+- asyncpg not available at test time (use `aiosqlite` for test DB OR use postgres via docker-compose)
+- mypy strict mode requires complete type annotations
+- passlib bcrypt requires `bcrypt` package at runtime
