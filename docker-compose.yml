@@ -101,10 +101,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_IDENTITY_URL: http://localhost:8001
-      NEXT_PUBLIC_CATALOG_URL: http://localhost:8002
-      NEXT_PUBLIC_PLANNING_URL: http://localhost:8003
-      NEXT_PUBLIC_SHOPPING_URL: http://localhost:8004
+      # Docker-internal service names — used by Next.js server-side fetches (RSC, route handlers).
+      # Browser clients reach these services via host-mapped ports (localhost:800x).
+      NEXT_PUBLIC_IDENTITY_URL: http://identity:8000
+      NEXT_PUBLIC_CATALOG_URL: http://catalog:8000
+      NEXT_PUBLIC_PLANNING_URL: http://planning:8000
+      NEXT_PUBLIC_SHOPPING_URL: http://shopping:8000
     depends_on:
       - identity
       - catalog
