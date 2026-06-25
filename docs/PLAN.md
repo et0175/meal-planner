@@ -1,39 +1,42 @@
-# Identity Service — Implementation Plan (CARD-001)
+# Catalog Service — Implementation Plan (CARD-003)
 
 ## Layers (ordered)
 
 - [x] Read card + ADRs
-- [ ] DB models (`db/models.py`) — accounts, sessions, reset_tokens
-- [ ] Alembic migration — initial schema
-- [ ] Pydantic schemas — account, session, reset
-- [ ] Email sender stub (`email/sender.py`)
-- [ ] Account service + router (register, sign-in, sign-out)
-- [ ] Reset service + router (reset-request, reset-confirm)
-- [ ] Session service (token validation, verify_token dependency)
-- [ ] shared auth_middleware (`shared/auth_middleware.py`)
-- [ ] main.py — register routers, lifespan
-- [ ] requirements.txt — finalize deps
-- [ ] Tests — all AC-* covered
+- [ ] DB models (`db/models.py`) — products, product_units, nutrition_per_100g, week_flags
+- [ ] DB engine (`db/engine.py`) — AsyncSession factory
+- [ ] Alembic migration — initial schema + index on products.name
+- [ ] Pydantic schemas — query, authoring, weekflag
+- [ ] Query service + router — GET /products, GET /products/:id
+- [ ] Authoring service + router — POST, PUT, DELETE /products
+- [ ] Weekflag service + router — PUT /products/:id/week-flag
+- [ ] Scheduler — Monday 00:00 rollover (APScheduler)
+- [ ] Auth middleware usage — verify_token for all protected endpoints
+- [ ] main.py — register routers, lifespan, scheduler start
+- [ ] requirements.txt — add aiosqlite, apscheduler, httpx
+- [ ] Tests — all AC-* covered (conftest with SQLite in-memory)
+- [ ] pytest.ini
 - [ ] ruff + mypy clean
 - [ ] Commit
 
 ## Key decisions
 
-- Passwords: bcrypt via passlib, rounds=10 (NFR-006)
-- Session tokens: `secrets.token_urlsafe(32)` stored in DB (not JWT); validated via `GET /auth/session` pattern
-- Reset tokens: `secrets.token_urlsafe(32)`, 60-min expiry (ADR-0005, NFR-007)
-- Rate limit: configurable threshold via env `RATE_LIMIT_MAX_ATTEMPTS` (default 10 per ADR-0006), lockout 1 hour; reset on success
-- AC-009 tests 5 failures → test overrides env var to 5
-- 410 for expired/used reset tokens (ADR-0005)
-- 429 + Retry-After header on lockout (ADR-0006)
-- No enumeration on reset-request: always 200
-- Role enum: "user" | "nutritionist" (INV-003)
-- Email backend: stdout print by default (`EMAIL_BACKEND=stdout`)
-- AsyncSession + asyncpg driver; DATABASE_URL from env
-- Migration: single initial migration covering all 3 tables
+- Auth: HTTP call to Identity service via `IDENTITY_SERVICE_URL` env var (shared pattern)
+- Week flags: stored in `week_flags` table keyed by (product_id, user_id); upsert on set
+- Flag rollover: APScheduler CronTrigger (Monday 00:00 UTC), runs inside app lifespan
+- Soft-delete: `is_deleted=True` on products; all queries filter it out
+- Owner check: `owner_id` null = global product → 403 on any edit/delete attempt
+- Unit limit: check count before insert, raise 422 on 11th (INV-004)
+- Product limit: check count before insert, raise 409 on 501st (INV-007)
+- Negative nutrition: Pydantic `ge=0` validators (INV-005)
+- Search: `ilike` on products.name with index for NFR-002
+- Sorting: protein, calories, name, category — query param
+- Week flag filter: supports `?week_flag=this_week&user_id=X` for ADR-0002
+- Tests: aiosqlite in-memory, monkeypatch verify_token for auth
 
 ## Risks
 
-- asyncpg not available at test time (use `aiosqlite` for test DB OR use postgres via docker-compose)
-- mypy strict mode requires complete type annotations
-- passlib bcrypt requires `bcrypt` package at runtime
+- APScheduler async compatibility — use AsyncIOScheduler
+- mypy strict with SQLAlchemy Mapped types — use `from __future__ import annotations`
+- aiosqlite does not support ARRAY columns — use JSON for diet_tags in tests
+- Dialect-specific: use `JSON` (not `ARRAY`) for diet_tags so tests run on SQLite
