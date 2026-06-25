@@ -1,6 +1,6 @@
 # CARD-002: Navigation Shell + Auth UI (Next.js)
 
-**Status:** ready
+**Status:** done
 **Priority:** P1
 **Category:** feature
 **Estimate:** 4d
@@ -12,9 +12,9 @@
 **Source:** meta/architecture/handoff.md#increment-1#ui
 **Depends on:** CARD-001
 **Review score:** —
-**Started:** —
-**Closed:** —
-**Actual:** —
+**Started:** 2026-06-25
+**Closed:** 2026-06-25
+**Actual:** 1d
 **Merge commit:** —
 **Blocked by:** —
 
@@ -67,4 +67,25 @@ Gate: unauthenticated access redirects to sign-in; session persists within tab (
 
 ## Worktree notes
 
-—
+Implemented on branch `card/002-navigation-shell-auth-ui`.
+
+**Files created:**
+- `frontend/src/app/(auth)/` — sign-in, register, forgot-password pages + layout (public, no shell)
+- `frontend/src/app/(app)/` — layout (auth guard + shell) + planner/products/shopping placeholder pages
+- `frontend/src/app/page.tsx` — root redirect (token present → /planner, absent → /sign-in)
+- `frontend/src/app/layout.tsx` + `globals.css` — root layout, Tailwind v4 with teal palette
+- `frontend/src/shell/Sidebar.tsx` — teal sidebar, 3 nav items, sign-out
+- `frontend/src/shell/Topbar.tsx` — module heading + week-stats (calls GET /plan/summary, zero-state when unavailable)
+- `frontend/src/lib/api/identity.ts` — typed wrappers: register, signIn, signOut, resetRequest, getSession
+- `frontend/src/lib/api/planning.ts` — getPlanSummary (zero-state guard for Increment 3 not yet live)
+- `frontend/src/lib/hooks/useAuth.ts` — sessionStorage session management (useReducer pattern)
+- `frontend/src/components/ui/Button.tsx` + `Input.tsx` — shared primitives
+- `frontend/CLAUDE.md` + `frontend/README.md` — documentation
+
+**Key decisions:**
+- `useReducer` used in `useAuth` and `(app)/layout.tsx` auth guard to comply with `react-hooks/set-state-in-effect` lint rule (React 19 / Next.js 16 default)
+- Auth guard calls `GET /auth/session` on every protected page load to catch expired tokens (AC-019)
+- Topbar shows zero-state (`0 planned, 0 kcal`) without spinner loop when planning service absent (AC-110 / ADR-0004)
+- sessionStorage key: `mf_session`
+
+**Quality gates:** `npm run lint` and `npm run format:check` both pass clean.
