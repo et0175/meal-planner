@@ -96,4 +96,15 @@ Gate: search returns in < 200 ms at 1,000 products; week flags persist and promo
 
 ## Worktree notes
 
-—
+Implementation complete. All 35 tests pass. ruff and mypy clean.
+
+Key decisions made:
+- `diet_tags` stored as JSON column (not PG ARRAY) — keeps tests running on SQLite in-memory
+- Week flag upsert uses select-then-update-or-insert (no UPSERT SQL) for portability
+- Monday rollover: Step 1 promotes next_week→this_week (captures timestamp), Step 2 clears stale this_week rows by comparing updated_at < now
+- Scheduler: APScheduler `AsyncIOScheduler` with CronTrigger; started in FastAPI lifespan
+- mypy run with `--explicit-package-bases` (workaround for service-as-root-package pattern)
+- `apscheduler` has no stubs — added `[mypy-apscheduler.*] ignore_missing_imports = true` to repo mypy.ini
+- Auth dependency overridden in tests via `app.dependency_overrides[verify_token]`
+
+Commit: babda03
