@@ -185,6 +185,18 @@ class TestProductDetail:
         assert resp.status_code == 404
 
 
+class TestWeekFlagFilter:
+    """week_flag query-param validation (ADR-0002)."""
+
+    async def test_week_flag_without_user_id_returns_400(
+        self, client: AsyncClient
+    ) -> None:
+        """Supplying week_flag without user_id must return 400, not silently drop the filter."""
+        resp = await client.get("/products?week_flag=this_week")
+        assert resp.status_code == 400
+        assert "user_id" in resp.json()["detail"]
+
+
 class TestNFR002:
     """NFR-002: search must return in < 200 ms at 1,000 products."""
 
@@ -229,5 +241,6 @@ class TestNFR002:
 
         assert resp.status_code == 200
         assert resp.json()["total"] == 1
-        # SQLite in-memory will be much faster; still verifies the call completes
-        assert elapsed_ms < 2000, f"Search took {elapsed_ms:.0f} ms (should be < 200 ms on PG)"
+        # SQLite in-memory is well under 200 ms; on PostgreSQL the GIN trigram index
+        # (ix_products_name_trgm, created in migration 0001) satisfies NFR-002.
+        assert elapsed_ms < 200, f"Search took {elapsed_ms:.0f} ms (NFR-002 requires < 200 ms)"

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Literal
 
 from db.models import NutritionPer100g, Product, WeekFlag, WeekFlagEnum
+from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -42,23 +43,25 @@ async def list_products(
     if search:
         stmt = stmt.where(Product.name.ilike(f"%{search}%"))
 
-    # Week flag filter (ADR-0002): only return products with the given flag for this user
-    if week_flag is not None and user_id is not None:
+    # Week flag filter (ADR-0002): only return products with the given flag for this user.
+    # user_id is mandatory when week_flag is specified — raise early rather than silently
+    # ignoring the filter (which would return an incorrect product list to Planning).
+    if week_flag is not None:
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="user_id is required when week_flag is specified",
+            )
         stmt = stmt.join(
             WeekFlag,
             (WeekFlag.product_id == Product.id) & (WeekFlag.user_id == user_id),
         ).where(WeekFlag.flag == week_flag)
 
     # Sorting
-    if sort_by == "protein":
-        order_col = NutritionPer100g.protein_g
-        stmt = stmt.outerjoin(NutritionPer100g, NutritionPer100g.product_id == Product.id)
-        if sort_dir == "desc":
-            stmt = stmt.order_by(order_col.desc().nulls_last())
-        else:
-            stmt = stmt.order_by(order_col.asc().nulls_last())
-    elif sort_by == "calories":
-        order_col = NutritionPer100g.calories
+    if sort_by in ("protein", "calories"):
+        order_col = (
+            NutritionPer100g.protein_g if sort_by == "protein" else NutritionPer100g.calories
+        )
         stmt = stmt.outerjoin(NutritionPer100g, NutritionPer100g.product_id == Product.id)
         if sort_dir == "desc":
             stmt = stmt.order_by(order_col.desc().nulls_last())

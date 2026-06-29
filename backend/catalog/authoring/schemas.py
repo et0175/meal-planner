@@ -63,6 +63,13 @@ class UpdateProductRequest(BaseModel):
             raise ValueError("A product may have at most 10 alternative units (INV-004)")
         return v
 
+    @field_validator("name")
+    @classmethod
+    def name_not_blank(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("Product name must not be blank")
+        return v
+
     model_config = ConfigDict(extra="ignore")
 
 

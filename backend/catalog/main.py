@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from auth_middleware import _identity_client
 from authoring.router import router as authoring_router
 from db.engine import get_engine, reset_engine
 from fastapi import FastAPI
@@ -37,7 +38,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Shutdown
     if _scheduler is not None and _scheduler.running:
-        _scheduler.shutdown(wait=False)
+        _scheduler.shutdown(wait=True)
+    await _identity_client.aclose()
     engine = get_engine()
     await engine.dispose()
     reset_engine()

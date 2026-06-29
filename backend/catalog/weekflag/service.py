@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from datetime import UTC, datetime
 from typing import cast
 
@@ -15,6 +16,12 @@ class ProductNotFoundError(Exception):
     """Raised when the target product does not exist."""
 
 
+def _is_sqlite() -> bool:
+    """Return True when the service is configured to use SQLite (i.e. in tests)."""
+    db_url = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./catalog.db")
+    return "sqlite" in db_url
+
+
 async def set_week_flag(
     db: AsyncSession,
     product_id: int,
@@ -22,6 +29,11 @@ async def set_week_flag(
     flag: WeekFlagEnum,
 ) -> WeekFlag:
     """Set or upsert a week flag for (product_id, user_id).
+
+    On PostgreSQL this uses INSERT … ON CONFLICT DO UPDATE against the
+    uq_week_flags_product_user constraint so concurrent requests cannot
+    produce duplicate rows.  On SQLite (tests) a SELECT-then-update/insert
+    fallback is used because SQLite does not support named-constraint upserts.
 
     EVT-009: flag updated.
     Raises ProductNotFoundError if the product doesn't exist or is deleted.
@@ -34,15 +46,37 @@ async def set_week_flag(
     if prod_result.scalar_one_or_none() is None:
         raise ProductNotFoundError(f"Product {product_id} not found")
 
-    # Check for existing flag row
-    stmt = select(WeekFlag).where(
+    now = datetime.now(tz=UTC)
+
+    if not _is_sqlite():
+        # PostgreSQL path: race-safe upsert using the named unique constraint
+        from sqlalchemy.dialects.postgresql import insert as pg_insert
+
+        stmt = (
+            pg_insert(WeekFlag)
+            .values(product_id=product_id, user_id=user_id, flag=flag, updated_at=now)
+            .on_conflict_do_update(
+                constraint="uq_week_flags_product_user",
+                set_={"flag": flag, "updated_at": now},
+            )
+            .returning(WeekFlag.id)
+        )
+        result = await db.execute(stmt)
+        row_id: int = result.scalar_one()
+        await db.commit()
+
+        # Re-fetch the full ORM object so callers receive a proper WeekFlag instance
+        fetch_stmt = select(WeekFlag).where(WeekFlag.id == row_id)
+        fetch_result = await db.execute(fetch_stmt)
+        return fetch_result.scalar_one()
+
+    # SQLite fallback (used in tests): SELECT-then-update-or-insert
+    stmt_sel = select(WeekFlag).where(
         WeekFlag.product_id == product_id,
         WeekFlag.user_id == user_id,
     )
-    flag_result = await db.execute(stmt)
+    flag_result = await db.execute(stmt_sel)
     existing: WeekFlag | None = flag_result.scalar_one_or_none()
-
-    now = datetime.now(tz=UTC)
 
     if existing is not None:
         await db.execute(

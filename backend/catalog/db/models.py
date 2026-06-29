@@ -16,6 +16,7 @@ from sqlalchemy import (
     Index,
     Integer,
     String,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -110,3 +111,7 @@ class WeekFlag(Base):
     )
 
     product: Mapped[Product] = relationship("Product", back_populates="week_flags")
+
+    __table_args__ = (
+        UniqueConstraint("product_id", "user_id", name="uq_week_flags_product_user"),
+    )

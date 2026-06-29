@@ -38,6 +38,14 @@ def upgrade() -> None:
     op.create_index(op.f("ix_products_name"), "products", ["name"], unique=False)
     op.create_index(op.f("ix_products_owner_id"), "products", ["owner_id"], unique=False)
 
+    # NFR-002: GIN trigram index for fast ILIKE search on PostgreSQL only
+    if op.get_bind().dialect.name == "postgresql":
+        op.execute("CREATE EXTENSION IF NOT EXISTS pg_trgm")
+        op.execute(
+            "CREATE INDEX IF NOT EXISTS ix_products_name_trgm"
+            " ON products USING GIN (name gin_trgm_ops)"
+        )
+
     # product_units table
     op.create_table(
         "product_units",
@@ -91,6 +99,7 @@ def upgrade() -> None:
         ),
         sa.ForeignKeyConstraint(["product_id"], ["products.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("product_id", "user_id", name="uq_week_flags_product_user"),
     )
     op.create_index(
         op.f("ix_week_flags_product_id"), "week_flags", ["product_id"], unique=False
@@ -110,6 +119,10 @@ def downgrade() -> None:
 
     op.drop_index(op.f("ix_product_units_product_id"), table_name="product_units")
     op.drop_table("product_units")
+
+    # Drop GIN trigram index before the B-tree index (PostgreSQL only)
+    if op.get_bind().dialect.name == "postgresql":
+        op.execute("DROP INDEX IF EXISTS ix_products_name_trgm")
 
     op.drop_index(op.f("ix_products_owner_id"), table_name="products")
     op.drop_index(op.f("ix_products_name"), table_name="products")

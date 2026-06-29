@@ -159,10 +159,10 @@ async def update_product(
             db.add(
                 NutritionPer100g(
                     product_id=product.id,
-                    calories=calories or 0.0,
-                    protein_g=protein_g or 0.0,
-                    fat_g=fat_g or 0.0,
-                    carbs_g=carbs_g or 0.0,
+                    calories=calories if calories is not None else 0.0,
+                    protein_g=protein_g if protein_g is not None else 0.0,
+                    fat_g=fat_g if fat_g is not None else 0.0,
+                    carbs_g=carbs_g if carbs_g is not None else 0.0,
                 )
             )
 
