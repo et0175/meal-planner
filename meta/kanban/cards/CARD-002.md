@@ -8,13 +8,13 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/002-navigation-shell-auth-ui
-**Worktree:** —
+**Worktree:** ../project-CARD-002
 **Source:** meta/architecture/handoff.md#increment-1#ui
 **Depends on:** CARD-001
-**Review score:** —
-**Started:** 2026-06-25
-**Closed:** 2026-06-25
-**Actual:** 1d
+**Review score:** 7 (cycle 1/3)
+**Started:** 2026-06-25T00:00:00Z
+**Closed:** 2026-06-29T00:00:00Z
+**Actual:** 4d
 **Merge commit:** —
 **Blocked by:** —
 
@@ -89,3 +89,16 @@ Implemented on branch `card/002-navigation-shell-auth-ui`.
 - sessionStorage key: `mf_session`
 
 **Quality gates:** `npm run lint` and `npm run format:check` both pass clean.
+
+[Build gate] FAILED (tsconfig @/* pointed at ./ instead of ./src/) → FIXED → PASSED
+[Review 1/3] Score: 7 — crit: 5, imp: 5
+  CRIT: text-gray-400 on white (2.54:1, need 4.5:1) in Topbar.tsx
+  CRIT: text-white/60 sign-out on teal-700 (3.34:1) in Sidebar.tsx
+  CRIT: text-white/70 email on teal-700 (3.96:1) in Sidebar.tsx
+  CRIT: AC-019 gap — useEffect not re-run on route change; add pathname to deps in (app)/layout.tsx
+  CRIT: Missing skip-to-main-content link (WCAG 2.4.1)
+  IMP: aria-label on bare div without role in Topbar.tsx
+  IMP: Loading spinner missing role="status" in (app)/layout.tsx
+  IMP: Button missing aria-busy when loading
+  IMP: signOut has no loading state
+  IMP: Sign-out button missing type="button"
