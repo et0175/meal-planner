@@ -1,6 +1,6 @@
 # CARD-007: Shopping List service (Python)
 
-**Status:** ready
+**Status:** in_progress
 **Priority:** P2
 **Category:** feature
 **Estimate:** 3d
@@ -8,11 +8,11 @@
 **Skill:** python-pro
 **TDD:** —
 **Branch:** card/007-shopping-list-service
-**Worktree:** —
+**Worktree:** ../project-CARD-007
 **Source:** meta/architecture/handoff.md#increment-4
 **Depends on:** CARD-005
 **Review score:** —
-**Started:** —
+**Started:** 2026-06-29T00:00:00Z
 **Closed:** —
 **Actual:** —
 **Merge commit:** —

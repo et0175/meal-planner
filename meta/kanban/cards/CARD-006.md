@@ -1,6 +1,6 @@
 # CARD-006: Meal Planning UI (Next.js)
 
-**Status:** ready
+**Status:** in_progress
 **Priority:** P1
 **Category:** feature
 **Estimate:** 5d
@@ -8,11 +8,11 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/006-meal-planning-ui
-**Worktree:** —
+**Worktree:** ../project-CARD-006
 **Source:** meta/architecture/handoff.md#increment-3#ui
 **Depends on:** CARD-005
 **Review score:** —
-**Started:** —
+**Started:** 2026-06-29T00:00:00Z
 **Closed:** —
 **Actual:** —
 **Merge commit:** —

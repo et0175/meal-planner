@@ -15,7 +15,7 @@
 **Started:** 2026-06-29T00:00:00Z
 **Closed:** 2026-06-29T00:00:00Z
 **Actual:** 4d
-**Merge commit:** c2fa435
+**Merge commit:** aad18ab
 **Blocked by:** —
 
 ## What to implement
