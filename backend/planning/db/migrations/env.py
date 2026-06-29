@@ -9,8 +9,9 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Import target_metadata from models once the schema is implemented (CARD-005).
-target_metadata = None
+from db.models import Base  # noqa: E402
+
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
@@ -25,7 +26,7 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
-def _do_run_migrations(connection):
+def _do_run_migrations(connection):  # type: ignore[no-untyped-def]
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
         context.run_migrations()

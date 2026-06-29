@@ -132,4 +132,27 @@ Gate: week plan round-trips correctly; log-from-plan writes to stub table; PDF d
 
 ## Worktree notes
 
-—
+Implementation complete on branch `card/005-meal-planning-service`.
+
+**What was built:**
+- `db/models.py` — MealPlanAssignment, NutritionTarget, TrackingEntry ORM models
+- `db/engine.py` — AsyncEngine/AsyncSession factory (same pattern as catalog)
+- `db/migrations/versions/0001_initial_schema.py` — full Alembic migration
+- `auth_middleware.py` — verify_token via Identity service (identical pattern to catalog)
+- `mealplan/` — assignment CRUD, week plan view, item search (FR-016–019, FR-023, FR-033)
+- `target/` — GET/PUT nutrition targets (FR-024, INV-013, INV-014)
+- `summary/` — GET /plan/summary for topbar widget (COMP-017, ADR-0004)
+- `logplan/` — log-from-plan (FR-025, ADR-0001): log/day, log/week, log/item
+- `pdf/` — reportlab PDF export (FR-026, NFR-004 < 3 s verified in tests)
+- `weekflag_reader/service.py` — HTTP client for Catalog week flags + product search (ADR-0002)
+- 56 tests, all green
+
+**Key decisions:**
+- Renamed log-from-plan package to `logplan/` (not `logging/`) — the stub `logging/__init__.py` shadowed stdlib `logging` and broke pytest; removed the stub.
+- Inline nutrition fields on assignments (kcal_per_unit etc.) for PDF/summary without runtime Catalog calls.
+- product_name denormalized into assignments for PDF rendering (NFR-004 compliance).
+- Week-flagged products only fetched for current ISO week (ADR-0002 / AC-052, AC-114).
+
+**NFR gates verified:**
+- NFR-004: PDF < 3 s confirmed by `test_export_pdf_within_3_seconds` (50 assignments, elapsed well under limit)
+- INV-008/010/013/014: all invariants covered by parametrized property tests
