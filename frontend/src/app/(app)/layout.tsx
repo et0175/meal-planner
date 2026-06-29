@@ -12,11 +12,11 @@
  */
 
 import { useEffect, useReducer } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { Sidebar } from '@/shell/Sidebar'
 import { Topbar } from '@/shell/Topbar'
 import { useAuth } from '@/lib/hooks/useAuth'
-import { getSession } from '@/lib/api/identity'
+import { getSession, isApiError } from '@/lib/api/identity'
 
 type AuthState = 'checking' | 'authenticated' | 'unauthenticated'
 
@@ -28,6 +28,7 @@ function authStateReducer(_prev: AuthState, action: AuthStateAction): AuthState 
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
+  const pathname = usePathname()
   const { session, isLoading, removeSession } = useAuth()
   const [authState, dispatch] = useReducer(authStateReducer, 'checking')
 
@@ -41,19 +42,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
 
     // Validate session against identity service to catch expired tokens (AC-019)
-    getSession(session.token)
+    const controller = new AbortController()
+
+    getSession(session.token, controller.signal)
       .then(() => dispatch({ type: 'authenticated' }))
-      .catch(() => {
-        removeSession()
-        router.replace('/sign-in')
-        dispatch({ type: 'unauthenticated' })
+      .catch((err: unknown) => {
+        if (controller.signal.aborted) {
+          // Stale request cancelled — ignore entirely
+          return
+        }
+        if (isApiError(err) && err.status === 401) {
+          // Confirmed invalid token — log out
+          removeSession()
+          router.replace('/sign-in')
+          dispatch({ type: 'unauthenticated' })
+        } else {
+          // Transient error (5xx, network) — assume token still valid
+          dispatch({ type: 'authenticated' })
+        }
       })
-  }, [session, isLoading, router, removeSession])
+
+    return () => controller.abort()
+  }, [session, isLoading, router, removeSession, pathname])
 
   // Show loading spinner while checking auth to avoid layout flash
   if (authState === 'checking') {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center" role="status">
         <span className="sr-only">Loading…</span>
         <span
           className="h-8 w-8 animate-spin rounded-full border-4 border-teal-700 border-t-transparent"
@@ -69,6 +84,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-full">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-4 focus:left-4 focus:bg-white focus:px-4 focus:py-2 focus:rounded focus:text-teal-800 focus:font-medium"
+      >
+        Skip to main content
+      </a>
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <Topbar />

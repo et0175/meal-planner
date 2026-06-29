@@ -108,9 +108,10 @@ export async function resetRequest(email: string): Promise<void> {
   await handleResponse<{ detail: string }>(res)
 }
 
-export async function getSession(token: string): Promise<SessionInfo> {
+export async function getSession(token: string, signal?: AbortSignal): Promise<SessionInfo> {
   const res = await fetch(`${BASE_URL}/auth/session`, {
     headers: { Authorization: `Bearer ${token}` },
+    signal,
   })
   return handleResponse<SessionInfo>(res)
 }

@@ -1,10 +1,5 @@
 import { type ButtonHTMLAttributes } from 'react'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: Parameters<typeof clsx>) {
-  return twMerge(clsx(...inputs))
-}
+import { cn } from '@/lib/utils/cn'
 
 type Variant = 'primary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md'
@@ -43,6 +38,7 @@ export function Button({
   return (
     <button
       disabled={disabled ?? isLoading}
+      aria-busy={isLoading || undefined}
       className={cn(
         'inline-flex items-center justify-center gap-2 rounded-xl font-medium cursor-pointer',
         'transition-colors duration-150',

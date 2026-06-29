@@ -20,11 +20,16 @@ const ZERO_STATE: PlanSummary = {
   week: '',
 }
 
-export async function getPlanSummary(token: string, week: string): Promise<PlanSummary> {
+export async function getPlanSummary(
+  token: string,
+  week: string,
+  signal?: AbortSignal
+): Promise<PlanSummary> {
   if (!BASE_URL) return ZERO_STATE
   try {
     const res = await fetch(`${BASE_URL}/plan/summary?week=${encodeURIComponent(week)}`, {
       headers: { Authorization: `Bearer ${token}` },
+      signal,
     })
     if (!res.ok) return ZERO_STATE
     const data = (await res.json()) as Partial<PlanSummary>
@@ -33,7 +38,8 @@ export async function getPlanSummary(token: string, week: string): Promise<PlanS
       total_kcal: data.total_kcal ?? 0,
       week: data.week ?? week,
     }
-  } catch {
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') throw err
     return ZERO_STATE
   }
 }

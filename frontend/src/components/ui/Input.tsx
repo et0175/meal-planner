@@ -1,19 +1,15 @@
 import { forwardRef, type InputHTMLAttributes } from 'react'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: Parameters<typeof clsx>) {
-  return twMerge(clsx(...inputs))
-}
+import { cn } from '@/lib/utils/cn'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string
   error?: string
   hint?: string
+  rightSlot?: React.ReactNode
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
-  { label, error, hint, id, className, ...rest },
+  { label, error, hint, id, className, rightSlot, ...rest },
   ref
 ) {
   const inputId = id ?? label.toLowerCase().replace(/\s+/g, '-')
@@ -33,31 +29,35 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           </span>
         )}
       </label>
-      <input
-        ref={ref}
-        id={inputId}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy || undefined}
-        aria-required={rest.required ? true : undefined}
-        className={cn(
-          'w-full rounded-xl border px-3 py-2 text-sm bg-white',
-          'placeholder:text-gray-400',
-          'focus:outline-none focus:ring-2 focus:ring-offset-0',
-          error
-            ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
-            : 'border-gray-200 focus:border-teal-500 focus:ring-teal-100',
-          'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
-          className
-        )}
-        {...rest}
-      />
+      <div className={rightSlot ? 'relative' : undefined}>
+        <input
+          ref={ref}
+          id={inputId}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy || undefined}
+          aria-required={rest.required ? true : undefined}
+          className={cn(
+            'w-full rounded-xl border px-3 py-2 text-sm bg-white',
+            'placeholder:text-gray-400',
+            'focus:outline-none focus:ring-2 focus:ring-offset-0',
+            error
+              ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+              : 'border-gray-200 focus:border-teal-500 focus:ring-teal-100',
+            'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400',
+            rightSlot && 'pr-10',
+            className
+          )}
+          {...rest}
+        />
+        {rightSlot && <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightSlot}</div>}
+      </div>
       {error && (
         <p id={errorId} role="alert" className="text-xs text-red-600">
           {error}
         </p>
       )}
-      {hint && !error && (
-        <p id={hintId} className="text-xs text-gray-400">
+      {hint && (
+        <p id={hintId} className={cn('text-xs', error ? 'sr-only' : 'text-gray-500')}>
           {hint}
         </p>
       )}

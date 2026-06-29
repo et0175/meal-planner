@@ -64,10 +64,18 @@ export function Topbar() {
     const token = getStoredToken()
     if (!token) return
 
+    const controller = new AbortController()
     const week = currentIsoWeek()
-    getPlanSummary(token, week).then((data) => {
-      if (isMounted.current) setSummary(data)
-    })
+    getPlanSummary(token, week, controller.signal)
+      .then((data) => {
+        if (isMounted.current) setSummary(data)
+      })
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === 'AbortError') return
+        // Other errors: getPlanSummary already returns ZERO_STATE internally
+      })
+
+    return () => controller.abort()
   }, [isPlanner, pathname])
 
   return (
@@ -75,7 +83,11 @@ export function Topbar() {
       <h1 className="text-base font-semibold text-gray-900 flex-1">{moduleLabel}</h1>
 
       {isPlanner && (
-        <div className="flex items-center gap-4 text-sm text-gray-400" aria-label="Week summary">
+        <div
+          className="flex items-center gap-4 text-sm text-gray-600"
+          role="group"
+          aria-label="Week summary"
+        >
           <span className="flex items-center gap-1.5">
             <CalendarDays size={13} aria-hidden="true" />
             <strong className="text-gray-700">{summary.total_assignments}</strong> planned

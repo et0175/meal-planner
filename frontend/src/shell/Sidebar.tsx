@@ -11,16 +11,12 @@
  */
 
 import Link from 'next/link'
+import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { CalendarDays, ShoppingBasket, Apple, LogOut, UtensilsCrossed, User } from 'lucide-react'
-import { clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 import { signOut } from '@/lib/api/identity'
 import { useAuth } from '@/lib/hooks/useAuth'
-
-function cn(...inputs: Parameters<typeof clsx>) {
-  return twMerge(clsx(...inputs))
-}
+import { cn } from '@/lib/utils/cn'
 
 interface NavItem {
   href: string
@@ -50,8 +46,10 @@ export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { session, removeSession } = useAuth()
+  const [isSigningOut, setIsSigningOut] = useState(false)
 
   async function handleSignOut() {
+    setIsSigningOut(true)
     if (session?.token) {
       try {
         await signOut(session.token)
@@ -109,21 +107,24 @@ export function Sidebar() {
           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
             <User size={12} className="text-white" aria-hidden="true" />
           </div>
-          <span className="text-white/70 text-xs truncate flex-1" title={session?.email}>
+          <span className="text-white/80 text-xs truncate flex-1" title={session?.email}>
             {session?.email ?? ''}
           </span>
         </div>
         <button
+          type="button"
           onClick={handleSignOut}
+          disabled={isSigningOut}
           className={cn(
             'w-full flex items-center gap-2 px-2 py-1.5 rounded-lg',
-            'text-white/60 hover:text-white hover:bg-white/10',
+            'text-white/80 hover:text-white hover:bg-white/10',
             'text-xs transition-colors cursor-pointer',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60',
+            'disabled:cursor-not-allowed disabled:opacity-60'
           )}
         >
           <LogOut size={13} aria-hidden="true" />
-          Sign out
+          {isSigningOut ? 'Signing out…' : 'Sign out'}
         </button>
       </div>
     </aside>

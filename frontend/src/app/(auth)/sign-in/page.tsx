@@ -128,40 +128,24 @@ export default function SignInPage() {
             placeholder="you@example.com"
           />
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password" className="text-xs font-medium text-gray-600">
-              Password{' '}
-              <span className="text-red-500" aria-hidden="true">
-                *
-              </span>
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value)
-                  if (passwordError) setPasswordError('')
-                }}
-                aria-invalid={passwordError ? true : undefined}
-                aria-describedby={passwordError ? 'password-error' : undefined}
-                aria-required="true"
-                className={[
-                  'w-full rounded-xl border px-3 py-2 pr-10 text-sm bg-white',
-                  'placeholder:text-gray-400',
-                  'focus:outline-none focus:ring-2 focus:ring-offset-0',
-                  passwordError
-                    ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
-                    : 'border-gray-200 focus:border-teal-500 focus:ring-teal-100',
-                ].join(' ')}
-              />
+          <Input
+            label="Password"
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              if (passwordError) setPasswordError('')
+            }}
+            error={passwordError}
+            required
+            rightSlot={
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded"
+                className="text-gray-500 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 rounded"
               >
                 {showPassword ? (
                   <EyeOff size={15} aria-hidden="true" />
@@ -169,13 +153,8 @@ export default function SignInPage() {
                   <Eye size={15} aria-hidden="true" />
                 )}
               </button>
-            </div>
-            {passwordError && (
-              <p id="password-error" role="alert" className="text-xs text-red-600">
-                {passwordError}
-              </p>
-            )}
-          </div>
+            }
+          />
 
           <Button type="submit" fullWidth isLoading={isPending}>
             Sign in
