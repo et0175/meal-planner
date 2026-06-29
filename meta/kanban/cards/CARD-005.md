@@ -1,6 +1,6 @@
 # CARD-005: Meal Planning service (Python)
 
-**Status:** ready
+**Status:** in_progress
 **Priority:** P1
 **Category:** feature
 **Estimate:** 6d
@@ -8,11 +8,11 @@
 **Skill:** python-pro
 **TDD:** —
 **Branch:** card/005-meal-planning-service
-**Worktree:** —
+**Worktree:** ../project-CARD-005
 **Source:** meta/architecture/handoff.md#increment-3
 **Depends on:** CARD-003
 **Review score:** —
-**Started:** —
+**Started:** 2026-06-29T00:00:00Z
 **Closed:** —
 **Actual:** —
 **Merge commit:** —

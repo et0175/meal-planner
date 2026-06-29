@@ -8,14 +8,14 @@
 **Skill:** python-pro
 **TDD:** —
 **Branch:** card/003-product-catalog-service
-**Worktree:** ../project-CARD-003
+**Worktree:** —
 **Source:** meta/architecture/handoff.md#increment-2
 **Depends on:** CARD-001
 **Review score:** 6 (cycle 1/3)
 **Started:** 2026-06-25T00:00:00Z
 **Closed:** 2026-06-29T00:00:00Z
 **Actual:** 5d
-**Merge commit:** —
+**Merge commit:** cc7d574
 **Blocked by:** —
 
 ## What to implement

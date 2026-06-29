@@ -8,14 +8,14 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/002-navigation-shell-auth-ui
-**Worktree:** ../project-CARD-002
+**Worktree:** —
 **Source:** meta/architecture/handoff.md#increment-1#ui
 **Depends on:** CARD-001
 **Review score:** 7 (cycle 1/3)
 **Started:** 2026-06-25T00:00:00Z
 **Closed:** 2026-06-29T00:00:00Z
 **Actual:** 4d
-**Merge commit:** —
+**Merge commit:** 677602a
 **Blocked by:** —
 
 ## What to implement

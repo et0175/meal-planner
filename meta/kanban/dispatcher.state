@@ -1,14 +1,14 @@
-wave: 2
+wave: 3
 mode: interactive
 active:
-  - id: CARD-002
+  - id: CARD-004
     phase: implementation
-    branch: card/002-navigation-shell-auth-ui
-    worktree: ../project-CARD-002
-    started: 2026-06-25T00:00:00Z
-  - id: CARD-003
+    branch: card/004-product-catalog-ui
+    worktree: ../project-CARD-004
+    started: 2026-06-29T00:00:00Z
+  - id: CARD-005
     phase: implementation
-    branch: card/003-product-catalog-service
-    worktree: ../project-CARD-003
-    started: 2026-06-25T00:00:00Z
-last_updated: 2026-06-25T00:00:00Z
+    branch: card/005-meal-planning-service
+    worktree: ../project-CARD-005
+    started: 2026-06-29T00:00:00Z
+last_updated: 2026-06-29T00:00:00Z

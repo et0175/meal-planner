@@ -1,6 +1,6 @@
 # CARD-004: Product Catalog UI (Next.js)
 
-**Status:** ready
+**Status:** in_progress
 **Priority:** P2
 **Category:** feature
 **Estimate:** 4d
@@ -8,11 +8,11 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/004-product-catalog-ui
-**Worktree:** —
+**Worktree:** ../project-CARD-004
 **Source:** meta/architecture/handoff.md#increment-2#ui
 **Depends on:** CARD-003
 **Review score:** —
-**Started:** —
+**Started:** 2026-06-29T00:00:00Z
 **Closed:** —
 **Actual:** —
 **Merge commit:** —
