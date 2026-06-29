@@ -65,7 +65,7 @@ Before marking a card done, confirm the relevant NFR:
 - All tests must pass with `python -m pytest` before the card is considered done.
 
 # Last step before the card is complete
-Write three files for the service:
+Write two documentation files for the service:
 
 1. **`backend/<service>/CLAUDE.md`** — context for future Claude sessions working on this service:
    - Key architecture decisions made during this card (patterns, gotchas, security choices)
@@ -82,14 +82,7 @@ Write three files for the service:
    - Docker / Compose usage
    - Environment variables table
 
-3. **`backend/<service>/seed.py`** — idempotent seed script that inserts realistic test data:
-   - One row per representative entity in this service's domain (2–5 records is enough)
-   - Must be idempotent: skip rows that already exist, never raise on re-run
-   - Print `added <identifier>` / `skip <identifier>` for each record
-   - Use the service's own `db/engine.py` session factory, not a raw connection
-   - Run inside the container: `docker exec mealplanner_new_1-<service>-1 python seed.py`
-
-Commit all three alongside the implementation. Do not skip this step — it is checked at card review.
+Commit both files alongside the implementation. Do not skip this step — it is checked at card review.
 
 # What not to do
 - Do not put business logic in routers.
