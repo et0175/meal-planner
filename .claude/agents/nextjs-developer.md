@@ -92,6 +92,13 @@ Write two documentation files for the UI module:
    - How auth and API calls work
    - Environment variables
 
+The frontend does not own a seed script — it depends on backend seed data. Before running
+or demoing the frontend, seed the backend services it calls:
+```bash
+docker exec mealplanner_new_1-identity-1 python seed.py
+# add catalog/planning/shopping equivalents as those cards are completed
+```
+
 Commit both files alongside the implementation. Do not skip this step — it is checked at card review.
 
 # What not to do

@@ -91,6 +91,17 @@ alembic upgrade head
 # repeat for planning, shopping
 ```
 
+## Seeding test data
+Each backend service has a `seed.py` that inserts realistic test records.
+Run after migrations, inside the running containers:
+```bash
+docker exec mealplanner_new_1-identity-1  python seed.py
+docker exec mealplanner_new_1-catalog-1   python seed.py
+docker exec mealplanner_new_1-planning-1  python seed.py
+docker exec mealplanner_new_1-shopping-1  python seed.py
+```
+Scripts are idempotent — safe to run multiple times. Output: `added <id>` or `skip <id>`.
+
 Add an `alembic.ini` to each service directory. The `sqlalchemy.url` should read from the `DATABASE_URL` env var:
 ```ini
 sqlalchemy.url = %(DATABASE_URL)s

@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: identity
       POSTGRES_PASSWORD: identity
     ports:
-      - "5432:5432"
+      - "15432:5432"
     volumes:
       - db-identity-data:/var/lib/postgresql/data
     healthcheck:
@@ -74,6 +74,9 @@ services:
       - "8001:8000"
     environment:
       DATABASE_URL: postgresql+asyncpg://identity:identity@db-identity:5432/identity
+    command: >-
+      bash -c 'until alembic upgrade head; do echo "migration failed, retrying..."; sleep 2; done
+      && uvicorn main:app --host 0.0.0.0 --port 8000'
     depends_on:
       db-identity:
         condition: service_healthy
@@ -85,6 +88,9 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://catalog:catalog@db-catalog:5432/catalog
       IDENTITY_SERVICE_URL: http://identity:8000
+    command: >-
+      bash -c 'until alembic upgrade head; do echo "migration failed, retrying..."; sleep 2; done
+      && uvicorn main:app --host 0.0.0.0 --port 8000'
     depends_on:
       db-catalog:
         condition: service_healthy
@@ -99,6 +105,9 @@ services:
       DATABASE_URL: postgresql+asyncpg://planning:planning@db-planning:5432/planning
       IDENTITY_SERVICE_URL: http://identity:8000
       CATALOG_SERVICE_URL: http://catalog:8000
+    command: >-
+      bash -c 'until alembic upgrade head; do echo "migration failed, retrying..."; sleep 2; done
+      && uvicorn main:app --host 0.0.0.0 --port 8000'
     depends_on:
       db-planning:
         condition: service_healthy
@@ -115,6 +124,9 @@ services:
       DATABASE_URL: postgresql+asyncpg://shopping:shopping@db-shopping:5432/shopping
       IDENTITY_SERVICE_URL: http://identity:8000
       PLANNING_SERVICE_URL: http://planning:8000
+    command: >-
+      bash -c 'until alembic upgrade head; do echo "migration failed, retrying..."; sleep 2; done
+      && uvicorn main:app --host 0.0.0.0 --port 8000'
     depends_on:
       db-shopping:
         condition: service_healthy
