@@ -1,6 +1,6 @@
 # CARD-003: Product Catalog service (Python)
 
-**Status:** ready
+**Status:** done
 **Priority:** P1
 **Category:** feature
 **Estimate:** 5d
@@ -8,13 +8,13 @@
 **Skill:** python-pro
 **TDD:** —
 **Branch:** card/003-product-catalog-service
-**Worktree:** —
+**Worktree:** ../project-CARD-003
 **Source:** meta/architecture/handoff.md#increment-2
 **Depends on:** CARD-001
-**Review score:** —
-**Started:** —
-**Closed:** —
-**Actual:** —
+**Review score:** 6 (cycle 1/3)
+**Started:** 2026-06-25T00:00:00Z
+**Closed:** 2026-06-29T00:00:00Z
+**Actual:** 5d
 **Merge commit:** —
 **Blocked by:** —
 
@@ -108,3 +108,15 @@ Key decisions made:
 - Auth dependency overridden in tests via `app.dependency_overrides[verify_token]`
 
 Commit: babda03
+
+[Build gate] PASSED (35/35 tests green)
+[Review 1/3] Score: 6 — crit: 2, imp: 3
+[Review 2/3] Score: 7 — crit: 1, imp: 2
+  CRIT: _is_sqlite() defaults to "" → returns False when DATABASE_URL unset → uses PG path on SQLite (harmless on SQLite 3.50.4 but fragile)
+  IMP: auth_middleware swallows identity-service network failures as unhandled 500 → should be 503
+  IMP: New httpx.AsyncClient per request — no connection pooling to identity service
+  CRIT: No UNIQUE(product_id, user_id) on week_flags → race → MultipleResultsFound crash
+  CRIT: Leading-wildcard ilike can't use B-tree index; NFR-002 test vacuous (SQLite, 2000ms threshold)
+  IMP: week_flag filter silently dropped when user_id omitted (ADR-0002 contract broken)
+  IMP: `x or 0.0` silently zeroes None nutrition fields — use `x if x is not None else 0.0`
+  IMP: shutdown(wait=False) + engine.dispose() race with in-flight rollover job
