@@ -1,6 +1,6 @@
 # CARD-004: Product Catalog UI (Next.js)
 
-**Status:** in_progress
+**Status:** done
 **Priority:** P2
 **Category:** feature
 **Estimate:** 4d
@@ -8,14 +8,14 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/004-product-catalog-ui
-**Worktree:** ../project-CARD-004
+**Worktree:** —
 **Source:** meta/architecture/handoff.md#increment-2#ui
 **Depends on:** CARD-003
 **Review score:** —
 **Started:** 2026-06-29T00:00:00Z
-**Closed:** —
-**Actual:** —
-**Merge commit:** —
+**Closed:** 2026-06-29T00:00:00Z
+**Actual:** 4d
+**Merge commit:** c2fa435
 **Blocked by:** —
 
 ## What to implement
@@ -82,4 +82,4 @@ Next.js Product Catalog UI (CTX-003, COMP-008–009 frontend):
 
 ## Worktree notes
 
-—
+Implemented the full Product Catalog UI on branch `card/004-product-catalog-ui` (commit c2fa435). The products page replaces the placeholder stub with two views: a category card grid (default, AC-024) that groups products by category and switches to the list view on click, and a sortable table view (AC-025) with a filter bar supporting debounced name search, category dropdown, and diet-tag multi-select (AC-027–031). A product detail modal (AC-032, AC-111) renders an SVG donut macro chart (no external charting library), a unit conversion table, and a week flag toggle that calls PUT /products/:id/week-flag immediately per ADR-0009 (AC-043/044). The add/edit form (AC-033, AC-039) validates client-side (empty name, negative values, 11+ units) and gates edit/delete buttons to the owning account (AC-040/042). Loading, error, and empty states are implemented throughout. State is managed with `useReducer` for async fetch state (to comply with the `react-hooks/set-state-in-effect` ESLint rule). 76 RTL integration tests pass across 8 suites; Playwright e2e tests (catalog.spec.ts) cover all key flows with mocked API calls.
