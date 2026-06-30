@@ -10,7 +10,7 @@
  * AC-116: empty day in single layout → empty-state per slot
  */
 
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CalendarView } from '@/planner/CalendarView'
 import type { Assignment, NutritionTarget } from '@/lib/api/planning'
@@ -225,9 +225,7 @@ describe('CalendarView', () => {
     await user.click(logDayBtns[0])
 
     await waitFor(() => expect(mockLogDay).toHaveBeenCalledWith(TOKEN, '2026-06-22'))
-    await waitFor(() =>
-      expect(onLogFeedback).toHaveBeenCalledWith(expect.stringContaining('Mon'))
-    )
+    await waitFor(() => expect(onLogFeedback).toHaveBeenCalledWith(expect.stringContaining('Mon')))
   })
 
   it('log item button calls logItem (AC-067)', async () => {
@@ -295,9 +293,7 @@ describe('CalendarView', () => {
     const addBtns = screen.getAllByRole('button', { name: /add item to dinner/i })
     await user.click(addBtns[0])
 
-    expect(
-      screen.getByRole('combobox', { name: /search for a product/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('combobox', { name: /search for a product/i })).toBeInTheDocument()
   })
 
   it('add flow creates assignment and refreshes (AC-054)', async () => {

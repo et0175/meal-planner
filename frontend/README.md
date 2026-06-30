@@ -16,7 +16,12 @@ Next.js 15 App Router application for Meal Forge: a meal planning, nutrition ana
   - "Log day" / "Log week" / "Log item" actions with toast feedback
   - "Export PDF" — calls planning service, opens browser print dialog
 - **Product Catalog UI (CARD-004)** — `/products` page with product table, filter bar, modals
-- **Placeholder** — Shopping list (`/shopping`, stub for Increment 4)
+- **Shopping List UI (CARD-008)** — `/shopping` page:
+  - Date range picker pre-filled to current ISO week (ADR-0007); "Apply" generates a new list
+  - Items grouped alphabetically by category; quantity + unit per item
+  - Staleness banner when plan has changed; "Refresh" regenerates the list
+  - Plan summary panel (date range, item count, category count)
+  - "Download PDF" triggers browser print dialog via shopping service
 
 ## Getting started
 
@@ -37,15 +42,15 @@ npm run format        # Auto-fix formatting issues
 
 ## Route map
 
-| Route              | File                                      | Description                                                    |
-| ------------------ | ----------------------------------------- | -------------------------------------------------------------- |
-| `/`                | `src/app/page.tsx`                        | Root redirect: token present → `/planner`, absent → `/sign-in` |
-| `/sign-in`         | `src/app/(auth)/sign-in/page.tsx`         | Sign-in form; calls `POST /auth/sign-in`                       |
-| `/register`        | `src/app/(auth)/register/page.tsx`        | Registration form; calls `POST /auth/register`                 |
-| `/forgot-password` | `src/app/(auth)/forgot-password/page.tsx` | Reset request; calls `POST /auth/reset-request`                |
+| Route              | File                                      | Description                                                     |
+| ------------------ | ----------------------------------------- | --------------------------------------------------------------- |
+| `/`                | `src/app/page.tsx`                        | Root redirect: token present → `/planner`, absent → `/sign-in`  |
+| `/sign-in`         | `src/app/(auth)/sign-in/page.tsx`         | Sign-in form; calls `POST /auth/sign-in`                        |
+| `/register`        | `src/app/(auth)/register/page.tsx`        | Registration form; calls `POST /auth/register`                  |
+| `/forgot-password` | `src/app/(auth)/forgot-password/page.tsx` | Reset request; calls `POST /auth/reset-request`                 |
 | `/planner`         | `src/app/(app)/planner/page.tsx`          | Meal planner — week nav, summary grid, calendar, nutrition bars |
-| `/products`        | `src/app/(app)/products/page.tsx`         | Product catalog (placeholder; Increment 2)                     |
-| `/shopping`        | `src/app/(app)/shopping/page.tsx`         | Shopping list (placeholder; Increment 4)                       |
+| `/products`        | `src/app/(app)/products/page.tsx`         | Product catalog — table, filters, add/edit/delete               |
+| `/shopping`        | `src/app/(app)/shopping/page.tsx`         | Shopping list — date picker, grouped items, PDF download        |
 
 ## Auth flow
 

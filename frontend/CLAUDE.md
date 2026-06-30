@@ -1,5 +1,38 @@
 # Meal Forge Frontend — Claude context
 
+## What has been implemented (CARD-008: Shopping List UI)
+
+### Shopping components (`src/shopping/`)
+
+- `ShoppingListView.tsx` — items grouped alphabetically by category; each category is a `<section>` landmark with an `<ul>` of items showing product name + quantity + unit; empty state when items array is empty (AC-071, AC-119)
+- `DateRangePicker.tsx` — two date inputs pre-filled to current ISO week Mon–Sun on mount (ADR-0007); "Apply" button with client-side from ≤ to validation (AC-073); `useReducer` for picker state
+- `StalenessBanner.tsx` — amber banner shown when `is_stale=true`; Refresh button triggers `POST /shopping/refresh`; banner disappears when parent updates list with `is_stale=false` (AC-075, AC-076)
+- `PlanSummaryPanel.tsx` — shows date range, total item count, and category count above the list
+
+### Shopping page (`src/app/(app)/shopping/page.tsx`)
+
+Full implementation replacing the CARD-002 placeholder:
+- Fetches `GET /shopping` on mount (auto-generates for current ISO week — AC-070)
+- `useReducer` for all async state (loading, generating, refreshing, PDF)
+- DateRangePicker → `POST /shopping/generate` → updates list
+- StalenessBanner → `POST /shopping/refresh` → clears stale flag
+- PDF button → `POST /shopping/export/pdf` → blob URL → `window.open` → `win.print()` (AC-077, AC-120)
+- Loading / error / empty states covered
+
+### API wrapper (`src/lib/api/shopping.ts`)
+
+- `getShoppingList(token)` — returns `ShoppingList | null` (null on 404 or BASE_URL absent)
+- `generateShoppingList(token, from_date, to_date)` — `POST /shopping/generate`
+- `refreshShoppingList(token)` — `POST /shopping/refresh`
+- `exportShoppingPdf(token, from_date, to_date)` — `POST /shopping/export/pdf` → `Blob`
+
+### Tests added (`src/__tests__/`)
+
+- `ShoppingListView.test.tsx` — 13 tests (empty state, category grouping, alphabetical order, item display, accessibility)
+- `DateRangePicker.test.tsx` — 12 tests (default values, Apply submission, validation, loading state)
+
+---
+
 ## What has been implemented (CARD-006: Meal Planning UI)
 
 ### Planner components (`src/planner/`)
@@ -14,6 +47,7 @@
 ### Planner page (`src/app/(app)/planner/page.tsx`)
 
 Full implementation replacing the CARD-002 placeholder:
+
 - Week state (ISO "YYYY-WNN"), navigated by WeekNav
 - Fetches assignments (`GET /plan?week=…&user_id=N`) on mount and on week change; refetches after mutations
 - Fetches nutrition target (`GET /plan/target`) once on mount
