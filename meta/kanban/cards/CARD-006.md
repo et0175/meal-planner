@@ -1,6 +1,6 @@
 # CARD-006: Meal Planning UI (Next.js)
 
-**Status:** in_progress
+**Status:** done
 **Priority:** P1
 **Category:** feature
 **Estimate:** 5d
@@ -8,15 +8,30 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/006-meal-planning-ui
-**Worktree:** ../project-CARD-006
+**Worktree:** —
 **Source:** meta/architecture/handoff.md#increment-3#ui
 **Depends on:** CARD-005
 **Review score:** —
-**Started:** 2026-06-29T00:00:00Z
-**Closed:** —
-**Actual:** —
-**Merge commit:** —
+**Started:** 2026-06-25
+**Closed:** 2026-06-29T00:00:00Z
+**Actual:** 5d
+**Merge commit:** ebb556b
 **Blocked by:** —
+
+## Implementation notes
+
+All components implemented in `frontend/src/planner/`:
+
+- **WeekNav** — week navigation with prev/next/today arrows; Today button highlighted with `aria-current="date"` when on current week (AC-113); diet label badge when set (AC-060/061); `aria-live="polite"` on week label
+- **WeekSummaryGrid** — spreadsheet grid grouped by meal slot; `useReducer`-based add-row form (product search → day → qty); unit toggle per row (client-side); nutrition bars when target set; weekly totals footer; empty-state with icon
+- **CalendarView** — week/4-day/single-day layout toggle; `DayColumn` sub-component handles per-slot items, add form, stepper, log-day/log-item; HTML5 native DnD with `draggable` + `onDragStart`/`onDrop`; stepper-to-0 validation error (AC-115); empty slot text (AC-116)
+- **PlanSummaryPanel** — 2-column grid of all slots; per-slot add-item form with ProductSearchDropdown + day selector + qty
+- **NutritionBar** — `role="progressbar"` with `aria-valuenow/min/max`; red bar when over target
+- **ProductSearchDropdown** — 300ms debounced combobox; `role="combobox"` + `role="listbox"` + `role="option"`; closes on outside click
+- **lib/api/planning.ts** — expanded to all endpoints: assignments CRUD, target get/put, search, log day/week/item, export PDF
+- **lib/utils/week.ts** — ISO 8601 week utilities: `isoWeekToMonday`, `weekDates`, `formatWeekLabel`, `currentIsoWeek`, `prevWeek`/`nextWeek`, `shortDayLabel`
+
+RTL tests: WeekNav (7 tests), WeekSummaryGrid (10 tests), CalendarView (14 tests) — all pass. `npm run build`, `npm run lint`, and `npm run format:check` all exit clean.
 
 ## What to implement
 
