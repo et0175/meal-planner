@@ -1,6 +1,6 @@
 # CARD-008: Shopping List UI (Next.js)
 
-**Status:** ready
+**Status:** in_progress
 **Priority:** P2
 **Category:** feature
 **Estimate:** 2d
@@ -8,11 +8,11 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/008-shopping-list-ui
-**Worktree:** —
+**Worktree:** ../project-CARD-008
 **Source:** meta/architecture/handoff.md#increment-4#ui
 **Depends on:** CARD-007
 **Review score:** —
-**Started:** —
+**Started:** 2026-06-30T00:00:00Z
 **Closed:** —
 **Actual:** —
 **Merge commit:** —

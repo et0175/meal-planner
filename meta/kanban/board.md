@@ -1,6 +1,6 @@
 # Kanban Board
 
-_Updated: 2026-06-29_
+_Updated: 2026-06-30_
 
 ## Wave plan
 
@@ -9,8 +9,8 @@ _Updated: 2026-06-29_
 | 1 | CARD-001 P1, CARD-009 P2 | ✓ done |
 | 2 | CARD-002 P1, CARD-003 P1 | ✓ done |
 | 3 | CARD-004 P2, CARD-005 P1 | ✓ done |
-| 4 | CARD-006 P1, CARD-007 P2 | ▶ active |
-| 5 | CARD-008 P2 | ⏳ blocked (→ CARD-007) |
+| 4 | CARD-006 P1, CARD-007 P2 | ✓ done |
+| 5 | CARD-008 P2 | ▶ active |
 
 _Gantt: [meta/kanban/gantt.md](gantt.md)_
 
@@ -27,12 +27,9 @@ _Gantt: [meta/kanban/gantt.md](gantt.md)_
 _(none)_
 
 ## In Progress
-- **CARD-006** P1 · Meal Planning UI (Next.js) _(wave 4)_
-  `worktree: ../project-CARD-006` · `branch: card/006-meal-planning-ui`
-  `elapsed: 0d / 5d est`
-- **CARD-007** P2 · Shopping List service (Python) _(wave 4)_
-  `worktree: ../project-CARD-007` · `branch: card/007-shopping-list-service`
-  `elapsed: 0d / 3d est`
+- **CARD-008** P2 · Shopping List UI (Next.js) _(wave 5)_
+  `worktree: ../project-CARD-008` · `branch: card/008-shopping-list-ui`
+  `elapsed: 0d / 2d est`
 
 ## Review
 _(none)_
@@ -44,3 +41,5 @@ _(none)_
 - **CARD-003** P1 · Product Catalog service (Python) — merged cc7d574
 - **CARD-004** P2 · Product Catalog UI (Next.js) — merged aad18ab
 - **CARD-005** P1 · Meal Planning service (Python) — merged 3a1afb9
+- **CARD-006** P1 · Meal Planning UI (Next.js) — merged 4afed2b
+- **CARD-007** P2 · Shopping List service (Python) — merged 3f7e717

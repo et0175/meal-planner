@@ -1,14 +1,9 @@
-wave: 4
+wave: 5
 mode: interactive
 active:
-  - id: CARD-006
+  - id: CARD-008
     phase: implementation
-    branch: card/006-meal-planning-ui
-    worktree: ../project-CARD-006
-    started: 2026-06-29T00:00:00Z
-  - id: CARD-007
-    phase: implementation
-    branch: card/007-shopping-list-service
-    worktree: ../project-CARD-007
-    started: 2026-06-29T00:00:00Z
-last_updated: 2026-06-29T00:00:00Z
+    branch: card/008-shopping-list-ui
+    worktree: ../project-CARD-008
+    started: 2026-06-30T00:00:00Z
+last_updated: 2026-06-30T00:00:00Z
