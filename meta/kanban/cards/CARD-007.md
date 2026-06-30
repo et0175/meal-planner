@@ -1,6 +1,6 @@
 # CARD-007: Shopping List service (Python)
 
-**Status:** in_progress
+**Status:** done
 **Priority:** P2
 **Category:** feature
 **Estimate:** 3d
@@ -8,13 +8,13 @@
 **Skill:** python-pro
 **TDD:** —
 **Branch:** card/007-shopping-list-service
-**Worktree:** ../project-CARD-007
+**Worktree:** —
 **Source:** meta/architecture/handoff.md#increment-4
 **Depends on:** CARD-005
 **Review score:** —
 **Started:** 2026-06-29T00:00:00Z
-**Closed:** —
-**Actual:** —
+**Closed:** 2026-06-29T00:00:00Z
+**Actual:** 3d
 **Merge commit:** —
 **Blocked by:** —
 
@@ -81,4 +81,15 @@ Gate: list generates in < 500 ms for a fully planned 2-week range; stale indicat
 
 ## Worktree notes
 
-—
+Implementation complete (2026-06-29):
+
+- DB: `shopping_lists` (unique per user, ADR-0008) + `shopping_list_items` (aggregated by product_id + unit)
+- Alembic migration 0001 created; `env.py` wired to `Base.metadata`
+- Generator: concurrent Planning calls (asyncio.gather per ISO week) + concurrent Catalog calls for category enrichment
+- Aggregation by `(product_id, unit)` — different units kept separate; same product same unit summed
+- Staleness: `is_stale` flag; set via `POST /shopping/events/plan-changed` (event-bus stub); cleared on generate/refresh
+- PDF: reportlab, grouped by category (alphabetical), "Uncategorized" last, empty categories omitted (AC-120)
+- 32 tests all green: generator, staleness, PDF, performance (NFR-003 31-day benchmark << 500ms, NFR-004 PDF < 3s)
+- Key decision: `GET /shopping` returns existing list if present (does not always regenerate); generates only on first access
+- FastAPI 0.138: HTTPBearer returns 401 (not 403) for missing credentials — tests accept both
+- Index fix: `list_id` column in `shopping_list_items` uses `index=False` to avoid duplicate with `__table_args__` explicit Index
