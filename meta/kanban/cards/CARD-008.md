@@ -1,6 +1,6 @@
 # CARD-008: Shopping List UI (Next.js)
 
-**Status:** in_progress
+**Status:** done
 **Priority:** P2
 **Category:** feature
 **Estimate:** 2d
@@ -8,13 +8,13 @@
 **Skill:** nextjs-developer
 **TDD:** —
 **Branch:** card/008-shopping-list-ui
-**Worktree:** ../project-CARD-008
+**Worktree:** —
 **Source:** meta/architecture/handoff.md#increment-4#ui
 **Depends on:** CARD-007
 **Review score:** —
 **Started:** 2026-06-30T00:00:00Z
-**Closed:** —
-**Actual:** —
+**Closed:** 2026-06-30T00:00:00Z
+**Actual:** 2d
 **Merge commit:** —
 **Blocked by:** —
 
@@ -77,4 +77,24 @@ Next.js Shopping List UI (CTX-005, COMP-020–022 frontend):
 
 ## Worktree notes
 
-—
+Status: done
+Closed: 2026-06-30T00:00:00Z
+Actual: 2d
+
+### Files created
+
+- `frontend/src/lib/api/shopping.ts` — typed wrappers: getShoppingList, generateShoppingList, refreshShoppingList, exportShoppingPdf
+- `frontend/src/shopping/ShoppingListView.tsx` — grouped-by-category list; empty state; `<section>` landmarks for a11y
+- `frontend/src/shopping/DateRangePicker.tsx` — from/to date inputs pre-filled to ISO week Mon–Sun; client-side from ≤ to validation (AC-073)
+- `frontend/src/shopping/StalenessBanner.tsx` — amber banner with Refresh button; hides on REFRESH_SUCCESS
+- `frontend/src/shopping/PlanSummaryPanel.tsx` — date range, item count, category count
+- `frontend/src/app/(app)/shopping/page.tsx` — page orchestrator; useReducer for all async state
+- `frontend/src/__tests__/ShoppingListView.test.tsx` — 13 RTL tests
+- `frontend/src/__tests__/DateRangePicker.test.tsx` — 12 RTL tests
+
+### Build results
+
+- All 138 tests pass (25 new)
+- `npm run lint` — clean (0 errors)
+- `npm run format:check` — clean
+- `npm run build` — clean production build
