@@ -7,7 +7,16 @@ Next.js 15 App Router application for Meal Forge: a meal planning, nutrition ana
 - **Authentication UI** — sign-in, register, forgot-password forms with validation and error handling
 - **Navigation shell** — teal sidebar with module navigation, topbar with current module name and week-stats widget
 - **Auth guard** — protects all app routes; redirects unauthenticated visitors to /sign-in
-- **Placeholder pages** — Planner, Products, Shopping (stubs for Increments 2–4)
+- **Meal Planning UI (CARD-006)** — full weekly planner at `/planner`:
+  - Week navigation header (previous/next/today, diet label)
+  - Week Summary tab — spreadsheet grid of assignments grouped by meal slot; add/remove rows; unit toggle
+  - Calendar tab — week/4-day/single-day layout; per-cell add/remove/stepper; HTML5 drag-and-drop between slots/days
+  - Plan Summary Panel — quick overview of all items by meal slot with "Add item" per slot
+  - Nutrition progress bars per day and week (kcal, protein, fat, carbs) shown only when target is set
+  - "Log day" / "Log week" / "Log item" actions with toast feedback
+  - "Export PDF" — calls planning service, opens browser print dialog
+- **Product Catalog UI (CARD-004)** — `/products` page with product table, filter bar, modals
+- **Placeholder** — Shopping list (`/shopping`, stub for Increment 4)
 
 ## Getting started
 
@@ -34,7 +43,7 @@ npm run format        # Auto-fix formatting issues
 | `/sign-in`         | `src/app/(auth)/sign-in/page.tsx`         | Sign-in form; calls `POST /auth/sign-in`                       |
 | `/register`        | `src/app/(auth)/register/page.tsx`        | Registration form; calls `POST /auth/register`                 |
 | `/forgot-password` | `src/app/(auth)/forgot-password/page.tsx` | Reset request; calls `POST /auth/reset-request`                |
-| `/planner`         | `src/app/(app)/planner/page.tsx`          | Meal planner (placeholder; Increment 3)                        |
+| `/planner`         | `src/app/(app)/planner/page.tsx`          | Meal planner — week nav, summary grid, calendar, nutrition bars |
 | `/products`        | `src/app/(app)/products/page.tsx`         | Product catalog (placeholder; Increment 2)                     |
 | `/shopping`        | `src/app/(app)/shopping/page.tsx`         | Shopping list (placeholder; Increment 4)                       |
 
@@ -57,6 +66,8 @@ All API calls go through wrappers in `src/lib/api/`:
 | ------------- | ---------------- | -------------------------- |
 | `identity.ts` | Identity (auth)  | `NEXT_PUBLIC_IDENTITY_URL` |
 | `planning.ts` | Planning service | `NEXT_PUBLIC_PLANNING_URL` |
+| `catalog.ts`  | Catalog service  | `NEXT_PUBLIC_CATALOG_URL`  |
+| `shopping.ts` | Shopping service | `NEXT_PUBLIC_SHOPPING_URL` |
 
 Never call `fetch` directly in components.
 

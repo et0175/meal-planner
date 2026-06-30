@@ -1,5 +1,44 @@
 # Meal Forge Frontend — Claude context
 
+## What has been implemented (CARD-006: Meal Planning UI)
+
+### Planner components (`src/planner/`)
+
+- `WeekNav.tsx` — week navigation header: prev/next arrows, Today button (highlighted on current week), diet label badge
+- `NutritionBar.tsx` — horizontal progress bar for one macro/kcal; shown only when target is set; red when over target
+- `ProductSearchDropdown.tsx` — debounced combobox that calls `GET /plan/search?q=…`; order controlled by backend (recently-used → user-owned → alphabetical per FR-023)
+- `WeekSummaryGrid.tsx` — spreadsheet-style grid: groups assignments by meal slot, rows = unique (product, slot), columns = Mon–Sun; add-row inline form with day selector; remove-row button; unit-display toggle; weekly totals footer
+- `CalendarView.tsx` — week/4-day/single-day layout toggle; `DayColumn` sub-component with per-cell add form, stepper (+/–), log-item button, HTML5 native drag-and-drop (`draggable`, `onDragStart/Over/Drop`); log-day button per column; nutrition bars per day (when target set)
+- `PlanSummaryPanel.tsx` — at-a-glance overview above calendar grid; all items grouped by slot; "Add item" inline form per slot
+
+### Planner page (`src/app/(app)/planner/page.tsx`)
+
+Full implementation replacing the CARD-002 placeholder:
+- Week state (ISO "YYYY-WNN"), navigated by WeekNav
+- Fetches assignments (`GET /plan?week=…&user_id=N`) on mount and on week change; refetches after mutations
+- Fetches nutrition target (`GET /plan/target`) once on mount
+- `useReducer` for async assignment state (avoids setState-in-effect ESLint error)
+- Tab nav: "Week Summary" | "Calendar" (accessible role="tablist")
+- "Log week" button (`POST /plan/log/week`) with success/error toast (auto-dismisses after 3 s)
+- "Export PDF" button (`POST /plan/export/pdf`) → opens blob URL in `window.open` → triggers `win.print()`
+
+### API wrapper updates (`src/lib/api/planning.ts`)
+
+Full expansion of all planning service endpoints:
+`getPlanSummary`, `getPlanAssignments`, `createAssignment`, `updateAssignment`, `deleteAssignment`, `moveAssignment`, `getNutritionTarget`, `updateNutritionTarget`, `searchPlanProducts`, `logDay`, `logWeek`, `logItem`, `exportPdf`
+
+### Utility (`src/lib/utils/week.ts`)
+
+ISO 8601 week helpers: `dateToIsoWeek`, `isoWeekToMonday`, `weekDates`, `formatWeekLabel`, `currentIsoWeek`, `prevWeek`, `nextWeek`, `shortDayLabel`, `isoDate`
+
+### Tests (`src/__tests__/`)
+
+- `WeekNav.test.tsx` — 7 tests (navigation, Today highlight, diet label)
+- `WeekSummaryGrid.test.tsx` — 10 tests (render, add row, remove row, unit toggle, error states)
+- `CalendarView.test.tsx` — 14 tests (layout switch, stepper, log actions, drag-drop, add flow)
+
+---
+
 ## What has been implemented (CARD-002)
 
 ### Route groups
