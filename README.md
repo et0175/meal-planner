@@ -10,7 +10,7 @@ A web app for meal planning, recipe management, and shopping lists.
 | Product Catalog service | Python / FastAPI | Railway |
 | Meal Planning service | Python / FastAPI | Railway |
 | Shopping List service | Python / FastAPI | Railway |
-| Frontend | Next.js 15 / TypeScript | Vercel |
+| Frontend | Next.js 16 / TypeScript | Vercel |
 
 Each backend service has its own PostgreSQL database (Railway Postgres plugin).
 
@@ -45,12 +45,25 @@ uvicorn main:app --reload --port 8001
 
 See each service's `README.md` for details:
 - [`backend/identity/README.md`](backend/identity/README.md)
+- [`backend/catalog/README.md`](backend/catalog/README.md)
+- [`backend/planning/README.md`](backend/planning/README.md)
+- [`backend/shopping/README.md`](backend/shopping/README.md)
+- [`frontend/README.md`](frontend/README.md)
 
 ## Running tests
 
 ```bash
-# Identity service (covers auth, rate limiting, password reset)
-cd backend/identity && python3 -m pytest tests/ -v
+# Backend services (run from each service directory)
+cd backend/identity  && python3 -m pytest tests/ -v
+cd backend/catalog   && python3 -m pytest tests/ -v
+cd backend/planning  && python3 -m pytest tests/ -v
+cd backend/shopping  && python3 -m pytest tests/ -v
+
+# Frontend (RTL unit tests)
+cd frontend && npm test
+
+# Frontend (Playwright e2e — requires dev server on :3001)
+cd frontend && npx playwright test
 ```
 
 ## Deployment
