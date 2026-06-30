@@ -1,9 +1,4 @@
 wave: 5
-mode: interactive
-active:
-  - id: CARD-008
-    phase: implementation
-    branch: card/008-shopping-list-ui
-    worktree: ../project-CARD-008
-    started: 2026-06-30T00:00:00Z
+mode: complete
+active: []
 last_updated: 2026-06-30T00:00:00Z

@@ -1,6 +1,7 @@
 # Changelog
 
 ## 2026-06-30
+- CARD-008 (feature): Implemented Shopping List UI — auto-load on nav, items grouped by category (alphabetical), date range picker pre-filled to ISO week (ADR-0007), stale banner with refresh, plan summary panel, PDF print via blob URL, 25 RTL tests (138 total).
 - CARD-006 (feature): Implemented Meal Planning UI — week nav, Week Summary spreadsheet grid, Calendar tab with HTML5 DnD and 3 layout modes, Plan Summary Panel, nutrition progress bars, log-day/week/item actions, PDF export, 31 RTL tests.
 - CARD-007 (feature): Implemented Shopping List service — auto-generate from Planning (concurrent ISO-week fetch), date-range generation, aggregation by product+unit, staleness flag, reportlab PDF grouped by category, 32 pytest tests (NFR-003 < 500ms, NFR-004 < 3s).
 

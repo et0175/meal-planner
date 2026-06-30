@@ -10,7 +10,7 @@ _Updated: 2026-06-30_
 | 2 | CARD-002 P1, CARD-003 P1 | ✓ done |
 | 3 | CARD-004 P2, CARD-005 P1 | ✓ done |
 | 4 | CARD-006 P1, CARD-007 P2 | ✓ done |
-| 5 | CARD-008 P2 | ▶ active |
+| 5 | CARD-008 P2 | ✓ done |
 
 _Gantt: [meta/kanban/gantt.md](gantt.md)_
 
@@ -27,9 +27,7 @@ _Gantt: [meta/kanban/gantt.md](gantt.md)_
 _(none)_
 
 ## In Progress
-- **CARD-008** P2 · Shopping List UI (Next.js) _(wave 5)_
-  `worktree: ../project-CARD-008` · `branch: card/008-shopping-list-ui`
-  `elapsed: 0d / 2d est`
+_(none)_
 
 ## Review
 _(none)_
@@ -43,3 +41,4 @@ _(none)_
 - **CARD-005** P1 · Meal Planning service (Python) — merged 3a1afb9
 - **CARD-006** P1 · Meal Planning UI (Next.js) — merged 4afed2b
 - **CARD-007** P2 · Shopping List service (Python) — merged 3f7e717
+- **CARD-008** P2 · Shopping List UI (Next.js) — merged 6750500

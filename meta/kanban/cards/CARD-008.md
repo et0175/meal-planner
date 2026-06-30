@@ -15,7 +15,7 @@
 **Started:** 2026-06-30T00:00:00Z
 **Closed:** 2026-06-30T00:00:00Z
 **Actual:** 2d
-**Merge commit:** —
+**Merge commit:** 6750500
 **Blocked by:** —
 
 ## What to implement
