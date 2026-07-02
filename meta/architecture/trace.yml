@@ -361,7 +361,7 @@ links:
     contexts: [CTX-003]
     components: [COMP-025, COMP-012]
     adrs: [ADR-0013]
-    tests: [TestImport_InsertsGlobalProducts, TestImport_ReimportIsIdempotent, TestImport_EnergyFallbackChain, TestImport_CapsUnitsAtTen]
+    tests: [TestImport_InsertsGlobalProducts, TestImport_ReimportIsIdempotent, TestImport_EnergyFallbackChain, TestImport_CapsUnitsAtTen, TestImport_EnergyDerivedFromMacros]
     status: partial
 
   # ── Non-functional ──────────────────────────────────────────────────────────

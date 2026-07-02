@@ -28,6 +28,21 @@ FAT_ID = "1004"
 CARBS_ID = "1005"
 _WANTED_NUTRIENTS = {*ENERGY_NUTRIENT_IDS, PROTEIN_ID, FAT_ID, CARBS_ID}
 
+# Atwater factors (kcal per gram) — used to derive energy when the source provides
+# no energy nutrient but does provide macros. Products with neither keep energy 0.0.
+_ATWATER_PROTEIN = 4.0
+_ATWATER_FAT = 9.0
+_ATWATER_CARBS = 4.0
+
+
+def _resolve_energy(nutrients: dict[str, float], protein: float, fat: float, carbs: float) -> float:
+    """Energy per 100 g: first available energy nutrient, else Atwater from macros."""
+    for nid in ENERGY_NUTRIENT_IDS:
+        if nid in nutrients:
+            return nutrients[nid]
+    derived = _ATWATER_PROTEIN * protein + _ATWATER_FAT * fat + _ATWATER_CARBS * carbs
+    return round(derived, 1)
+
 MAX_UNITS = 10  # INV-004
 _DEFAULT_CATEGORY = "Uncategorized"
 
@@ -119,17 +134,19 @@ def parse_usda(data_dir: str | Path, datasets: tuple[str, ...] = DATASETS) -> li
     records: list[ImportRecord] = []
     for fdc_id, food in targets.items():
         n = nutrients.get(fdc_id, {})
-        energy = next((n[e] for e in ENERGY_NUTRIENT_IDS if e in n), 0.0)
+        protein = n.get(PROTEIN_ID, 0.0)
+        fat = n.get(FAT_ID, 0.0)
+        carbs = n.get(CARBS_ID, 0.0)
         units = _build_units(portions.get(fdc_id, []))
         records.append(
             ImportRecord(
                 external_id=fdc_id,
                 name=food["name"],
                 category=categories.get(food["category_id"], _DEFAULT_CATEGORY),
-                calories=energy,
-                protein_g=n.get(PROTEIN_ID, 0.0),
-                fat_g=n.get(FAT_ID, 0.0),
-                carbs_g=n.get(CARBS_ID, 0.0),
+                calories=_resolve_energy(n, protein, fat, carbs),
+                protein_g=protein,
+                fat_g=fat,
+                carbs_g=carbs,
                 units=units,
             )
         )

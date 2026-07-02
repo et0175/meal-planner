@@ -1022,6 +1022,12 @@ functional:
         kind: boundary
         invariant: INV-004
         test: TestImport_CapsUnitsAtTen
+      - id: AC-130
+        given: an external record with no energy nutrient but non-zero macros
+        when: the record is imported
+        then: energy is derived from macros via Atwater factors (4*protein + 9*fat + 4*carbs); a record with neither energy nor macros keeps energy 0.0 and is still imported
+        kind: boundary
+        test: TestImport_EnergyDerivedFromMacros
 
 
 non_functional:

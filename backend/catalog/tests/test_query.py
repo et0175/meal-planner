@@ -185,6 +185,49 @@ class TestProductDetail:
         assert resp.status_code == 404
 
 
+class TestImportedDataShapes:
+    """Behaviors driven by real USDA data: zero-calorie, empty tags, comma names."""
+
+    async def test_zero_calorie_product_sorts_and_renders(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """~20% of imported products have calories 0 — they must sort and render, not crash."""
+        await _create_product(db, name="Water", category="Beverages", calories=0.0)
+        await _create_product(db, name="Olive Oil", category="Fats", calories=884.0)
+
+        resp = await client.get("/products?sort_by=calories&sort_dir=desc")
+        assert resp.status_code == 200
+        cals = [i["nutrition"]["calories"] for i in resp.json()["items"]]
+        assert cals == [884.0, 0.0]
+
+        water = next(
+            i for i in (await client.get("/products")).json()["items"] if i["name"] == "Water"
+        )
+        detail = await client.get(f"/products/{water['id']}")
+        assert detail.status_code == 200
+        assert detail.json()["nutrition"]["calories"] == 0.0
+
+    async def test_diet_filter_on_untagged_products_returns_empty(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """Imported products have empty diet_tags — a diet filter yields [] without error."""
+        await _create_product(db, name="Raw Beef", category="Meat", diet_tags=[])
+        resp = await client.get("/products?diet_tag=Vegan")
+        assert resp.status_code == 200
+        assert resp.json()["items"] == []
+
+    async def test_search_matches_comma_style_usda_name(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """USDA names are comma-heavy ('Milk, whole, ...') — substring search still matches."""
+        await _create_product(db, name="Milk, whole, shelf stable", category="Dairy")
+        resp = await client.get("/products?search=shelf")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["total"] == 1
+        assert body["items"][0]["name"] == "Milk, whole, shelf stable"
+
+
 class TestWeekFlagFilter:
     """week_flag query-param validation (ADR-0002)."""
 

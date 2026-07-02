@@ -147,3 +147,23 @@ class TestPagination:
         names2 = {i["name"] for i in page2["items"]}
         assert names1.isdisjoint(names2)
         assert len(page2["items"]) == 10
+
+    async def test_offset_beyond_total_returns_empty_but_keeps_total(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """An offset past the end returns no items but the full total is still reported."""
+        for i in range(5):
+            await _create_product(db, name=f"Item {i:02d}", translations={"en": f"Item {i:02d}"})
+        body = (await client.get("/products?limit=10&offset=100")).json()
+        assert body["total"] == 5
+        assert body["items"] == []
+
+    async def test_limit_over_max_is_rejected(self, client: AsyncClient) -> None:
+        """limit above the 200 cap is a 422 (contract guard, not silent clamp)."""
+        resp = await client.get("/products?limit=201")
+        assert resp.status_code == 422
+
+    async def test_limit_zero_is_rejected(self, client: AsyncClient) -> None:
+        """limit below 1 is a 422."""
+        resp = await client.get("/products?limit=0")
+        assert resp.status_code == 422

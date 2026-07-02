@@ -30,8 +30,11 @@ planning), loaded by a **one-time bulk CLI importer**.
   User-added products keep `source=NULL` and are never touched by the importer.
 - **Mapping:** `food.description` → `products.name` and `product_translations(locale='en')`;
   `food_category` → `products.category`; per-100 g nutrients → `nutrition_per_100g`
-  (energy = first available of nutrient ids **1008 → 2048 → 2047**; protein **1003**,
-  fat **1004**, carbs **1005**; missing values default to 0.0); `food_portion` →
+  (energy = first available of nutrient ids **1008 → 2048 → 2047**, and when the
+  source provides no energy nutrient at all, energy is **derived from macros via
+  Atwater factors** (4·protein + 9·fat + 4·carbs); protein **1003**, fat **1004**,
+  carbs **1005**; missing macros default to 0.0, so a product with neither energy
+  nor macros keeps energy 0.0 but is still imported); `food_portion` →
   `product_units` (`grams_per_unit = gram_weight / amount`, base `100g` always present,
   capped at 10 per INV-004).
 - **Datasets, not the API:** the CSV bulk download is used (no API key, no rate limits),
@@ -77,7 +80,10 @@ catalogue.
 - Category stays free-text (`products.category`); a controlled-vocabulary mapping is
   deferred with the ADR-0012 category/diet-tag normalization.
 - Energy uses an Atwater fallback chain because Foundation foods populate 1008
-  inconsistently (135/469) vs. 2047/2048.
+  inconsistently (135/469) vs. 2047/2048; when no energy nutrient exists at all,
+  energy is derived from macros (Atwater). In the Foundation import this recovered
+  49 of 92 zero-energy products; the remaining 43 (no macros either — e.g. water)
+  are kept with energy 0.0.
 - One-time cadence chosen; a scheduled re-sync can reuse the same idempotent loader
   later without schema change.
 

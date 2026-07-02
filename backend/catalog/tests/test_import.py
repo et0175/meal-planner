@@ -76,6 +76,40 @@ class TestParse:
         assert ("100 g", 100.0) in by_id["1001"].units
         assert any(u[0] == "cup" for u in by_id["1001"].units)
 
+    def test_energy_derived_from_macros_when_absent(self, tmp_path: Path) -> None:
+        """No energy nutrient but macros present -> Atwater (4p + 9f + 4c)."""
+        _write(tmp_path / "food_category.csv", ["id", "code", "description"], [["1", "x", "Cat"]])
+        _write(tmp_path / "food.csv",
+            ["fdc_id", "data_type", "description", "food_category_id", "publication_date"],
+            [["3001", "foundation_food", "No-energy food", "1", "2020-01-01"]])
+        # protein 10, fat 2, carbs 5 -> 4*10 + 9*2 + 4*5 = 78 kcal, no energy nutrient row
+        _write(tmp_path / "food_nutrient.csv", ["id", "fdc_id", "nutrient_id", "amount"],
+            [["1", "3001", "1003", "10"], ["2", "3001", "1004", "2"], ["3", "3001", "1005", "5"]])
+        rec = parse_usda(tmp_path)[0]
+        assert rec.calories == 78.0
+
+    def test_no_energy_no_macros_stays_zero(self, tmp_path: Path) -> None:
+        """No energy and no macros -> calories 0.0 (product still kept)."""
+        _write(tmp_path / "food_category.csv", ["id", "code", "description"], [["1", "x", "Cat"]])
+        _write(tmp_path / "food.csv",
+            ["fdc_id", "data_type", "description", "food_category_id", "publication_date"],
+            [["3002", "foundation_food", "Water", "1", "2020-01-01"]])
+        _write(tmp_path / "food_nutrient.csv", ["id", "fdc_id", "nutrient_id", "amount"], [])
+        rec = parse_usda(tmp_path)[0]
+        assert rec.calories == 0.0
+        assert rec.protein_g == 0.0
+
+    def test_unknown_category_defaults_to_uncategorized(self, tmp_path: Path) -> None:
+        """A food_category_id with no matching category row -> 'Uncategorized'."""
+        _write(tmp_path / "food_category.csv", ["id", "code", "description"], [["1", "x", "Cat"]])
+        _write(tmp_path / "food.csv",
+            ["fdc_id", "data_type", "description", "food_category_id", "publication_date"],
+            [["3003", "foundation_food", "Orphan category food", "999", "2020-01-01"]])
+        _write(tmp_path / "food_nutrient.csv", ["id", "fdc_id", "nutrient_id", "amount"],
+            [["1", "3003", "1008", "50"]])
+        rec = parse_usda(tmp_path)[0]
+        assert rec.category == "Uncategorized"
+
     def test_units_capped_at_ten(self, tmp_path: Path) -> None:
         """AC-129: no more than 10 units even with many portions."""
         _write(tmp_path / "food_category.csv", ["id", "code", "description"], [["1", "x", "Cat"]])
@@ -158,3 +192,22 @@ class TestLoad:
             await db.execute(select(Product).where(Product.external_id == "1001"))
         ).scalar_one()
         assert milk.name == "Milk, whole (updated)"
+
+    async def test_reimport_resurrects_soft_deleted(
+        self, tmp_path: Path, db: AsyncSession
+    ) -> None:
+        """A product soft-deleted between imports is un-deleted when it reappears."""
+        _build_fixture(tmp_path)
+        await load_records(db, parse_usda(tmp_path))
+
+        milk = (
+            await db.execute(select(Product).where(Product.external_id == "1001"))
+        ).scalar_one()
+        milk.is_deleted = True
+        await db.commit()
+
+        await load_records(db, parse_usda(tmp_path))
+        refreshed = (
+            await db.execute(select(Product).where(Product.external_id == "1001"))
+        ).scalar_one()
+        assert refreshed.is_deleted is False
