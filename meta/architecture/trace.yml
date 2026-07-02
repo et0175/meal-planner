@@ -355,6 +355,15 @@ links:
     tests: [TestProducts_ReturnsRequestedLocale, TestProducts_FallsBackToDefaultLocale, TestProducts_LocalizedDietTagFilter, TestUserProduct_StoredInCreatorLocale]
     status: partial
 
+  - req: FR-038
+    description: "Bulk-import global products from USDA FDC; idempotent on (source, external_id)"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-025, COMP-012]
+    adrs: [ADR-0013]
+    tests: [TestImport_InsertsGlobalProducts, TestImport_ReimportIsIdempotent, TestImport_EnergyFallbackChain, TestImport_CapsUnitsAtTen]
+    status: partial
+
   # ── Non-functional ──────────────────────────────────────────────────────────
   - req: NFR-001
     description: "p95 initial page load <= 2s (cold, 10 Mbps)"
@@ -552,6 +561,15 @@ links:
     contexts: [CTX-003]
     components: [COMP-008, COMP-012]
     adrs: [ADR-0012]
+    tests: []
+    status: covered
+
+  - req: CON-008
+    description: "MVP global catalog sourced from USDA FoodData Central (public domain, English)"
+    capabilities: []
+    contexts: [CTX-003]
+    components: [COMP-025, COMP-012]
+    adrs: [ADR-0013]
     tests: []
     status: covered
 

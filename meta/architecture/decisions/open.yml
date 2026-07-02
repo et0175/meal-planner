@@ -311,3 +311,35 @@ open:
     status: resolved
     resolved_by: ADR-0012
     blocks: none
+
+  - id: DEC-012
+    question: >
+      Where does the global product catalogue come from, given NFR-010 targets
+      ~10k products per language and seed.py ships only 5? Which external source,
+      and how is the load made idempotent so it can be re-run without duplicating
+      products (today seed.py dedupes by matching on name, which breaks under
+      localization)?
+    surfaced_from:
+      kind: nfr
+      ref: [NFR-010, CTX-003, US-056]
+    alternatives:
+      - label: usda_fdc_bulk
+        summary: >
+          Bulk-import USDA FoodData Central (Foundation + SR Legacy) CSVs via a
+          one-time CLI. Add products.source + external_id with a partial
+          UNIQUE(source, external_id) so re-import is an upsert on (usda_fdc, fdcId).
+        pros: [Public domain (no license constraint), authoritative per-100g
+               nutrition, idempotent re-run, decoupled offline importer]
+        cons: [English names only, no diet labels, Foundation alone is ~469 items]
+      - label: open_food_facts
+        summary: Crowd-sourced multilingual dataset with diet labels.
+        pros: [Multilingual names, diet labels, huge coverage]
+        cons: [ODbL attribution/share-alike, branded/noisy, uneven quality]
+      - label: live_api
+        summary: Fetch-on-demand from a commercial nutrition API with caching.
+        pros: [No bulk dataset to host, always current]
+        cons: [Rate limits, API key/cost, unsuitable for 10k preload]
+    criteria_refs: [NFR-010, FR-038]
+    status: resolved
+    resolved_by: ADR-0013
+    blocks: none

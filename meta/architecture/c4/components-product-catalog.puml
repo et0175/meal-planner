@@ -6,7 +6,8 @@
 ' Full COMP inventory: see c4/components-identity.puml (overview).
 ' Generated from: CTX-003 capabilities [CAP-003], context_map CTXREL-001 (auth), CTXREL-006 (WeekFlag read by CTX-004)
 ' ADR references: ADR-0009 (rollover auto-clear old this-week), ADR-0002 (WeekFlag served sync to CTX-004),
-'                 ADR-0012 (localization model: translation tables + per-locale search; FR-037, NFR-002/010)
+'                 ADR-0012 (localization model: translation tables + per-locale search; FR-037, NFR-002/010),
+'                 ADR-0013 (global catalog bulk-imported from USDA FoodData Central; FR-038, CON-008)
 ' ============================================================
 title Components: Product Catalog Service (CTX-003)
 
@@ -15,12 +16,14 @@ Container_Boundary(catalog, "Product Catalog Service") {
   Component(authoring, "COMP-009 Product Authoring", "Python", "CAP-003: AddProduct/EditProduct/DeleteProduct (CMD-006/007/008); enforces INV-004/005/006/007")
   Component(weekflag, "COMP-010 WeekFlag Manager", "Python", "CAP-003: SetProductWeekFlag (CMD-009, EVT-009); serves 'This week' query to CTX-004 (CTXREL-006, ADR-0002)")
   Component(scheduler, "COMP-011 Rollover Scheduler", "Python", "CAP-003: PromoteNextWeekFlags (CMD-010, POL-001, EVT-010) every Monday; auto-clears old this-week flags (ADR-0009)")
-  ComponentDb(catalogDb, "COMP-012 Catalog DB", "PostgreSQL", "Product (lang-neutral), units, WeekFlag (AGG-002); product/category/diet-tag translation tables + controlled vocab, per-locale indexes (FR-037, ADR-0012)")
+  Component(importer, "COMP-025 Catalog Importer", "Python (CLI)", "FR-038/ADR-0013: one-time bulk import of global products from USDA FoodData Central CSVs; idempotent upsert on (source, external_id)")
+  ComponentDb(catalogDb, "COMP-012 Catalog DB", "PostgreSQL", "Product (lang-neutral) + source/external_id provenance, units, WeekFlag (AGG-002); product/category/diet-tag translation tables + controlled vocab, per-locale indexes (FR-037, ADR-0012)")
 }
 
 Container_Ext(frontend, "Web Frontend", "Next.js")
 Container_Ext(identity, "Identity Service", "CTX-001")
 Container_Ext(planning, "Meal Planning Service", "CTX-004")
+Container_Ext(usda, "USDA FoodData Central", "public-domain dataset (CON-008)")
 
 Rel(frontend, query, "Browse / search / filter / sort / detail", "REST")
 Rel(frontend, authoring, "Add / edit / delete product", "REST")
@@ -35,4 +38,7 @@ Rel(query, catalogDb, "Reads", "SQL")
 Rel(authoring, catalogDb, "Reads/writes", "SQL")
 Rel(weekflag, catalogDb, "Reads/writes flags", "SQL")
 Rel(scheduler, catalogDb, "Promotes / clears flags", "SQL")
+
+Rel(importer, usda, "Reads FoodData Central CSV bulk export (FR-038, CON-008)", "file")
+Rel(importer, catalogDb, "Idempotent upsert of global products (source, external_id)", "SQL")
 @enduml

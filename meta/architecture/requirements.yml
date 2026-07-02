@@ -989,6 +989,40 @@ functional:
         kind: boundary
         test: TestUserProduct_StoredInCreatorLocale
 
+  - id: FR-038
+    statement: >
+      The system must be able to bulk-import global products (owner_id NULL) from an
+      external nutrition dataset, mapping per-100 g nutrition, units, category, and
+      the English product name. The import must be idempotent — re-running it updates
+      existing rows rather than duplicating them — by keying on (source, external_id).
+    source: [US-056]
+    acceptance:
+      - id: AC-126
+        given: a dataset of external food records not yet in the catalog
+        when: the importer runs
+        then: each record is inserted as a global product with nutrition, units, and an English name translation
+        kind: happy
+        test: TestImport_InsertsGlobalProducts
+      - id: AC-127
+        given: an import that has already been run once
+        when: the same dataset is imported again
+        then: no duplicate products are created; existing rows are updated in place
+        kind: idempotency
+        test: TestImport_ReimportIsIdempotent
+      - id: AC-128
+        given: an external record whose energy value is absent under nutrient 1008
+        when: the record is imported
+        then: energy falls back to an Atwater factor (2048 then 2047) and nutrition is stored
+        kind: boundary
+        test: TestImport_EnergyFallbackChain
+      - id: AC-129
+        given: an external record with more than 10 portion units
+        when: the record is imported
+        then: at most 10 units are stored (INV-004)
+        kind: boundary
+        invariant: INV-004
+        test: TestImport_CapsUnitsAtTen
+
 
 non_functional:
 
@@ -1266,3 +1300,12 @@ constraints:
       global products (owner_id IS NULL) are translated into all supported locales;
       user-added products are stored in their creator's single locale.
     source: "ADR-0012, 2026-06-30"
+
+  - id: CON-008
+    type: technical
+    statement: >
+      The MVP global product catalogue is sourced from USDA FoodData Central
+      (Foundation Foods + SR Legacy datasets), which is US-government public domain.
+      Imported products carry source='usda_fdc' and external_id=<fdcId>; names are
+      English-only. Branded Foods and the live FDC API are out of scope for MVP.
+    source: "ADR-0013, 2026-07-02"

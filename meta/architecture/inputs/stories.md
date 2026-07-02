@@ -59,6 +59,8 @@ US-024: As a user adding a product, I want to define multiple alternative units 
 
 US-055: As a user who reads in my own language, I want product names, categories, and diet-tag labels shown in my chosen language — falling back to English when a translation is missing — so that I can browse and search the catalog without a language barrier. [US-PA-013]
 
+US-056: As the product owner, I want the global product catalog pre-populated from a trusted nutrition dataset, so that new users find a rich set of products with accurate nutrition on day one instead of an empty catalog. [US-PA-014]
+
 ## Meal Planner (2026-06-21)
 <!-- source: docs/user-stories/meal-planner.md (US-MP-001–023) -->
 

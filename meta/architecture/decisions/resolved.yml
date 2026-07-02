@@ -64,3 +64,9 @@ resolved:
     resolved_by: ADR-0012
     resolution_label: translation_tables
     date: 2026-06-30
+
+  - id: DEC-012
+    question: "External source and idempotency strategy for seeding the global product catalogue"
+    resolved_by: ADR-0013
+    resolution_label: usda_fdc_bulk
+    date: 2026-07-02
