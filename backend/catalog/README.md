@@ -91,7 +91,18 @@ The load is **idempotent** — keyed on `(source, external_id)`, re-running upda
 rows in place instead of duplicating. Imported products are global (`owner_id NULL`,
 `source='usda_fdc'`) with English names; USDA carries no diet labels, so `diet_tags`
 are empty. Flags: `--source`, `--locale` (default `en`), `--batch-size`, `--limit`
-(cap records, for smoke tests).
+(cap records, for smoke tests). Foundation + SR Legacy together yield ~8.3k products.
+
+### Scale benchmark (NFR-002)
+
+To validate search latency at the 10k-products-per-language target:
+```bash
+python -m scripts.bench_search --target 10000 --iterations 40
+```
+It seeds synthetic products (`source='scale_bench'`, en + de), measures the `GET /products`
+search p95 against the running API, prints it vs. the 200 ms threshold, and removes the
+bench rows (`--keep` to retain them). Latest run: p95 ≈ 32 ms. See
+[`docs/database-localization-scale-analysis.md`](../../docs/database-localization-scale-analysis.md) §8.
 
 ### Run tests
 

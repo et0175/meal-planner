@@ -24,6 +24,7 @@
 - `importer/usda.py` — parse USDA FDC CSVs → `ImportRecord` (energy fallback, unit cap)
 - `importer/loader.py` — idempotent batched upsert keyed on `(source, external_id)`
 - `importer/__main__.py` — `python -m importer --dir <fdc_csv_dir>` CLI
+- `scripts/bench_search.py` — NFR-002 scale benchmark: seeds 10k/locale (source='scale_bench'), measures search p95 via the API, cleans up
 - `db/engine.py` — `AsyncEngine` / `AsyncSession` factory; `reset_engine()` for tests
 - `db/migrations/env.py` — Alembic async migration runner
 - `db/migrations/versions/0001_initial_schema.py` — initial schema migration
@@ -66,7 +67,7 @@ python3 -m pytest tests/ -q
 - `INV-005`: all nutrition values >= 0 — enforced by Pydantic `ge=0` field validators in `NutritionIn`
 - `INV-006`: only owner can edit/delete; global products (`owner_id=null`) → 403 always
 - `INV-007`: max 500 user products per user — checked before insert in `create_product`
-- `NFR-002`: `products.name` + `product_translations.name` have `pg_trgm` GIN indexes for < 200 ms per-locale ILIKE search; list reads are paginated (`limit`/`offset`)
+- `NFR-002`: list reads are paginated (`limit`/`offset`). **Validated at 10k products/language** (`scripts/bench_search.py`): search p95 ≈ 32 ms (≤ 200 ms). Note: the `pg_trgm` GIN indexes are **not** used by the localized search — `COALESCE(translation.name, products.name) ILIKE` seq-scans (~12 ms at 18k rows); still well within budget, but see `docs/database-localization-scale-analysis.md` §8 for the index-usage follow-up
 - `FR-037`/`CON-007`/`ADR-0012`: per-locale product names via `product_translations`; reads resolve to `?locale=` with English fallback; user products stored in creator's locale
 - `ADR-0002`: `GET /products?week_flag=this_week&user_id=X` is the Planning service's read endpoint
 - `ADR-0009`: Monday 00:00 UTC rollover via APScheduler CronTrigger

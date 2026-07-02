@@ -10,6 +10,16 @@
 **User stories:** [`products-database.md`](../user-stories/products-database.md)  
 **Test data:** Products p-001 – p-028 from test-data.json
 
+> **Dataset assumptions.** Cases TC-PRD-001–034 exercise the **prototype seed dataset**
+> (`test-data.json`, p-001–p-028) — curated products with populated `dietTags`, short
+> names, and diverse categories. The **production catalog is bulk-imported from USDA
+> FoodData Central** (ADR-0013), which differs in ways that affect these cases:
+> diet tags are **empty** for imported products (diet-tag search/filter returns nothing),
+> names are long and comma-style ("Milk, whole, …"), display names may repeat across
+> distinct products, and ~9% carry 0 kcal. Cases that depend on diet tags or specific
+> product names (e.g. TC-PRD-006, TC-PRD-010) are **prototype-only** unless re-based on
+> imported data. API-level cases (TC-PRD-035–037) run against either dataset.
+
 ---
 
 ### TC-PRD-001: Products view shows only products
@@ -107,6 +117,7 @@
 ### TC-PRD-006: Search filters by diet tag
 **AC:** US-PA-003 — search covers relevant attributes  
 **Priority:** Medium
+**Dataset:** Prototype seed only — imported USDA products have empty diet tags, so this case yields no matches against the production catalog.
 
 **Steps:**
 1. Type `keto` in the search box.
@@ -174,6 +185,7 @@
 ### TC-PRD-010: Diet filter restricts list
 **AC:** US-PA-002 extension — diet tag filter  
 **Priority:** Medium
+**Dataset:** Prototype seed only — imported USDA products have empty diet tags (diet filter returns nothing against the production catalog until diet-tag enrichment lands).
 
 **Steps:**
 1. Select **Keto** from the diet filter dropdown.
@@ -715,4 +727,29 @@ servingAmount: "abc", kcal: "lots", protein: "much", fat: "fat", carbs: "many"
 - User-added products (`source` NULL) are untouched.
 
 **Automated:** `backend/catalog/tests/test_import.py`
+**Status:** ✅
+
+---
+
+### TC-PRD-037: Product list pagination (API)
+**AC:** FR-011 / NFR-002 — paginated catalog reads at scale (ADR-0012)
+**Priority:** High
+**Level:** API / backend
+**Dataset:** Either — needs enough products to exceed one page (e.g. imported USDA catalog).
+
+**Preconditions:** The catalog holds more than one page of products (e.g. > 50).
+
+**Steps:**
+1. `GET /products?limit=10&offset=0` and note `items` and `total`.
+2. `GET /products?limit=10&offset=10&sort_by=name`.
+3. `GET /products?limit=10&offset=<very large, past the end>`.
+4. `GET /products?limit=0` and `GET /products?limit=201`.
+
+**Expected result:**
+- Each page returns at most `limit` items; `total` reflects the full match count, not the page size.
+- Consecutive pages (offset 0 vs 10) return disjoint items under a stable sort.
+- An offset past the end returns `items: []` with `total` unchanged.
+- `limit` below 1 or above 200 is rejected with **422** (contract guard, not silent clamp).
+
+**Automated:** `backend/catalog/tests/test_localization.py` (`TestPagination`)
 **Status:** ✅

@@ -159,3 +159,36 @@ API: add a `locale` query param (or derive from `Accept-Language` / user profile
   single-locale (the creator's)? Likely yes — saves translating user data.
 - Default/fallback locale (recommend `en`).
 - INV-007 "max 500 user products" — count products, not translation rows (unchanged).
+
+---
+
+## 8. Benchmark results (2026-07-02) — NFR-002 at 10k/language
+
+Measured with `backend/catalog/scripts/bench_search.py` against the running Catalog
+API on local PostgreSQL 16, after importing USDA Foundation + SR Legacy (~8.3k real
+`en` products) and seeding 10,000 synthetic products per locale
+(`en` = 18,268, `de` = 10,005 — both ≥ 10k/language):
+
+| Scenario (limit=50, 40 iterations) | Matches | Median | p95 | NFR-002 ≤ 200 ms |
+|---|---|---|---|---|
+| broad `zeta` @ `de` (matches all 10k) | 10,000 | 27.2 ms | **32.5 ms** | PASS |
+| broad `zeta` @ `en` | 10,000 | 29.1 ms | **34.4 ms** | PASS |
+| selective `4242` @ `de` | 1 | 22.7 ms | **33.8 ms** | PASS |
+
+**NFR-002 holds at 10k products per language with ~6× headroom.**
+
+**Finding — the `pg_trgm` index is NOT used by the localized search.** `EXPLAIN ANALYZE`
+shows a `Seq Scan on products` + `Hash Left Join` + `Filter: COALESCE(t.name, p.name)
+ILIKE '%…%'` (exec ~12 ms at 18k rows). The `COALESCE(translation, base)` over the
+LEFT JOIN — introduced to implement the locale-with-fallback read — cannot use the
+per-column trigram indexes (`ix_products_name_trgm`, `ix_product_translations_name_trgm`).
+We still pass comfortably because a seq scan of ~18k rows is cheap, but this will grow
+linearly with the catalogue. **Follow-up options** (not urgent while p95 ≪ 200 ms):
+1. Rewrite search as `t.name ILIKE :q OR (t.name IS NULL AND p.name ILIKE :q)` so each
+   side can use its own trigram index.
+2. Materialize a per-(product, locale) resolved-name column with its own trgm index.
+3. Query `product_translations` for the locale directly, unioned with untranslated
+   products' base name.
+
+The benchmark is repeatable (`python -m scripts.bench_search`); bench rows are tagged
+`source='scale_bench'` and removed on completion.
