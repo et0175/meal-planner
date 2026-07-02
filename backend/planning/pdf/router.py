@@ -21,14 +21,14 @@ router = APIRouter(prefix="/plan/export", tags=["export"])
 
 def _current_iso_week() -> str:
     iso = date.today().isocalendar()
-    return f"{iso.year}-{iso.week:02d}"
+    return f"{iso.year}-W{iso.week:02d}"
 
 
 @router.post("/pdf")
 async def export_pdf_route(
     db: Annotated[AsyncSession, Depends(get_db)],
     session: Annotated[dict[str, Any], Depends(verify_token)],
-    week: str | None = Query(None, description="ISO week YYYY-WW, default current"),
+    week: str | None = Query(None, description="ISO week YYYY-WNN (e.g. 2026-W27), default current"),
 ) -> Response:
     """Generate and return a PDF of the week meal plan.
 

@@ -1,0 +1,145 @@
+version: 1
+generated_at: "2026-06-30T08:31:31Z"
+target: "working tree (git diff) — MVP integration wiring"
+overall_score: 6.5
+risk_level: medium
+review_lane: deep
+reviewer: forge:review
+
+coverage:
+  read:
+    - "backend/planning/weekflag_reader/service.py"
+    - "backend/planning/mealplan/service.py"
+    - "backend/planning/mealplan/router.py"
+    - "backend/planning/mealplan/schemas.py"
+    - "backend/planning/{summary,pdf,logplan}/service.py"
+    - "backend/catalog/query/router.py"
+    - "backend/catalog/query/service.py"
+    - "backend/{identity,catalog,planning,shopping}/main.py"
+    - "backend/shopping/generator/planning_client.py"
+    - "frontend/src/lib/api/{catalog,planning}.ts"
+    - "backend/planning/tests/test_mealplan.py"
+    - "docker-compose.yml / frontend/Dockerfile / README.md"
+  not_reached:
+    - "backend/shopping (staleness/pdf consumers of week strings)"
+    - "frontend components calling getProducts/getPlanAssignments"
+  confidence: high
+metrics:
+  diff: { files: 22, added: 105, removed: 27 }
+  max_fan_in: { symbol: "_current_iso_week", callers: 4 }
+  tests_cover_change: false   # search test mocks the catalog call; week tests use old format
+  hotspots: []                # low churn (~2 commits/12mo on touched files)
+  cochange_missing:
+    - "backend/catalog/query/router.py"   # q/search param not aligned with weekflag_reader+frontend
+
+root_causes:
+  - id: RC-1
+    title: "Catalog search param name disagreement: callers send 'q', catalog reads 'search'"
+    finding_ids: [F-001, F-003]
+
+findings:
+  - id: F-001
+    severity: critical
+    category: tech-debt
+    type: bug
+    file: backend/planning/weekflag_reader/service.py
+    line: 57
+    title: "Planning search sends ?q= but Catalog only reads ?search= → filter silently dropped"
+    description: |
+      search_catalog_products now calls GET {catalog}/products?q=<query>, but the
+      catalog query router (backend/catalog/query/router.py:22) declares the param
+      as `search`, with no `q` alias. FastAPI silently ignores unknown query params,
+      so `search` stays None and list_products applies no name filter and has no LIMIT
+      — it returns the ENTIRE non-deleted catalog. The /plan/search endpoint then sorts
+      and returns all products instead of matches for `q`, breaking FR-023 (AC-062 /
+      AC-121). Pre-change the call used params={"search": q} and worked.
+    suggestion: |
+      Align the param name. Either revert to params={"search": q}, or (preferred, since
+      the frontend already sends `q`) add `q` to the catalog router — e.g.
+      search: str | None = Query(default=None, alias="q") — and update its callers
+      consistently.
+    confidence: high
+    source: static
+    root_cause: RC-1
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+  - id: F-002
+    severity: medium
+    category: tech-debt
+    type: gap
+    file: backend/planning/tests/test_mealplan.py
+    line: 391
+    title: "Search test mocks search_catalog_products, hiding the q/search contract break"
+    description: |
+      test_search_recently_used_first patches mealplan.router.search_catalog_products,
+      so the real catalog HTTP call (and its param name) is never exercised. That is why
+      F-001 passes the suite. No test asserts the outbound catalog query param, and the
+      week-format tests still pass YYYY-WW ("2026-27"), so the new YYYY-WNN path is also
+      untested end-to-end.
+    suggestion: |
+      Add a contract test that asserts the outbound catalog request carries the search
+      term under the param name the catalog actually reads (respx/httpx mock asserting
+      the URL/params), and one week test using the new "2026-W27" form.
+    confidence: high
+    source: static
+    root_cause: RC-1
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+  - id: F-003
+    severity: low
+    category: tech-debt
+    type: risk
+    file: frontend/src/lib/api/catalog.ts
+    line: 84
+    title: "Frontend getProducts also sends ?q= to catalog (pre-existing, same mismatch)"
+    description: |
+      Outside this diff's changed lines, getProducts builds params.set('q', query.q),
+      which the catalog ignores for the same reason as F-001 — frontend product name
+      search returns the whole catalog. Pre-existing, but the same root cause; fixing
+      the catalog to accept `q` resolves both.
+    confidence: high
+    source: static
+    root_cause: RC-1
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+  - id: F-004
+    severity: low
+    category: tech-debt
+    type: risk
+    file: README.md
+    line: 45
+    title: "Seed command hard-codes Compose container name that may not match"
+    description: |
+      The doc instructs `docker exec mealplanner_new_1-identity-1 python seed.py`. The
+      Compose project name is derived from the directory "MealPlanner _new_1" (contains a
+      space); the resulting container name may differ, so the copy-paste command can fail.
+      seed.py itself exists and is correct.
+    suggestion: |
+      Use `docker compose exec identity python seed.py` (service name, project-agnostic).
+    confidence: medium
+    source: static
+    root_cause: null
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+  - id: F-005
+    severity: info
+    category: compliance
+    type: question
+    file: backend/identity/main.py
+    line: 32
+    title: "Default CORS allow_origins='*' across all services"
+    description: |
+      All four services default CORS_ORIGINS to "*". Acceptable for local MVP (Bearer
+      tokens, not cookies, so allow_credentials is correctly omitted), but the deployed
+      environments must set CORS_ORIGINS explicitly. Note for rollout config, not a bug.
+    suggestion: "Ensure Railway/Vercel envs set CORS_ORIGINS to the real frontend origin."
+    confidence: high
+    source: static
+    root_cause: null
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null

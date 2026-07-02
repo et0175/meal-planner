@@ -86,7 +86,7 @@ export async function getProducts(token: string, query: ProductsQuery = {}): Pro
   if (!BASE_URL) return []
   const params = new URLSearchParams()
   if (query.category) params.set('category', query.category)
-  if (query.q) params.set('q', query.q)
+  if (query.q) params.set('search', query.q)
   if (query.sort_by) params.set('sort_by', query.sort_by)
   if (query.order) params.set('order', query.order)
   if (query.week_flag) params.set('week_flag', query.week_flag)
@@ -95,7 +95,8 @@ export async function getProducts(token: string, query: ProductsQuery = {}): Pro
   const res = await fetch(`${BASE_URL}/products${qs ? `?${qs}` : ''}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
-  return handleResponse<Product[]>(res)
+  const data = await handleResponse<{ items: Product[] }>(res)
+  return data.items
 }
 
 export async function getProduct(token: string, id: number): Promise<Product> {

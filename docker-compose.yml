@@ -138,7 +138,13 @@ services:
   # ── Frontend ─────────────────────────────────────────────────────────────────
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_IDENTITY_URL: http://localhost:8001
+        NEXT_PUBLIC_CATALOG_URL: http://localhost:8002
+        NEXT_PUBLIC_PLANNING_URL: http://localhost:8003
+        NEXT_PUBLIC_SHOPPING_URL: http://localhost:8004
     ports:
       - "3000:3000"
     environment:

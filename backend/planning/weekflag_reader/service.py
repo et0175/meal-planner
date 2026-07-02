@@ -37,7 +37,7 @@ async def get_this_week_products(user_id: int) -> list[dict[str, Any]]:
             timeout=5.0,
         )
         if resp.status_code == 200:
-            return resp.json()  # type: ignore[no-any-return]
+            return resp.json().get("items", [])  # type: ignore[no-any-return]
         _log.warning("Catalog returned %d for week flags", resp.status_code)
         return []
     except httpx.HTTPError as exc:
@@ -54,11 +54,11 @@ async def search_catalog_products(q: str) -> list[dict[str, Any]]:
     try:
         resp = await _catalog_client.get(
             f"{url}/products",
-            params={"search": q},
+            params={"search": q},  # Catalog GET /products reads `search`, not `q`
             timeout=5.0,
         )
         if resp.status_code == 200:
-            return resp.json()  # type: ignore[no-any-return]
+            return resp.json().get("items", [])  # type: ignore[no-any-return]
         _log.warning("Catalog returned %d for search", resp.status_code)
         return []
     except httpx.HTTPError as exc:

@@ -1,0 +1,201 @@
+version: 1
+generated_at: "2026-06-30T08:13:25Z"
+target: "unstaged+staged changes (git diff + git diff --cached)"
+overall_score: 8.0
+risk_level: medium
+review_lane: fast
+reviewer: forge:review
+
+coverage:
+  read:
+    - "backend/identity/main.py"
+    - "backend/catalog/main.py"
+    - "backend/catalog/alembic.ini"
+    - "backend/planning/main.py"
+    - "backend/planning/alembic.ini"
+    - "backend/planning/mealplan/service.py"
+    - "backend/planning/mealplan/router.py"
+    - "backend/planning/weekflag_reader/service.py"
+    - "backend/planning/logplan/service.py"
+    - "backend/planning/summary/service.py"
+    - "backend/planning/pdf/service.py"
+    - "backend/planning/pdf/router.py"
+    - "backend/shopping/main.py"
+    - "backend/shopping/alembic.ini"
+    - "backend/shopping/generator/planning_client.py"
+    - "backend/shopping/generator/service.py"
+    - "frontend/src/lib/api/catalog.ts"
+    - "frontend/src/lib/api/planning.ts"
+    - "frontend/Dockerfile"
+    - "docker-compose.yml"
+    - "backend/planning/tests/test_mealplan.py (grep)"
+    - "backend/planning/tests/test_summary.py (grep)"
+    - "backend/planning/tests/test_log.py (grep)"
+    - "backend/planning/tests/test_pdf.py (grep)"
+  not_reached:
+    - "backend/catalog/query/router.py"  # to verify q= vs search= param name
+  confidence: high
+
+metrics:
+  diff:
+    files: 16
+    added: 120
+    removed: 30
+  max_fan_in:
+    symbol: "_parse_iso_week (5 independent copies)"
+    callers: 1  # each copy has 1 internal caller
+  tests_cover_change: true  # indirectly; tests use old format, not new
+  hotspots:
+    - "docker-compose.yml"       # 6 fix commits in 12mo
+    - "backend/planning/mealplan/service.py"
+  cochange_missing:
+    - "backend/shopping/generator/planning_client.py"  # format-coupled, not in diff
+
+root_causes:
+  - id: RC-1
+    title: "Week format YYYY-WNN introduced but not fully propagated"
+    finding_ids: [F-001, F-003, F-004]
+  - id: RC-2
+    title: "CORS wildcard (allow_origins=['*']) across all 4 services"
+    finding_ids: [F-002]
+  - id: RC-3
+    title: "Build-time localhost URLs baked into Docker image"
+    finding_ids: [F-005]
+
+findings:
+  - id: F-001
+    severity: high
+    category: tech-debt
+    type: risk
+    file: backend/shopping/generator/planning_client.py
+    line: 35
+    title: "Week format inconsistency — shopping planning client not updated"
+    description: |
+      _iso_weeks_in_range() still generates "YYYY-WW" strings (e.g. "2026-27").
+      When Shopping calls Planning for the current week, mealplan/router.py:62 compares
+      resolved_week ("2026-27") == current_week ("2026-W27") → False, so
+      week_flagged_products are silently skipped. Shopping doesn't consume this field
+      today, but the format mismatch is a latent bug for any future consumer.
+    suggestion: |
+      Change line 35 from:
+        week_str = f"{iso.year}-{iso.week:02d}"
+      to:
+        week_str = f"{iso.year}-W{iso.week:02d}"
+    confidence: high
+    source: static
+    root_cause: RC-1
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+
+  - id: F-002
+    severity: medium
+    category: compliance
+    type: risk
+    file: backend/identity/main.py
+    line: 30
+    title: "CORS allow_origins=['*'] too permissive for production"
+    description: |
+      All 4 services use allow_origins=["*"] without origin restriction.
+      While Bearer-token auth (not cookies) limits practical CSRF risk,
+      any web page can call auth endpoints from a browser. Must be narrowed
+      to the Vercel deployment origin before Railway production deploy.
+      Same issue in backend/catalog/main.py:52, backend/planning/main.py:36,
+      backend/shopping/main.py:36.
+    suggestion: |
+      Use env-var-driven origin list in each service main.py:
+        origins = os.getenv("CORS_ORIGINS", "*").split(",")
+        app.add_middleware(CORSMiddleware, allow_origins=origins, ...)
+      Set CORS_ORIGINS=https://your-app.vercel.app in Railway env.
+    confidence: high
+    source: static
+    root_cause: RC-2
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+
+  - id: F-003
+    severity: low
+    category: tech-debt
+    type: gap
+    file: backend/planning/tests/test_mealplan.py
+    line: 81
+    title: "No regression test for YYYY-WNN format round-trip"
+    description: |
+      All planning tests pass "2026-27" (old format) and assert body["week"] == "2026-27".
+      The new _current_iso_week() returns "2026-W27" but no test verifies that:
+      (a) "2026-W27" is accepted by _parse_iso_week, and
+      (b) it is echoed back in the response correctly.
+    suggestion: |
+      Add a test: GET /plan?week=2026-W27 → assert resp.status_code == 200
+      and body["week"] == "2026-W27".
+    confidence: high
+    source: static
+    root_cause: RC-1
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+
+  - id: F-004
+    severity: low
+    category: tech-debt
+    type: gap
+    file: backend/planning/CLAUDE.md
+    line: 1
+    title: "Stale week format documentation"
+    description: |
+      CLAUDE.md still documents "Week format is strict ISO YYYY-WW (e.g. 2026-27)".
+      Also stale: mealplan/router.py:49, pdf/router.py:31, summary/router.py:21
+      Query description= strings all say "ISO week as YYYY-WW".
+    suggestion: |
+      Update CLAUDE.md and all three Query description= strings to say YYYY-WNN
+      (e.g. 2026-W27).
+    confidence: high
+    source: static
+    root_cause: RC-1
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+
+  - id: F-005
+    severity: low
+    category: ops
+    type: risk
+    file: frontend/Dockerfile
+    line: 10
+    title: "Build-time localhost URLs make Docker image environment-specific"
+    description: |
+      NEXT_PUBLIC_* build args are baked with http://localhost:800X values.
+      The resulting Docker image only works when services are on the host's localhost.
+      Cannot be promoted to staging/production without a rebuild with different args.
+    suggestion: |
+      Document in README/Dockerfile that staging/prod builds must supply:
+        --build-arg NEXT_PUBLIC_IDENTITY_URL=https://identity.railway.app
+      Or use Next.js runtime env injection (publicRuntimeConfig) instead of build args.
+    confidence: high
+    source: static
+    root_cause: RC-3
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null
+
+  - id: F-006
+    severity: info
+    category: tech-debt
+    type: question
+    file: backend/planning/weekflag_reader/service.py
+    line: 57
+    title: "Pre-existing: search_catalog_products uses wrong query param name"
+    description: |
+      search_catalog_products sends params={"search": q} but Catalog GET /products
+      expects q= per catalog.ts. Catalog likely ignores the unknown "search" param
+      and returns unfiltered results. Not introduced by this diff.
+    suggestion: |
+      Change params={"search": q} to params={"q": q} in search_catalog_products.
+      Track as separate issue; this diff only changed the response unwrapping.
+    confidence: medium
+    source: static
+    root_cause: null
+    status: fixed
+    fixed_in: null
+    dismissed_reason: null

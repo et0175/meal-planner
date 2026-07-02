@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -11,6 +12,7 @@ from auth_middleware import _identity_client
 from authoring.router import router as authoring_router
 from db.engine import get_engine, reset_engine
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from query.router import router as query_router
 from scheduler.jobs import run_weekly_rollover
 from weekflag.router import router as weekflag_router
@@ -45,7 +47,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     reset_engine()
 
 
+_cors_origins = os.getenv("CORS_ORIGINS", "*").split(",")
+
 app = FastAPI(title="Product Catalog Service", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(query_router)
 app.include_router(authoring_router)

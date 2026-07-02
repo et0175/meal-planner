@@ -30,21 +30,21 @@ class AuthorizationError(Exception):
 
 
 def _parse_iso_week(week_str: str) -> tuple[date, date]:
-    """Parse 'YYYY-WW' into (monday, sunday) date objects."""
+    """Parse 'YYYY-WNN' or 'YYYY-NN' into (monday, sunday) date objects."""
     parts = week_str.split("-")
     if len(parts) != 2:  # noqa: PLR2004
-        raise ValueError(f"Invalid week format: {week_str!r}. Expected YYYY-WW")
-    year, week = int(parts[0]), int(parts[1])
+        raise ValueError(f"Invalid week format: {week_str!r}. Expected YYYY-WNN")
+    year, week = int(parts[0]), int(parts[1].lstrip("W"))
     monday = date.fromisocalendar(year, week, 1)
     sunday = date.fromisocalendar(year, week, 7)
     return monday, sunday
 
 
 def _current_iso_week() -> str:
-    """Return the current ISO week as 'YYYY-WW'."""
+    """Return the current ISO week as 'YYYY-WNN'."""
     today = date.today()
     iso = today.isocalendar()
-    return f"{iso.year}-{iso.week:02d}"
+    return f"{iso.year}-W{iso.week:02d}"
 
 
 # ---------------------------------------------------------------------------
@@ -227,14 +227,17 @@ async def move_assignment(
 async def _get_recent_product_ids(db: AsyncSession, user_id: int) -> list[int]:
     """Return product_ids used by this user, most-recently-assigned first."""
     stmt = (
-        select(MealPlanAssignment.product_id)
+        select(
+            MealPlanAssignment.product_id,
+            func.max(MealPlanAssignment.updated_at).label("last_used"),
+        )
         .where(MealPlanAssignment.user_id == user_id)
-        .order_by(MealPlanAssignment.updated_at.desc())
-        .distinct()
+        .group_by(MealPlanAssignment.product_id)
+        .order_by(func.max(MealPlanAssignment.updated_at).desc())
         .limit(100)
     )
     result = await db.execute(stmt)
-    return list(result.scalars().all())
+    return [row[0] for row in result.all()]
 
 
 async def search_items(

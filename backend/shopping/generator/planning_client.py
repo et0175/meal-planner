@@ -27,12 +27,12 @@ def _planning_url() -> str:
 
 
 def _iso_weeks_in_range(from_date: date, to_date: date) -> list[str]:
-    """Return ISO 'YYYY-WW' strings for every week that overlaps [from_date, to_date]."""
+    """Return ISO 'YYYY-WNN' strings for every week that overlaps [from_date, to_date]."""
     weeks: list[str] = []
     current = from_date
     while current <= to_date:
         iso = current.isocalendar()
-        week_str = f"{iso.year}-{iso.week:02d}"
+        week_str = f"{iso.year}-W{iso.week:02d}"
         if week_str not in weeks:
             weeks.append(week_str)
         # Advance to the Monday of the *next* week

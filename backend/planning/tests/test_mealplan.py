@@ -85,6 +85,21 @@ class TestWeekPlan:
         ids = [x["id"] for x in body["assignments"]]
         assert a.id in ids
 
+    async def test_get_week_plan_w_prefixed_week(
+        self, client: AsyncClient, db: AsyncSession
+    ) -> None:
+        """The YYYY-WNN form (e.g. 2026-W27) is accepted and echoed back unchanged."""
+        a = await _seed_assignment(db, assignment_date=date(2026, 6, 29))  # week 27
+        with patch(
+            "mealplan.router.get_this_week_products",
+            new=AsyncMock(return_value=[]),
+        ):
+            resp = await client.get("/plan", params={"week": "2026-W27"})
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["week"] == "2026-W27"
+        assert a.id in [x["id"] for x in body["assignments"]]
+
     async def test_different_week_not_included(
         self, client: AsyncClient, db: AsyncSession
     ) -> None:
@@ -434,3 +449,29 @@ class TestSearch:
         # user-owned (id=2) should come before global (id=1)
         ids = [r["id"] for r in results]
         assert ids.index(2) < ids.index(1)
+
+
+class TestCatalogSearchContract:
+    """Outbound contract with Catalog GET /products (param name + response shape)."""
+
+    async def test_search_sends_search_param_not_q(self) -> None:
+        """search_catalog_products must use the param name Catalog reads (`search`).
+
+        Catalog's GET /products declares `search`, not `q`; sending `q` is silently
+        ignored and returns the unfiltered catalog. This asserts the wire contract that
+        the other search tests bypass by mocking search_catalog_products.
+        """
+        import weekflag_reader.service as wfr
+
+        fake_resp = AsyncMock()
+        fake_resp.status_code = 200
+        fake_resp.json = lambda: {"items": [{"id": 1, "name": "Oat Bran"}]}
+        mock_client = AsyncMock()
+        mock_client.get = AsyncMock(return_value=fake_resp)
+
+        with patch.object(wfr, "_catalog_client", mock_client):
+            items = await wfr.search_catalog_products("oat")
+
+        assert items == [{"id": 1, "name": "Oat Bran"}]
+        _, kwargs = mock_client.get.call_args
+        assert kwargs["params"] == {"search": "oat"}

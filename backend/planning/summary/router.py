@@ -18,7 +18,7 @@ router = APIRouter(prefix="/plan/summary", tags=["summary"])
 async def get_summary_route(
     db: Annotated[AsyncSession, Depends(get_db)],
     session: Annotated[dict[str, Any], Depends(verify_token)],
-    week: str | None = Query(None, description="ISO week as YYYY-WW, or omit for current week"),
+    week: str | None = Query(None, description="ISO week as YYYY-WNN (e.g. 2026-W27), or omit for current week"),
 ) -> PlanSummaryResponse:
     """Return aggregate weekly nutrition totals for the topbar widget.
 

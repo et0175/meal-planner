@@ -13,14 +13,14 @@ def _parse_iso_week(week_str: str) -> tuple[date, date]:
     parts = week_str.split("-")
     if len(parts) != 2:  # noqa: PLR2004
         raise ValueError(f"Invalid week format: {week_str!r}")
-    year, week = int(parts[0]), int(parts[1])
+    year, week = int(parts[0]), int(parts[1].lstrip("W"))
     return date.fromisocalendar(year, week, 1), date.fromisocalendar(year, week, 7)
 
 
 def _current_iso_week() -> str:
     today = date.today()
     iso = today.isocalendar()
-    return f"{iso.year}-{iso.week:02d}"
+    return f"{iso.year}-W{iso.week:02d}"
 
 
 async def compute_summary(

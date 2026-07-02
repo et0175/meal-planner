@@ -37,7 +37,7 @@ def _parse_iso_week(week_str: str) -> date:
     parts = week_str.split("-")
     if len(parts) != 2:  # noqa: PLR2004
         raise ValueError(f"Invalid week format: {week_str!r}")
-    year, week = int(parts[0]), int(parts[1])
+    year, week = int(parts[0]), int(parts[1].lstrip("W"))
     return date.fromisocalendar(year, week, 1)
 
 

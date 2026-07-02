@@ -149,7 +149,8 @@ export async function getPlanAssignments(
   const res = await fetch(`${BASE_URL}/plan?week=${encodeURIComponent(week)}&user_id=${userId}`, {
     headers: authHeader(token),
   })
-  return handleResponse<Assignment[]>(res)
+  const data = await handleResponse<{ assignments: Assignment[] }>(res)
+  return data.assignments
 }
 
 export async function createAssignment(

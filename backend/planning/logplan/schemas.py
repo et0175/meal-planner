@@ -12,7 +12,7 @@ class LogDayRequest(BaseModel):
 
 
 class LogWeekRequest(BaseModel):
-    week: str  # YYYY-WW
+    week: str  # YYYY-WNN (e.g. 2026-W27)
 
 
 class LogItemRequest(BaseModel):

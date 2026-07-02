@@ -39,14 +39,14 @@ def _current_iso_week() -> str:
     from datetime import date
 
     iso = date.today().isocalendar()
-    return f"{iso.year}-{iso.week:02d}"
+    return f"{iso.year}-W{iso.week:02d}"
 
 
 @router.get("", response_model=WeekPlanResponse)
 async def get_week_plan(
     db: Annotated[AsyncSession, Depends(get_db)],
     session: Annotated[dict[str, Any], Depends(verify_token)],
-    week: str | None = Query(None, description="ISO week as YYYY-WW, or omit for current week"),
+    week: str | None = Query(None, description="ISO week as YYYY-WNN (e.g. 2026-W27), or omit for current week"),
 ) -> WeekPlanResponse:
     """List all assignments for a week (defaults to current ISO week).
 

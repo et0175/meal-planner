@@ -63,6 +63,6 @@ python3 -m pytest tests/ -q
 ## Non-obvious constraints
 
 - `MealSlot` enum values must be lowercase: `breakfast`, `lunch`, `dinner`, `snacks`.
-- Week format is strict ISO `YYYY-WW` (e.g. `2026-27`). The string `"current"` or an omitted `week` param defaults to today's ISO week via `date.today().isocalendar()`.
+- Week format is ISO `YYYY-WNN` (e.g. `2026-W27`). Legacy `YYYY-WW` (e.g. `2026-27`) is still accepted by the parsers (`int(parts[1].lstrip("W"))`) for backward compatibility, but `_current_iso_week()` now emits the `W`-prefixed form. An omitted `week` param defaults to today's ISO week via `date.today().isocalendar()`.
 - The `logging/` directory must NOT exist as a Python package — it shadows `stdlib logging` and breaks pytest + FastAPI logging.
 - Inline nutrition fields (`kcal_per_unit` etc.) are nullable. Summary totals use `COALESCE(..., 0.0)` in SQL so NULL values contribute 0 rather than NULL-propagating the sum.
