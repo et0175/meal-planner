@@ -6,7 +6,7 @@
 |---|---|
 | Initial page load (cold, 10 Mbps connection) | < 2 s |
 | Live nutrition recalculation in Products Analyser | < 100 ms after each input change |
-| Search / filter response time (catalogue ≤ 10,000 items) | < 200 ms |
+| Search / filter response time (catalogue ≤ 10,000 items per language) | < 200 ms |
 | Shopping list generation | < 500 ms for up to 31 days of assignments |
 | PDF generation (print dialog open) | < 3 s |
 
@@ -22,7 +22,7 @@
 
 | Entity | Limit |
 |---|---|
-| Products in global catalogue | 10,000 |
+| Products in global catalogue | 10,000 per language |
 | User-added products per account | 500 |
 | Recipes per account | 500 |
 | Meal plan assignments (total, all time) | 10,000 |

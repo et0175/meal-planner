@@ -194,3 +194,37 @@ Source: [01_products-database.md](../requirements/01_products-database.md)
 - [ ] When the selected unit is not a weight unit (not g or kg), the conversion input label reads **"grams per [unit name]"** (e.g. "grams per tbsp", "grams per cup").
 - [ ] When the selected unit is a weight unit, no conversion label is needed (the value is the gram weight directly).
 - [ ] Alternative units are saved and reflected in the product's units conversion table visible on the product detail card.
+
+---
+
+## US-PA-013 Browse the catalog in my own language
+
+**As a** user who reads in my own language
+**I want** product names shown in my chosen language, falling back to English when a translation is missing
+**So that** I can browse and search the catalog without a language barrier.
+
+Source: [01_products-database.md](../requirements/01_products-database.md) · ADR-0012
+
+**Acceptance criteria**
+
+- [ ] Requesting the catalog with a locale returns product names in that language when a translation exists.
+- [ ] When a product has no translation for the requested locale, its English name is returned (no error, no blank name).
+- [ ] Search and sort operate on the resolved (localized) name, not only the English one.
+- [ ] A user-added product appears to all users in its creator's language.
+
+---
+
+## US-PA-014 Rich catalog pre-populated from a trusted source
+
+**As a** product owner
+**I want** the global product catalog pre-populated from a trusted nutrition dataset
+**So that** new users find a rich set of products with accurate nutrition on day one instead of an empty catalog.
+
+Source: [01_products-database.md](../requirements/01_products-database.md) · ADR-0013
+
+**Acceptance criteria**
+
+- [ ] Global products are bulk-imported from USDA FoodData Central with per-100 g nutrition, alternative units, and an English name.
+- [ ] Re-running the import updates existing products in place rather than creating duplicates (idempotent on source + external id).
+- [ ] Imported products are visible to all users and are clearly global (no owner); user-added products are never modified by an import.
+- [ ] Imported products carry at most 10 alternative units (consistent with the product unit limit).

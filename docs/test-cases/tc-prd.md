@@ -672,3 +672,47 @@ servingAmount: "abc", kcal: "lots", protein: "much", fat: "fat", carbs: "many"
 - Navigating back confirms TW remains active
 
 **Status:** ✅
+
+---
+
+### TC-PRD-035: Product name localization with English fallback (API)
+**AC:** US-PA-013 — localized names, English fallback (ADR-0012, FR-037)
+**Priority:** High
+**Level:** API / backend
+
+**Preconditions:** A product has an `en` name ("Whole Milk") and a `de` name ("Vollmilch"); a second product has only an `en` name.
+
+**Steps:**
+1. `GET /products?locale=de` and inspect the first product's `name`.
+2. `GET /products?locale=de` for the product that has no German translation.
+3. `GET /products?locale=de&search=vollm`.
+
+**Expected result:**
+- Product with a German translation returns "Vollmilch".
+- Product without one returns its English name (no error, no blank).
+- Search matches the resolved (localized) name.
+
+**Automated:** `backend/catalog/tests/test_localization.py`
+**Status:** ✅
+
+---
+
+### TC-PRD-036: USDA catalog import is idempotent (API)
+**AC:** US-PA-014 — bulk import of global products, idempotent (ADR-0013, FR-038)
+**Priority:** High
+**Level:** API / backend
+
+**Preconditions:** A USDA FoodData Central CSV export directory is available.
+
+**Steps:**
+1. Run `python -m importer --dir <fdc_csv_dir>` against an empty catalog.
+2. Run the same import a second time.
+3. Inspect global products (`source='usda_fdc'`).
+
+**Expected result:**
+- First run inserts global products with per-100 g nutrition, units (≤ 10), and an English name.
+- Second run updates in place — no duplicate products (max one row per `external_id`).
+- User-added products (`source` NULL) are untouched.
+
+**Automated:** `backend/catalog/tests/test_import.py`
+**Status:** ✅
