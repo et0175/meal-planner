@@ -273,3 +273,41 @@ open:
     status: resolved
     resolved_by: ADR-0004
     blocks: synthesis
+
+  - id: DEC-011
+    question: >
+      How should the Product Catalog model localized product data so it can hold
+      ~10,000 products per language while preserving NFR-002 (search/filter p95
+      <= 200ms) and NFR-010 (10k catalogue) at the larger row count? Today
+      products.name and products.category are single-language varchar columns,
+      diet_tags is an unindexed JSON column, and the catalog list endpoint has no
+      pagination. The denormalized product_name copied into Meal Planning
+      (AGG-003) and Shopping List (AGG-004) also has no record of which language
+      it was captured in.
+    surfaced_from:
+      kind: nfr
+      ref: [NFR-002, NFR-010, CTX-003, CTXREL-006, CTXREL-007]
+    alternatives:
+      - label: translation_tables
+        summary: >
+          Keep products language-neutral; move name into product_translations
+          (product_id, locale, name) with UNIQUE(product_id, locale); promote
+          category and diet_tags to controlled-vocabulary tables with their own
+          translation rows; per-locale trigram/FTS indexes; paginate the list
+          endpoint. Downstream contexts store the denormalized name plus the
+          locale it was captured in.
+        pros: [Per-locale indexable search and language-correct sorting,
+               normalized vocab for category/diet-tag filtering, scales to
+               10k x N languages, clean fallback chain]
+        cons: [More tables and joins, larger migration, backfill of existing rows]
+      - label: jsonb_per_row
+        summary: >
+          Store name as a JSONB map {"en":..,"de":..} on products; keep category
+          as a code; diet_tags as text[]. Fewer tables.
+        pros: [Simplest migration, single row per product]
+        cons: [Per-locale search needs one expression index per locale, awkward
+               language-correct sorting/collation, no controlled vocab]
+    criteria_refs: [NFR-002, NFR-010, FR-010, FR-011]
+    status: resolved
+    resolved_by: ADR-0012
+    blocks: none

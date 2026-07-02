@@ -57,6 +57,8 @@ US-023: As a user comparing products, I want to sort the product table by any co
 
 US-024: As a user adding a product, I want to define multiple alternative units with clear gram-conversion labels, so that the product can be measured accurately in every context. [US-PA-012]
 
+US-055: As a user who reads in my own language, I want product names, categories, and diet-tag labels shown in my chosen language — falling back to English when a translation is missing — so that I can browse and search the catalog without a language barrier. [US-PA-013]
+
 ## Meal Planner (2026-06-21)
 <!-- source: docs/user-stories/meal-planner.md (US-MP-001–023) -->
 

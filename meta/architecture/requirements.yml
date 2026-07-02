@@ -953,6 +953,42 @@ functional:
         invariant: INV-006
         test: TestUserProduct_DeniesEditByOther
 
+  # ── Localization ──────────────────────────────────────────────────────────────
+
+  - id: FR-037
+    statement: >
+      The Product Catalog must store and serve product names, category labels, and
+      diet-tag labels in multiple languages. List and detail reads return text in
+      the caller's requested locale, falling back to the default locale (English)
+      when a translation is missing. Global products are translatable into every
+      supported locale; user-added products are stored in their creator's locale.
+    source: [US-055]
+    acceptance:
+      - id: AC-122
+        given: a product with English and German name translations and a caller locale of "de"
+        when: the product list or detail is requested with locale "de"
+        then: the German name is returned
+        kind: happy
+        test: TestProducts_ReturnsRequestedLocale
+      - id: AC-123
+        given: a product with only an English name translation and a caller locale of "de"
+        when: the product is requested with locale "de"
+        then: the English (default-locale) name is returned without error
+        kind: boundary
+        test: TestProducts_FallsBackToDefaultLocale
+      - id: AC-124
+        given: a catalog filtered by diet tag with caller locale "de"
+        when: the user filters by the "Vegan" diet tag
+        then: matching products are returned and their diet-tag labels are localized to German
+        kind: happy
+        test: TestProducts_LocalizedDietTagFilter
+      - id: AC-125
+        given: user Alice (locale "en") adds a product
+        when: a caller with locale "de" browses the catalog
+        then: Alice's user-added product appears with its creator-locale (English) name
+        kind: boundary
+        test: TestUserProduct_StoredInCreatorLocale
+
 
 non_functional:
 
@@ -974,14 +1010,15 @@ non_functional:
     category: performance
     metric: search_filter_response_time
     threshold: 200ms
-    condition: catalogue of up to 10,000 products, p95
+    condition: catalogue of up to 10,000 products per language, p95
     rationale: >
       Users filter while browsing; latency over 200 ms causes perceived lag and
-      workflow interruption.
+      workflow interruption. Per-locale trigram/FTS indexing keeps this bound as
+      the catalogue grows by language (ADR-0012).
     acceptance:
       - id: AC-086
-        given: a catalogue of 10,000 products
-        when: a search/filter query is submitted
+        given: a catalogue of 10,000 products in the queried language
+        when: a localized search/filter query is submitted
         then: p95 response time <= 200ms
         kind: boundary
         test: BenchSearchFilter_10kProducts_p95
@@ -1090,13 +1127,16 @@ non_functional:
   - id: NFR-010
     category: scalability
     metric: global_catalogue_size
-    threshold: 10000 products
-    condition: without degradation in search/filter performance
-    rationale: Projected upper bound for global product catalog in MVP1.
+    threshold: 10000 products per language
+    condition: per supported language, without degradation in search/filter performance
+    rationale: >
+      Projected upper bound for the global product catalogue is ~10,000 products
+      per language. The localized catalogue (ADR-0012) must hold this many rows in
+      each supported locale and still satisfy NFR-002.
     acceptance:
       - id: AC-094
-        given: the global catalogue loaded with 10,000 products
-        when: search/filter queries are run at normal usage rate
+        given: the global catalogue loaded with 10,000 products in a single language
+        when: localized search/filter queries are run at normal usage rate
         then: p95 response time remains <= 200ms (NFR-002 holds)
         kind: boundary
         test: ScaleTest_10kProducts_SearchFilter
@@ -1217,3 +1257,12 @@ constraints:
       The Nutritionist role is stored on the account but has identical
       permissions to the User role in MVP1; no UI differentiation.
     source: "OQ-005 resolved, 2026-06-21"
+
+  - id: CON-007
+    type: technical
+    statement: >
+      Locales are identified by BCP-47 tags and English ("en") is the default
+      fallback locale. The set of supported locales is configuration-driven. Only
+      global products (owner_id IS NULL) are translated into all supported locales;
+      user-added products are stored in their creator's single locale.
+    source: "ADR-0012, 2026-06-30"

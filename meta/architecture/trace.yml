@@ -346,6 +346,15 @@ links:
     tests: [TestUserProduct_VisibleToAllUsers, TestUserProduct_DeniesEditByOther]
     status: partial
 
+  - req: FR-037
+    description: "Localized product/category/diet-tag text; locale fallback to English"
+    capabilities: [CAP-003]
+    contexts: [CTX-003]
+    components: [COMP-008, COMP-012]
+    adrs: [ADR-0012]
+    tests: [TestProducts_ReturnsRequestedLocale, TestProducts_FallsBackToDefaultLocale, TestProducts_LocalizedDietTagFilter, TestUserProduct_StoredInCreatorLocale]
+    status: partial
+
   # ── Non-functional ──────────────────────────────────────────────────────────
   - req: NFR-001
     description: "p95 initial page load <= 2s (cold, 10 Mbps)"
@@ -357,11 +366,11 @@ links:
     status: partial
 
   - req: NFR-002
-    description: "p95 search/filter <= 200ms at 10k products"
+    description: "p95 search/filter <= 200ms at 10k products per language"
     capabilities: [CAP-003]
     contexts: [CTX-003]
     components: [COMP-008, COMP-012]
-    adrs: [ADR-0002]
+    adrs: [ADR-0002, ADR-0012]
     tests: [BenchSearchFilter_10kProducts_p95]
     status: partial
 
@@ -429,11 +438,11 @@ links:
     status: partial
 
   - req: NFR-010
-    description: "Global catalogue scales to 10,000 products w/o perf loss"
+    description: "Global catalogue scales to 10,000 products per language w/o perf loss"
     capabilities: [CAP-003]
     contexts: [CTX-003]
     components: [COMP-008, COMP-012]
-    adrs: []
+    adrs: [ADR-0012]
     tests: [ScaleTest_10kProducts_SearchFilter]
     status: partial
 
@@ -534,6 +543,15 @@ links:
     contexts: [CTX-001]
     components: [COMP-001, COMP-005]
     adrs: []
+    tests: []
+    status: covered
+
+  - req: CON-007
+    description: "BCP-47 locales; English default fallback; only global products fully translated"
+    capabilities: []
+    contexts: [CTX-003]
+    components: [COMP-008, COMP-012]
+    adrs: [ADR-0012]
     tests: []
     status: covered
 

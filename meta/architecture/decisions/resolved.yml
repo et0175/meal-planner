@@ -58,3 +58,9 @@ resolved:
     resolved_by: ADR-0010
     resolution_label: separate_nfr_large_text
     date: 2026-06-22
+
+  - id: DEC-011
+    question: "Product catalog localization model and scale to 10k products per language"
+    resolved_by: ADR-0012
+    resolution_label: translation_tables
+    date: 2026-06-30
