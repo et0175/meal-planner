@@ -51,6 +51,7 @@ async def create_product_route(
             fat_g=body.nutrition.fat_g,
             carbs_g=body.nutrition.carbs_g,
             units=cast(list[UnitDict], [u.model_dump() for u in body.units]),
+            locale=body.locale,
         )
     except ProductLimitError as exc:
         raise HTTPException(
@@ -94,6 +95,7 @@ async def update_product_route(
                 if body.units is not None
                 else None
             ),
+            locale=body.locale,
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc

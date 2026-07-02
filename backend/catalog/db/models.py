@@ -56,10 +56,36 @@ class Product(Base):
     week_flags: Mapped[list[WeekFlag]] = relationship(
         "WeekFlag", back_populates="product", cascade="all, delete-orphan"
     )
+    # FR-037 / ADR-0012: per-locale name translations. `products.name` remains the
+    # canonical default-locale (English) value and the fallback when a requested
+    # locale has no row here.
+    translations: Mapped[list[ProductTranslation]] = relationship(
+        "ProductTranslation", back_populates="product", cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         # NFR-002: name search < 200 ms at 1,000 products
         Index("ix_products_name", "name"),
+    )
+
+
+class ProductTranslation(Base):
+    """Localized product text (FR-037, ADR-0012). One row per (product, locale)."""
+
+    __tablename__ = "product_translations"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    product_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    # BCP-47 locale tag, e.g. "en", "de", "en-US" (CON-007)
+    locale: Mapped[str] = mapped_column(String(10), nullable=False)
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    product: Mapped[Product] = relationship("Product", back_populates="translations")
+
+    __table_args__ = (
+        UniqueConstraint("product_id", "locale", name="uq_product_translations_product_locale"),
     )
 
 

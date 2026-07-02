@@ -27,11 +27,16 @@ Manages products, their nutritional data, unit conversions, and week-flag taggin
 |-------|------|-------------|
 | `category` | string | Exact category match |
 | `diet_tag` | string | Exact diet tag match (e.g. `Vegan`) |
-| `search` | string | Case-insensitive name search (ilike) |
-| `sort_by` | `name` \| `category` \| `protein` \| `calories` | Sort field (default: `name`) |
+| `search` | string | Case-insensitive search on the locale-resolved name (ilike) |
+| `sort_by` | `name` \| `category` \| `protein` \| `calories` | Sort field (default: `name`); `name` sorts the resolved locale name |
 | `sort_dir` | `asc` \| `desc` | Sort direction (default: `asc`) |
 | `week_flag` | `this_week` \| `next_week` \| `none` | Filter by flag (requires `user_id`) |
 | `user_id` | int | User whose flags to filter by (for Planning service ADR-0002) |
+| `locale` | string (BCP-47) | Language for product names; falls back to English when missing (default: `en`, FR-037) |
+| `limit` | int (1–200) | Page size (default: `50`) |
+| `offset` | int (≥0) | Page offset (default: `0`) |
+
+`GET /products/{id}` also accepts `locale`. `total` in the list response is the full match count, not the page size. `POST`/`PUT /products` accept an optional `locale` (default `en`) — the authored name is stored as that locale's translation (CON-007: user products are single-locale).
 
 ## Setup and local dev
 

@@ -30,6 +30,8 @@ class CreateProductRequest(BaseModel):
     nutrition: NutritionIn
     # INV-004: max 10 alternative units; validated below
     units: list[ProductUnitIn] = Field(default_factory=list)
+    # FR-037 / CON-007: locale the name is authored in (user products are single-locale)
+    locale: str = Field(default="en", min_length=2, max_length=10, description="BCP-47 locale")
 
     @field_validator("units")
     @classmethod
@@ -55,6 +57,8 @@ class UpdateProductRequest(BaseModel):
     nutrition: NutritionIn | None = None
     # INV-004: max 10 alternative units
     units: list[ProductUnitIn] | None = None
+    # FR-037: locale the (updated) name applies to
+    locale: str = Field(default="en", min_length=2, max_length=10, description="BCP-47 locale")
 
     @field_validator("units")
     @classmethod

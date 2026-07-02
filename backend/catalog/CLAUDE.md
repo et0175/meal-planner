@@ -4,6 +4,8 @@
 
 - **Auth**: tokens validated by calling `GET /auth/session` on the Identity service (`IDENTITY_SERVICE_URL` env var). The `verify_token` FastAPI dependency is in `auth_middleware.py`. Tests override it via `app.dependency_overrides`.
 - **diet_tags storage**: `JSON` column (not PostgreSQL `ARRAY`) so tests run on SQLite in-memory. The column stores a list of strings. Filtering uses SQLAlchemy's `.contains()`.
+- **Localization (FR-037, ADR-0012)**: product names are localized via `product_translations (product_id, locale, name)`, `UNIQUE(product_id, locale)`. `products.name` stays the canonical English value and fallback. Reads `LEFT JOIN` translations on the requested `locale` and `COALESCE(translation.name, products.name)`; search and sort run on that resolved name. `list_products` returns `(list[(Product, resolved_name)], total)` and is **paginated** (`limit`/`offset`, real `total`); `get_product` returns `(Product, resolved_name)`. The router applies the resolved name via `model_copy(update={"name": ...})`. Authoring upserts a translation row for the request's `locale` (default `en`). PostgreSQL gets a per-locale `pg_trgm` GIN index (`ix_product_translations_name_trgm`) for NFR-002 at 10k products/language.
+- **Localization phases (ADR-0012)**: Phase 1 (done) = product-name translation + pagination + locale-resolved reads. **Deferred**: category/diet-tag vocab tables + their translations (FR-037 AC-124 — `category`/`diet_tags` stay free-text/JSON for now), dropping the legacy `products.name`/`category`/`diet_tags` columns, and the `locale` column on Planning/Shopping denormalized names (cross-service, CARD-005/007).
 - **Week flag upsert**: the `week_flags` table stores one row per (product_id, user_id). `set_week_flag` does a select-then-update-or-insert pattern. Monday rollover: Step 1 promotes `next_week → this_week` (capturing the timestamp), Step 2 clears any `this_week` rows whose `updated_at` is still older than the rollover time.
 - **Soft-delete**: `products.is_deleted = True`. All queries filter `is_deleted == False`. Hard deletes are never used.
 - **INV-006**: global products have `owner_id = NULL`. Any edit/delete attempt by any user returns 403. User can only edit their own (non-null) products.
@@ -15,7 +17,8 @@
 
 - `main.py` — FastAPI app factory, router registration, APScheduler lifespan
 - `auth_middleware.py` — `verify_token` dependency (HTTP call to Identity service)
-- `db/models.py` — `Product`, `ProductUnit`, `NutritionPer100g`, `WeekFlag` ORM models
+- `db/models.py` — `Product`, `ProductTranslation`, `ProductUnit`, `NutritionPer100g`, `WeekFlag` ORM models
+- `db/migrations/versions/0002_product_translations.py` — adds `product_translations`, backfills `name`→`en`, builds the per-locale trigram index
 - `db/engine.py` — `AsyncEngine` / `AsyncSession` factory; `reset_engine()` for tests
 - `db/migrations/env.py` — Alembic async migration runner
 - `db/migrations/versions/0001_initial_schema.py` — initial schema migration
@@ -33,6 +36,7 @@
 - `tests/test_query.py` — FR-010/011/012, NFR-002 tests
 - `tests/test_authoring.py` — FR-013/014/032 tests
 - `tests/test_weekflag.py` — FR-015 tests including rollover
+- `tests/test_localization.py` — FR-037 tests: locale resolution, English fallback, creator-locale authoring, pagination
 - `seed.py` — idempotent seed with 5 realistic products
 - `pytest.ini` — `asyncio_mode = auto`, testpaths = tests
 
@@ -56,6 +60,7 @@ python3 -m pytest tests/ -q
 - `INV-005`: all nutrition values >= 0 — enforced by Pydantic `ge=0` field validators in `NutritionIn`
 - `INV-006`: only owner can edit/delete; global products (`owner_id=null`) → 403 always
 - `INV-007`: max 500 user products per user — checked before insert in `create_product`
-- `NFR-002`: `products.name` has a DB index (`ix_products_name`) for < 200 ms ilike search
+- `NFR-002`: `products.name` + `product_translations.name` have `pg_trgm` GIN indexes for < 200 ms per-locale ILIKE search; list reads are paginated (`limit`/`offset`)
+- `FR-037`/`CON-007`/`ADR-0012`: per-locale product names via `product_translations`; reads resolve to `?locale=` with English fallback; user products stored in creator's locale
 - `ADR-0002`: `GET /products?week_flag=this_week&user_id=X` is the Planning service's read endpoint
 - `ADR-0009`: Monday 00:00 UTC rollover via APScheduler CronTrigger

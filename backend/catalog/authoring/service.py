@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TypedDict
 
-from db.models import NutritionPer100g, Product, ProductUnit
+from db.models import NutritionPer100g, Product, ProductTranslation, ProductUnit
 from query.service import count_user_products
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +12,25 @@ from sqlalchemy.orm import selectinload
 
 _MAX_USER_PRODUCTS = 500  # INV-007
 _MAX_UNITS = 10  # INV-004
+DEFAULT_LOCALE = "en"
+
+
+async def _upsert_translation(
+    db: AsyncSession, product_id: int, locale: str, name: str
+) -> None:
+    """Insert or update the (product, locale) name translation (FR-037)."""
+    existing = (
+        await db.execute(
+            select(ProductTranslation).where(
+                ProductTranslation.product_id == product_id,
+                ProductTranslation.locale == locale,
+            )
+        )
+    ).scalar_one_or_none()
+    if existing is None:
+        db.add(ProductTranslation(product_id=product_id, locale=locale, name=name))
+    else:
+        existing.name = name
 
 
 class UnitDict(TypedDict):
@@ -43,6 +62,7 @@ async def create_product(
     fat_g: float,
     carbs_g: float,
     units: list[UnitDict],
+    locale: str = DEFAULT_LOCALE,
 ) -> Product:
     """Create a new user product.
 
@@ -89,6 +109,9 @@ async def create_product(
             )
         )
 
+    # FR-037: store the authored name as the product's locale translation.
+    await _upsert_translation(db, product.id, locale, name)
+
     await db.commit()
     await db.refresh(product)
     return product
@@ -107,6 +130,7 @@ async def update_product(
     fat_g: float | None = None,
     carbs_g: float | None = None,
     units: list[UnitDict] | None = None,
+    locale: str = DEFAULT_LOCALE,
 ) -> Product:
     """Update an existing product. Only the owner may edit it (INV-006).
 
@@ -138,7 +162,9 @@ async def update_product(
         )
 
     if name is not None:
+        # Canonical name + the locale translation are kept in sync (FR-037).
         product.name = name
+        await _upsert_translation(db, product.id, locale, name)
     if category is not None:
         product.category = category
     if diet_tags is not None:

@@ -13,14 +13,17 @@ import asyncio
 from typing import Any
 
 from db.engine import get_session_factory
-from db.models import NutritionPer100g, Product, ProductUnit
+from db.models import NutritionPer100g, Product, ProductTranslation, ProductUnit
 from sqlalchemy import select
 
+# `name` is the canonical (English) value and fallback; `translations` maps BCP-47
+# locale -> name (FR-037, ADR-0012). English is included explicitly for clarity.
 SEED_PRODUCTS: list[dict[str, Any]] = [
     {
         "name": "Chicken Breast (raw)",
         "category": "Meat & Poultry",
         "diet_tags": ["Gluten-Free", "High-Protein"],
+        "translations": {"en": "Chicken Breast (raw)", "de": "Hähnchenbrust (roh)"},
         "nutrition": {"calories": 165.0, "protein_g": 31.0, "fat_g": 3.6, "carbs_g": 0.0},
         "units": [
             {"unit_name": "100g", "grams_per_unit": 100.0},
@@ -31,6 +34,7 @@ SEED_PRODUCTS: list[dict[str, Any]] = [
         "name": "Whole Milk",
         "category": "Dairy",
         "diet_tags": ["Vegetarian"],
+        "translations": {"en": "Whole Milk", "de": "Vollmilch"},
         "nutrition": {"calories": 61.0, "protein_g": 3.2, "fat_g": 3.3, "carbs_g": 4.8},
         "units": [
             {"unit_name": "100ml", "grams_per_unit": 103.0},
@@ -42,6 +46,7 @@ SEED_PRODUCTS: list[dict[str, Any]] = [
         "name": "Rolled Oats",
         "category": "Grains & Cereals",
         "diet_tags": ["Vegan", "Vegetarian"],
+        "translations": {"en": "Rolled Oats", "de": "Haferflocken"},
         "nutrition": {"calories": 389.0, "protein_g": 16.9, "fat_g": 6.9, "carbs_g": 66.3},
         "units": [
             {"unit_name": "100g", "grams_per_unit": 100.0},
@@ -53,6 +58,7 @@ SEED_PRODUCTS: list[dict[str, Any]] = [
         "name": "Broccoli",
         "category": "Vegetables",
         "diet_tags": ["Vegan", "Vegetarian", "Gluten-Free"],
+        "translations": {"en": "Broccoli", "de": "Brokkoli"},
         "nutrition": {"calories": 34.0, "protein_g": 2.8, "fat_g": 0.4, "carbs_g": 6.6},
         "units": [
             {"unit_name": "100g", "grams_per_unit": 100.0},
@@ -64,6 +70,7 @@ SEED_PRODUCTS: list[dict[str, Any]] = [
         "name": "Extra Virgin Olive Oil",
         "category": "Oils & Fats",
         "diet_tags": ["Vegan", "Vegetarian", "Gluten-Free", "Keto"],
+        "translations": {"en": "Extra Virgin Olive Oil", "de": "Natives Olivenöl extra"},
         "nutrition": {"calories": 884.0, "protein_g": 0.0, "fat_g": 100.0, "carbs_g": 0.0},
         "units": [
             {"unit_name": "100ml", "grams_per_unit": 91.0},
@@ -118,6 +125,15 @@ async def seed() -> None:
                         product_id=product.id,
                         unit_name=str(unit["unit_name"]),
                         grams_per_unit=float(unit["grams_per_unit"]),
+                    )
+                )
+
+            # FR-037: localized names (defaults to the canonical name as English)
+            translations: dict[str, str] = product_data.get("translations", {"en": name})
+            for locale, localized_name in translations.items():
+                db.add(
+                    ProductTranslation(
+                        product_id=product.id, locale=locale, name=localized_name
                     )
                 )
 
