@@ -73,6 +73,26 @@ cd backend/catalog
 uvicorn main:app --reload --port 8002
 ```
 
+### Import the global product catalog (USDA FoodData Central)
+
+The global catalog is bulk-loaded from USDA FoodData Central CSV exports
+(FR-038, ADR-0013). Download the **Foundation Foods** and **SR Legacy** datasets
+from <https://fdc.nal.usda.gov/download-datasets>, unzip them, then point the
+importer at each CSV directory:
+
+```bash
+cd backend/catalog
+export DATABASE_URL=postgresql+asyncpg://catalog:catalog@localhost:5436/catalog
+python -m importer --dir /path/to/FoodData_Central_foundation_food_csv_YYYY-MM-DD
+python -m importer --dir /path/to/FoodData_Central_sr_legacy_food_csv_YYYY-MM-DD
+```
+
+The load is **idempotent** — keyed on `(source, external_id)`, re-running updates
+rows in place instead of duplicating. Imported products are global (`owner_id NULL`,
+`source='usda_fdc'`) with English names; USDA carries no diet labels, so `diet_tags`
+are empty. Flags: `--source`, `--locale` (default `en`), `--batch-size`, `--limit`
+(cap records, for smoke tests).
+
 ### Run tests
 
 ```bash

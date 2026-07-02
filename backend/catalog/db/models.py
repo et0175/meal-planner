@@ -18,6 +18,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -43,6 +44,10 @@ class Product(Base):
     # Stored as JSON array of strings — portable across PostgreSQL and SQLite (tests)
     diet_tags: Mapped[list[Any]] = mapped_column(JSON, nullable=False, default=list)
     is_deleted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # Provenance for imported globals (FR-038, ADR-0013). NULL for user-added products;
+    # 'usda_fdc' etc. for imports. (source, external_id) is the idempotent upsert key.
+    source: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    external_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -66,6 +71,16 @@ class Product(Base):
     __table_args__ = (
         # NFR-002: name search < 200 ms at 1,000 products
         Index("ix_products_name", "name"),
+        # FR-038 / ADR-0013: idempotent import key. Partial so many user products
+        # (source/external_id NULL) do not collide on a unique constraint.
+        Index(
+            "uq_products_source_external_id",
+            "source",
+            "external_id",
+            unique=True,
+            postgresql_where=text("external_id IS NOT NULL"),
+            sqlite_where=text("external_id IS NOT NULL"),
+        ),
     )
 
 

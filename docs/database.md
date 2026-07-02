@@ -71,9 +71,11 @@ Owns the product catalogue: product definitions, units, nutrition data, and per-
 | `category` | varchar(100) | NOT NULL | Free-text category label (vocab normalization deferred — see ADR-0012 phase notes) |
 | `diet_tags` | JSON | NOT NULL, default `[]` | Array of strings. Stored as JSON for SQLite test compatibility |
 | `is_deleted` | boolean | NOT NULL, default `false` | Soft-delete — hard deletes are never used |
+| `source` | varchar(50) | nullable | Provenance (FR-038, ADR-0013): `NULL` = user-added; `usda_fdc` = imported from USDA FoodData Central |
+| `external_id` | varchar(100) | nullable | Source's stable id (FDC `fdcId`) for imported rows |
 | `created_at` | timestamptz | NOT NULL, server default `now()` | |
 
-**Constraints:** max 500 user-owned products per user enforced in service layer (INV-007).
+**Constraints:** max 500 user-owned products per user enforced in service layer (INV-007). Partial `UNIQUE (source, external_id) WHERE external_id IS NOT NULL` (`uq_products_source_external_id`) makes external imports idempotent (upsert on `(source, external_id)`) without constraining user products.
 
 ### `product_translations`
 

@@ -21,3 +21,6 @@ frontend/.env.local
 # Docker / OS
 .DS_Store
 *.log
+
+# USDA FoodData Central bulk CSVs (downloaded, not tracked)
+docs/data/
