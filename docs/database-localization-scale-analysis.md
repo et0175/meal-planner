@@ -177,18 +177,30 @@ API on local PostgreSQL 16, after importing USDA Foundation + SR Legacy (~8.3k r
 
 **NFR-002 holds at 10k products per language with ~6× headroom.**
 
-**Finding — the `pg_trgm` index is NOT used by the localized search.** `EXPLAIN ANALYZE`
-shows a `Seq Scan on products` + `Hash Left Join` + `Filter: COALESCE(t.name, p.name)
-ILIKE '%…%'` (exec ~12 ms at 18k rows). The `COALESCE(translation, base)` over the
-LEFT JOIN — introduced to implement the locale-with-fallback read — cannot use the
-per-column trigram indexes (`ix_products_name_trgm`, `ix_product_translations_name_trgm`).
-We still pass comfortably because a seq scan of ~18k rows is cheap, but this will grow
-linearly with the catalogue. **Follow-up options** (not urgent while p95 ≪ 200 ms):
-1. Rewrite search as `t.name ILIKE :q OR (t.name IS NULL AND p.name ILIKE :q)` so each
-   side can use its own trigram index.
-2. Materialize a per-(product, locale) resolved-name column with its own trgm index.
-3. Query `product_translations` for the locale directly, unioned with untranslated
-   products' base name.
+### Search index behaviour (investigated 2026-07-02)
+
+The search predicate was rewritten from `COALESCE(t.name, p.name) ILIKE :q` to the
+index-eligible, logically-identical form:
+
+```
+t.name ILIKE :q  OR  (t.name IS NULL AND p.name ILIKE :q)
+```
+
+Rationale: `COALESCE(a, b) ILIKE` is an expression over two columns and can **never**
+use a per-column index; the `OR` form lets each branch use its own trigram GIN index
+(`ix_product_translations_name_trgm`, `ix_products_name_trgm`) when that is cheaper.
+
+**However, at the 10k/language target the planner correctly does NOT use the trigram
+index — a sequential scan is genuinely faster at this size.** `EXPLAIN` on a *selective*
+`name ILIKE` over 10k rows: seq scan cost ≈ 577 (~7 ms) vs. the trgm bitmap-index-scan
+cost ≈ 2194. With `enable_seqscan=off` the planner *will* use
+`ix_product_translations_name_trgm`, confirming the index is reachable — it is simply
+not worth it yet. A GIN trigram index's fixed cost only pays off at much larger row
+counts (roughly 100k+ per locale, well beyond NFR-010's 10k target).
+
+**Net:** the rewrite is the correct long-term form at zero cost today (still ~30 ms p95);
+the trigram indexes are retained and become effective automatically once the catalogue
+outgrows the seq-scan crossover. No further action needed at MVP scale.
 
 The benchmark is repeatable (`python -m scripts.bench_search`); bench rows are tagged
 `source='scale_bench'` and removed on completion.

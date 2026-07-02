@@ -12,7 +12,7 @@ from typing import Literal
 
 from db.models import NutritionPer100g, Product, ProductTranslation, WeekFlag, WeekFlagEnum
 from fastapi import HTTPException, status
-from sqlalchemy import Select, func, select
+from sqlalchemy import Select, and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.elements import ColumnElement
@@ -61,7 +61,19 @@ async def list_products(
             # JSON contains filter — portable across SQLite and PostgreSQL for string arrays
             stmt = stmt.where(Product.diet_tags.contains(diet_tag))
         if search:
-            stmt = stmt.where(resolved_name.ilike(f"%{search}%"))
+            pattern = f"%{search}%"
+            # Search each column directly rather than COALESCE(t.name, p.name) so the
+            # per-column pg_trgm GIN indexes (ix_product_translations_name_trgm,
+            # ix_products_name_trgm) can be used. Logically identical to
+            # COALESCE(t.name, p.name) ILIKE :pattern:
+            #   - translated rows (t.name not null): match on t.name
+            #   - untranslated rows (t.name null):   match on the base p.name
+            stmt = stmt.where(
+                or_(
+                    ProductTranslation.name.ilike(pattern),
+                    and_(ProductTranslation.name.is_(None), Product.name.ilike(pattern)),
+                )
+            )
         if week_flag is not None:
             # user_id is mandatory when week_flag is specified — raise early rather than
             # silently ignoring the filter (which would return an incorrect list to Planning).

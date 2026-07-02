@@ -115,7 +115,9 @@ async def _explain(conn: asyncpg.Connection, term: str, locale: str) -> str:
         SELECT p.id, coalesce(t.name, p.name) rn
         FROM products p
         LEFT JOIN product_translations t ON t.product_id = p.id AND t.locale = $2
-        WHERE p.is_deleted = false AND coalesce(t.name, p.name) ILIKE '%' || $1 || '%'
+        WHERE p.is_deleted = false
+          AND (t.name ILIKE '%' || $1 || '%'
+               OR (t.name IS NULL AND p.name ILIKE '%' || $1 || '%'))
         ORDER BY coalesce(t.name, p.name) LIMIT 50
         """,
         term,
