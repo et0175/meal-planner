@@ -43,6 +43,8 @@ export interface ProductsQuery {
   order?: 'asc' | 'desc'
   week_flag?: 'this_week' | 'next_week'
   user_id?: number
+  limit?: number
+  offset?: number
 }
 
 export interface CreateProductBody {
@@ -91,6 +93,8 @@ export async function getProducts(token: string, query: ProductsQuery = {}): Pro
   if (query.order) params.set('order', query.order)
   if (query.week_flag) params.set('week_flag', query.week_flag)
   if (query.user_id !== undefined) params.set('user_id', String(query.user_id))
+  if (query.limit !== undefined) params.set('limit', String(query.limit))
+  if (query.offset !== undefined) params.set('offset', String(query.offset))
   const qs = params.toString()
   const res = await fetch(`${BASE_URL}/products${qs ? `?${qs}` : ''}`, {
     headers: { Authorization: `Bearer ${token}` },

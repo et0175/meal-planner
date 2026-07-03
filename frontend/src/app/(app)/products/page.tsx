@@ -19,7 +19,7 @@
  * synchronously inside useEffect (avoids react-hooks/set-state-in-effect rule).
  */
 
-import { useEffect, useMemo, useReducer, useState } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import { LayoutGrid, List, Plus } from 'lucide-react'
 import { getProducts, deleteProduct, type Product } from '@/lib/api/catalog'
 import { getStoredToken } from '@/lib/hooks/useAuth'
@@ -119,6 +119,11 @@ export default function ProductsPage() {
   // Trigger counter — increment to retry the fetch
   const [fetchTrigger, setFetchTrigger] = useState(0)
 
+  // Pagination state
+  const [offset, setOffset] = useState(0)
+  const [hasMore, setHasMore] = useState(true)
+  const [isLoadingMore, setIsLoadingMore] = useState(false)
+
   // UI state
   const [view, setView] = useState<PageView>('categories')
   const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS)
@@ -139,40 +144,90 @@ export default function ProductsPage() {
     [allProducts]
   )
 
-  /** Products after client-side filtering and sorting. */
+  /** Products after client-side filtering and sorting.
+   * Note: search and category are applied server-side (passed to API).
+   * Diet tags are filtered client-side for instant response.
+   */
   const displayedProducts = useMemo(() => {
     let result = allProducts
-
-    if (filters.search) {
-      const q = filters.search.toLowerCase()
-      result = result.filter((p) => p.name.toLowerCase().includes(q))
-    }
-
-    if (filters.category) {
-      result = result.filter((p) => p.category === filters.category)
-    }
 
     if (filters.dietTags.length > 0) {
       result = result.filter((p) => filters.dietTags.every((t) => p.diet_tags.includes(t)))
     }
 
     return sortProducts(result, filters.sortBy, filters.sortOrder)
-  }, [allProducts, filters])
+  }, [allProducts, filters.dietTags, filters.sortBy, filters.sortOrder])
 
   // ── Fetch ─────────────────────────────────────────────────────────────────
 
+  // Initial fetch
   useEffect(() => {
     const token = getStoredToken()
     if (!token) return
     dispatchFetch({ type: 'LOADING' })
-    getProducts(token, { user_id: session?.accountId })
+    setOffset(0)
+    setHasMore(true)
+    getProducts(token, {
+      user_id: session?.accountId,
+      q: filters.search || undefined,
+      category: filters.category || undefined,
+      limit: 200,
+      offset: 0,
+    })
       .then((products) => {
         dispatchFetch({ type: 'SUCCESS', products })
+        setOffset(200)
+        setHasMore(products.length === 200)
       })
       .catch(() => {
         dispatchFetch({ type: 'ERROR', error: 'Failed to load products. Please try again.' })
       })
-  }, [fetchTrigger, session?.accountId])
+  }, [fetchTrigger, session?.accountId, filters.search, filters.category])
+
+  // Load more products
+  const loadMore = useCallback(async () => {
+    const token = getStoredToken()
+    if (!token || !hasMore || isLoadingMore) return
+    setIsLoadingMore(true)
+    try {
+      const moreProducts = await getProducts(token, {
+        user_id: session?.accountId,
+        q: filters.search || undefined,
+        category: filters.category || undefined,
+        limit: 200,
+        offset,
+      })
+      dispatchFetch({
+        type: 'SUCCESS',
+        products: [...allProducts, ...moreProducts],
+      })
+      setOffset((prev) => prev + 200)
+      setHasMore(moreProducts.length === 200)
+    } catch {
+      // Silently fail for load-more — user can retry by scrolling
+    } finally {
+      setIsLoadingMore(false)
+    }
+  }, [hasMore, isLoadingMore, offset, allProducts, session?.accountId, filters.search, filters.category])
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasMore && !isLoadingMore && !isLoading) {
+          loadMore()
+        }
+      },
+      { threshold: 0.1 }
+    )
+
+    const sentinel = document.getElementById('products-end-sentinel')
+    if (sentinel) {
+      observer.observe(sentinel)
+    }
+
+    return () => observer.disconnect()
+  }, [loadMore, hasMore, isLoadingMore, isLoading])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -339,13 +394,30 @@ export default function ProductsPage() {
       {view === 'categories' ? (
         <CategoryGrid products={allProducts} onCategorySelect={handleCategorySelect} />
       ) : (
-        <ProductTable
-          products={displayedProducts}
-          sortBy={filters.sortBy}
-          sortOrder={filters.sortOrder}
-          onSortChange={handleSortChange}
-          onProductClick={setSelectedProduct}
-        />
+        <>
+          <ProductTable
+            products={displayedProducts}
+            sortBy={filters.sortBy}
+            sortOrder={filters.sortOrder}
+            onSortChange={handleSortChange}
+            onProductClick={setSelectedProduct}
+          />
+          {/* Infinite scroll sentinel */}
+          <div id="products-end-sentinel" className="h-4" />
+          {isLoadingMore && (
+            <div className="flex justify-center py-4">
+              <span
+                className="h-6 w-6 animate-spin rounded-full border-2 border-teal-700 border-t-transparent"
+                aria-hidden="true"
+              />
+            </div>
+          )}
+          {!hasMore && displayedProducts.length > 0 && (
+            <div className="text-center py-6 text-gray-400 text-sm">
+              No more products to load
+            </div>
+          )}
+        </>
       )}
 
       {/* Detail modal */}

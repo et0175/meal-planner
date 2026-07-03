@@ -73,6 +73,73 @@ ISO 8601 week helpers: `dateToIsoWeek`, `isoWeekToMonday`, `weekDates`, `formatW
 
 ---
 
+## What has been implemented (CARD-004: Product Catalog UI)
+
+### Catalog components (`src/catalog/`)
+
+- `ProductsPage` (`src/app/(app)/products/page.tsx`) — main page with infinite scroll pagination; fetches 200 products at a time; passes `search` and `category` to API (server-side filtering); remaining filters (diet tags, sorting) applied client-side
+- `FilterBar.tsx` — search input, category dropdown, diet tag pills, sort controls, clear filters button
+- `ProductTable.tsx` — sortable table: name, category, nutrition (kcal, protein, fat, carbs), diet tags; row click → detail modal
+- `CategoryGrid.tsx` — grid of category cards (derived from loaded products); click → filter to that category + switch to list view
+- `ProductDetailModal.tsx` — full product detail: nutrition facts, unit conversion table, week flag toggle, edit/delete buttons; modal actions (AC-032)
+- `ProductForm.tsx` — create/edit product dialog: name, category, nutrition per 100g, units (up to 10), diet tags; validation (INV-004/005) (AC-033, AC-039)
+- `WeekFlagToggle.tsx` — cycling button state: None → This Week → Next Week → None; calls `setWeekFlag()` API (FR-015)
+- `MacroPieChart.tsx` — visual macro split (protein/fat/carbs %) in detail view
+- `UnitConversionTable.tsx` — all units and gram equivalents for a product
+
+### Pagination (Infinite Scroll)
+
+**How it works:**
+- Initial load: fetches 200 products with filters applied (`?search=`, `?category=`)
+- Scroll to bottom: `IntersectionObserver` on sentinel element triggers `loadMore()`
+- Load more: appends next 200 products from `?offset=200`, `?offset=400`, etc.
+- Stop: when API returns fewer than 200 products, `hasMore=false`
+
+**State tracking:**
+- `allProducts`: accumulated array of all loaded products (may grow to 400+)
+- `offset`: current pagination position (0, 200, 400, ...)
+- `hasMore`: true if last batch was a full 200 (more to load)
+- `isLoadingMore`: prevents duplicate requests while fetching
+
+**Key design decision:** Search and category filters are passed to the API (`?q=`, `?category=`), so results are server-filtered. Diet tag filter is client-side for instant response on already-loaded products. Sorting is client-side on loaded results.
+
+### Week Flags (FR-015, ADR-0009)
+
+Products can be tagged for the current week (`this_week`) or next week (`next_week`), supporting meal planning workflow.
+
+**Frontend:**
+- `WeekFlagToggle` component: visible in product detail modal
+- `setWeekFlag(token, productId, flag)` API call: `PUT /products/{id}/week-flag`
+- Flag persisted in `Product.week_flag` as `{ flag: 'this_week' | 'next_week' | 'none' } | null`
+- On success, modal re-renders with new flag state
+
+**Backend (ADR-0009):**
+- Monday 00:00 UTC cron job: promotes `next_week` → `this_week`, clears stale `this_week`
+- Flags are per-user per-product in `week_flags` table
+
+### API wrapper updates (`src/lib/api/catalog.ts`)
+
+**New `ProductsQuery` fields:**
+- `q?: string` — search (sent as `?search=...`)
+- `category?: string` — category filter
+- `limit?: number` — page size (default 200, max 200)
+- `offset?: number` — pagination offset
+- `sort_by`, `sort_dir` — sorting (sent to API but also applied client-side)
+- `week_flag`, `user_id` — filter by flag (for Planning service)
+
+**Functions:**
+- `getProducts(token, query)` — returns `Product[]`
+- `setWeekFlag(token, id, flag)` — returns updated `Product`
+- Other mutations: `createProduct`, `updateProduct`, `deleteProduct`
+
+### Tests added (`src/__tests__/`)
+
+- `ProductTable.test.tsx` — table rendering, column headers, row click handlers, sorting
+- `ProductDetailModal.test.tsx` — modal open/close, week flag toggle, edit/delete actions
+- `ProductForm.test.tsx` — form submission, validation, category + unit handling, edit mode
+
+---
+
 ## What has been implemented (CARD-002)
 
 ### Route groups
