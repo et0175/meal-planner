@@ -41,6 +41,13 @@ export interface PlanSummary {
   week: string
 }
 
+export interface NutritionPerUnit {
+  kcal?: number
+  protein_g?: number
+  fat_g?: number
+  carbs_g?: number
+}
+
 export interface CreateAssignmentBody {
   product_id: number
   product_name: string
@@ -48,10 +55,7 @@ export interface CreateAssignmentBody {
   meal_slot: MealSlot
   quantity: number
   unit: string
-  kcal_per_unit: number
-  protein_per_unit: number
-  fat_per_unit: number
-  carbs_per_unit: number
+  nutrition?: NutritionPerUnit
 }
 
 export interface UpdateAssignmentBody {

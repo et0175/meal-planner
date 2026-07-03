@@ -188,10 +188,12 @@ export function WeekSummaryGrid({
         meal_slot: addForm.slot,
         quantity: qty,
         unit: addForm.product.unit,
-        kcal_per_unit: addForm.product.kcal_per_unit,
-        protein_per_unit: addForm.product.protein_per_unit,
-        fat_per_unit: addForm.product.fat_per_unit,
-        carbs_per_unit: addForm.product.carbs_per_unit,
+        nutrition: {
+          kcal: addForm.product.kcal_per_unit,
+          protein_g: addForm.product.protein_per_unit,
+          fat_g: addForm.product.fat_per_unit,
+          carbs_g: addForm.product.carbs_per_unit,
+        },
       })
       dispatchForm({ type: 'CLOSE' })
       onRefresh()
