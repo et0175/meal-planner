@@ -13,6 +13,7 @@ import { CalendarDays, Table2, Download, BookmarkCheck, Loader2, X } from 'lucid
 import { useAuth } from '@/lib/hooks/useAuth'
 import { WeekNav } from '@/planner/WeekNav'
 import { WeekSummaryGrid } from '@/planner/WeekSummaryGrid'
+import { WeekProductsPanel } from '@/planner/WeekProductsPanel'
 import { CalendarView } from '@/planner/CalendarView'
 import { PlanSummaryPanel } from '@/planner/PlanSummaryPanel'
 import {
@@ -301,7 +302,9 @@ export default function PlannerPage() {
             role="tabpanel"
             aria-labelledby="tab-summary"
             hidden={activeTab !== 'summary'}
+            className="space-y-4"
           >
+            <WeekProductsPanel token={session.token} accountId={session.accountId} />
             <WeekSummaryGrid
               assignments={assignments}
               week={week}
@@ -319,6 +322,8 @@ export default function PlannerPage() {
             hidden={activeTab !== 'calendar'}
           >
             <div className="space-y-4">
+              <WeekProductsPanel token={session.token} accountId={session.accountId} />
+
               <PlanSummaryPanel
                 assignments={assignments}
                 week={week}
