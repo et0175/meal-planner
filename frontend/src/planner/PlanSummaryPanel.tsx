@@ -111,8 +111,9 @@ export function PlanSummaryPanel({ assignments, week, token, onRefresh }: PlanSu
       })
       dispatchAdd({ type: 'CLOSE' })
       onRefresh()
-    } catch {
-      setSaveError('Failed to add item. Please try again.')
+    } catch (err) {
+      const msg = err instanceof Object && 'detail' in err ? (err.detail as string) : 'Failed to add item. Please try again.'
+      setSaveError(msg)
     } finally {
       setSaving(false)
     }

@@ -185,8 +185,9 @@ function DayColumn({
       })
       dispatchAdd({ type: 'CLOSE' })
       onSave()
-    } catch {
-      setQtyError('Failed to add item.')
+    } catch (err) {
+      const msg = err instanceof Object && 'detail' in err ? (err.detail as string) : 'Failed to add item.'
+      setQtyError(msg)
     } finally {
       setSaving(false)
     }
