@@ -35,6 +35,8 @@ class ProductSummary(BaseModel):
     category: str
     diet_tags: list[str]
     nutrition: NutritionSchema | None
+    units: list[ProductUnitSchema]
+    is_deleted: bool
     created_at: datetime
 
 
@@ -50,6 +52,7 @@ class ProductDetail(BaseModel):
     diet_tags: list[str]
     nutrition: NutritionSchema | None
     units: list[ProductUnitSchema]
+    is_deleted: bool
     created_at: datetime
 
 

@@ -95,7 +95,7 @@ async def list_products(
     # Page query: select the entity plus the resolved name.
     page_stmt = apply_filters(
         select(Product, resolved_name.label("resolved_name")).options(
-            selectinload(Product.nutrition)
+            selectinload(Product.nutrition), selectinload(Product.units)
         )
     )
 
