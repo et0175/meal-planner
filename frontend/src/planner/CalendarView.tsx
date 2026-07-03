@@ -523,8 +523,18 @@ export function CalendarView({
           const dropData = JSON.parse(dataStr)
           if (dropData.type === 'product' && dropData.product) {
             const product = dropData.product
+            const searchProduct: SearchProduct = {
+              id: product.id,
+              name: product.name,
+              category: product.category,
+              kcal_per_unit: product.nutrition.calories,
+              protein_per_unit: product.nutrition.protein_g,
+              fat_per_unit: product.nutrition.fat_g,
+              carbs_per_unit: product.nutrition.carbs_g,
+              unit: product.units[0]?.unit_name || '100g',
+            }
             dispatchAdd({ type: 'OPEN', date: targetDate, slot: targetSlot })
-            dispatchAdd({ type: 'SELECT', product: { id: product.id, name: product.name } })
+            dispatchAdd({ type: 'SELECT', product: searchProduct })
             return
           }
         } catch {
