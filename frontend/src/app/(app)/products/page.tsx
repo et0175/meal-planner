@@ -165,14 +165,14 @@ export default function ProductsPage() {
     const token = getStoredToken()
     if (!token) return
     dispatchFetch({ type: 'LOADING' })
-    getProducts(token)
+    getProducts(token, { user_id: session?.accountId })
       .then((products) => {
         dispatchFetch({ type: 'SUCCESS', products })
       })
       .catch(() => {
         dispatchFetch({ type: 'ERROR', error: 'Failed to load products. Please try again.' })
       })
-  }, [fetchTrigger])
+  }, [fetchTrigger, session?.accountId])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
