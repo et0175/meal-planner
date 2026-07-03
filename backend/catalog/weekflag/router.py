@@ -7,7 +7,7 @@ from typing import Annotated, Any
 from auth_middleware import verify_token
 from authoring.schemas import ProductResponse
 from db.engine import get_db
-from db.models import Product
+from db.models import Product, WeekFlag
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -44,4 +44,17 @@ async def set_week_flag_route(
     )
     result = await db.execute(stmt)
     product = result.scalar_one()
-    return ProductResponse.model_validate(product)
+    
+    # Load the week flag for this user
+    flag_stmt = select(WeekFlag).where(
+        WeekFlag.product_id == product_id,
+        WeekFlag.user_id == user_id,
+    )
+    flag_result = await db.execute(flag_stmt)
+    week_flag_row = flag_result.scalar_one_or_none()
+    
+    # Convert to response
+    response = ProductResponse.model_validate(product)
+    if week_flag_row:
+        response.week_flag = {"flag": str(week_flag_row.flag)}
+    return response

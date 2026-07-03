@@ -98,6 +98,14 @@ class ProductUnitSchema(BaseModel):
     grams_per_unit: float
 
 
+class WeekFlagSchema(BaseModel):
+    """Week flag schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    flag: str
+
+
 class ProductResponse(BaseModel):
     """Response schema for created/updated product (POST/PUT)."""
 
@@ -111,6 +119,7 @@ class ProductResponse(BaseModel):
     nutrition: NutritionSchema
     units: list[ProductUnitSchema]
     is_deleted: bool
+    week_flag: WeekFlagSchema | None = None
 
 
 class DeleteResponse(BaseModel):
