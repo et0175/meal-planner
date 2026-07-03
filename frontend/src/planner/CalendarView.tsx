@@ -39,7 +39,7 @@ import {
   logDay,
   logItem,
 } from '@/lib/api/planning'
-import { MEAL_SLOTS, weekDates, isoDate, shortDayLabel, type MealSlot } from '@/lib/utils/week'
+import { MEAL_SLOTS, displayMealSlot, weekDates, isoDate, shortDayLabel, type MealSlot } from '@/lib/utils/week'
 
 // ── Layout types ──────────────────────────────────────────────────────────────
 
@@ -78,17 +78,17 @@ function addCellReducer(state: AddCellForm | null, action: AddCellAction): AddCe
 // ── Slot style map ────────────────────────────────────────────────────────────
 
 const SLOT_STYLES: Record<MealSlot, string> = {
-  Breakfast: 'bg-amber-50 border-amber-100 text-amber-800',
-  Lunch: 'bg-green-50 border-green-100 text-green-800',
-  Dinner: 'bg-blue-50 border-blue-100 text-blue-800',
-  Snacks: 'bg-purple-50 border-purple-100 text-purple-800',
+  breakfast: 'bg-amber-50 border-amber-100 text-amber-800',
+  lunch: 'bg-green-50 border-green-100 text-green-800',
+  dinner: 'bg-blue-50 border-blue-100 text-blue-800',
+  snacks: 'bg-purple-50 border-purple-100 text-purple-800',
 }
 
 const SLOT_HEADER_STYLES: Record<MealSlot, string> = {
-  Breakfast: 'text-amber-700',
-  Lunch: 'text-green-700',
-  Dinner: 'text-blue-700',
-  Snacks: 'text-purple-700',
+  breakfast: 'text-amber-700',
+  lunch: 'text-green-700',
+  dinner: 'text-blue-700',
+  snacks: 'text-purple-700',
 }
 
 // ── Drag data type ────────────────────────────────────────────────────────────
@@ -312,7 +312,7 @@ function DayColumn({
                 isDragOver && 'bg-teal-50 ring-1 ring-inset ring-teal-300'
               )}
             >
-              <p className={cn('text-xs font-medium mb-1', SLOT_HEADER_STYLES[slot])}>{slot}</p>
+              <p className={cn('text-xs font-medium mb-1', SLOT_HEADER_STYLES[slot])}>{displayMealSlot(slot)}</p>
 
               {/* Items */}
               <div className="space-y-1">

@@ -12,7 +12,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_PLANNING_URL ?? ''
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type MealSlot = 'Breakfast' | 'Lunch' | 'Dinner' | 'Snacks'
+export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snacks'
 
 export interface Assignment {
   id: number

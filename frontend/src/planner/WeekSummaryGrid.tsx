@@ -21,7 +21,7 @@ import {
   createAssignment,
   deleteAssignment,
 } from '@/lib/api/planning'
-import { MEAL_SLOTS, DAY_NAMES, weekDates, isoDate, type MealSlot } from '@/lib/utils/week'
+import { MEAL_SLOTS, displayMealSlot, DAY_NAMES, weekDates, isoDate, type MealSlot } from '@/lib/utils/week'
 
 interface WeekSummaryGridProps {
   assignments: Assignment[]

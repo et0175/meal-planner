@@ -14,7 +14,7 @@ import { Plus, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { ProductSearchDropdown } from '@/planner/ProductSearchDropdown'
 import { type Assignment, type SearchProduct, createAssignment } from '@/lib/api/planning'
-import { MEAL_SLOTS, weekDates, isoDate, type MealSlot } from '@/lib/utils/week'
+import { MEAL_SLOTS, displayMealSlot, weekDates, isoDate, type MealSlot } from '@/lib/utils/week'
 
 interface PlanSummaryPanelProps {
   assignments: Assignment[]
@@ -59,10 +59,10 @@ function slotAddReducer(state: SlotAddForm | null, action: SlotAddAction): SlotA
 // ── Slot colours ──────────────────────────────────────────────────────────────
 
 const SLOT_DOT: Record<MealSlot, string> = {
-  Breakfast: 'bg-amber-400',
-  Lunch: 'bg-green-500',
-  Dinner: 'bg-blue-500',
-  Snacks: 'bg-purple-400',
+  breakfast: 'bg-amber-400',
+  lunch: 'bg-green-500',
+  dinner: 'bg-blue-500',
+  snacks: 'bg-purple-400',
 }
 
 const DAY_ABBR = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -135,13 +135,13 @@ export function PlanSummaryPanel({ assignments, week, token, onRefresh }: PlanSu
                   className={cn('w-2 h-2 rounded-full flex-shrink-0', SLOT_DOT[slot])}
                   aria-hidden="true"
                 />
-                <span className="text-xs font-semibold text-gray-700">{slot}</span>
+                <span className="text-xs font-semibold text-gray-700">{displayMealSlot(slot)}</span>
                 <span className="text-xs text-gray-400 ml-auto">{items.length}</span>
               </div>
 
               {/* Items */}
               {items.length === 0 && !isFormOpen ? (
-                <p className="text-xs text-gray-300 italic">No {slot.toLowerCase()} planned</p>
+                <p className="text-xs text-gray-300 italic">No {slot} planned</p>
               ) : (
                 <ul className="space-y-1" aria-label={`${slot} items`}>
                   {items.map((a) => (

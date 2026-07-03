@@ -8,8 +8,13 @@
 export const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const
 export type DayName = (typeof DAY_NAMES)[number]
 
-export const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'] as const
+export const MEAL_SLOTS = ['breakfast', 'lunch', 'dinner', 'snacks'] as const
 export type MealSlot = (typeof MEAL_SLOTS)[number]
+
+/** Capitalize a meal slot for display. */
+export function displayMealSlot(slot: MealSlot): string {
+  return slot.charAt(0).toUpperCase() + slot.slice(1)
+}
 
 /** Convert a Date to an ISO date string "YYYY-MM-DD" (UTC). */
 export function isoDate(d: Date): string {
