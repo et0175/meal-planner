@@ -34,8 +34,7 @@ export function NutritionBar({ label, current, target, color, unit = '' }: Nutri
       <div className="flex justify-between text-xs">
         <span className="text-gray-500">{label}</span>
         <span className={cn('font-medium', isOver ? 'text-red-600' : 'text-gray-700')}>
-          {Math.round(current)}/{Math.round(target)}
-          {unit}
+          {Number.isNaN(current) ? '0' : Math.round(current)}/{Number.isNaN(target) ? '0' : Math.round(target)}{unit && ' '}{unit}
         </span>
       </div>
       <div
