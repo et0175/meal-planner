@@ -5,10 +5,11 @@ from __future__ import annotations
 from typing import Annotated, Literal
 
 from db.engine import get_db
-from db.models import WeekFlagEnum
+from db.models import Product, WeekFlag, WeekFlagEnum
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from query.schemas import ProductDetail, ProductListResponse, ProductSummary
 from query.service import DEFAULT_LOCALE, get_product, list_products
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -47,10 +48,29 @@ async def list_products_route(
         limit=limit,
         offset=offset,
     )
-    items = [
-        ProductSummary.model_validate(p).model_copy(update={"name": name})
-        for (p, name) in rows
-    ]
+    
+    # Load week flags for these products if user_id is provided
+    product_week_flags: dict[int, str | None] = {}
+    if user_id:
+        product_ids = [p.id for p, _ in rows]
+        if product_ids:
+            stmt = select(WeekFlag).where(
+                WeekFlag.product_id.in_(product_ids),
+                WeekFlag.user_id == user_id,
+            )
+            result = await db.execute(stmt)
+            week_flags = result.scalars().all()
+            for wf in week_flags:
+                product_week_flags[wf.product_id] = str(wf.flag)
+    
+    items = []
+    for p, name in rows:
+        summary = ProductSummary.model_validate(p).model_copy(update={"name": name})
+        # Include week_flag if available
+        if user_id and p.id in product_week_flags:
+            summary.week_flag = {"flag": product_week_flags[p.id]}
+        items.append(summary)
+    
     return ProductListResponse(items=items, total=total)
 
 
@@ -59,6 +79,7 @@ async def get_product_route(
     product_id: int,
     db: Annotated[AsyncSession, Depends(get_db)],
     locale: str = Query(default=DEFAULT_LOCALE, description="BCP-47 locale; English fallback"),  # noqa: B008
+    user_id: int | None = Query(default=None, description="User ID for week flag"),  # noqa: B008
 ) -> ProductDetail:
     """Get product detail with nutrition and unit conversion table.
 
@@ -72,4 +93,17 @@ async def get_product_route(
             detail=f"Product {product_id} not found",
         )
     product, resolved_name = result
-    return ProductDetail.model_validate(product).model_copy(update={"name": resolved_name})
+    detail = ProductDetail.model_validate(product).model_copy(update={"name": resolved_name})
+    
+    # Load week flag if user_id is provided
+    if user_id:
+        stmt = select(WeekFlag).where(
+            WeekFlag.product_id == product_id,
+            WeekFlag.user_id == user_id,
+        )
+        wf_result = await db.execute(stmt)
+        week_flag_row = wf_result.scalar_one_or_none()
+        if week_flag_row:
+            detail.week_flag = {"flag": str(week_flag_row.flag)}
+    
+    return detail

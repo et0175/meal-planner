@@ -24,6 +24,14 @@ class ProductUnitSchema(BaseModel):
     grams_per_unit: float
 
 
+class WeekFlagSchema(BaseModel):
+    """Week flag schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    flag: str
+
+
 class ProductSummary(BaseModel):
     """Lightweight product representation for list/card views."""
 
@@ -37,6 +45,7 @@ class ProductSummary(BaseModel):
     nutrition: NutritionSchema | None
     units: list[ProductUnitSchema]
     is_deleted: bool
+    week_flag: WeekFlagSchema | None = None
     created_at: datetime
 
 
@@ -53,6 +62,7 @@ class ProductDetail(BaseModel):
     nutrition: NutritionSchema | None
     units: list[ProductUnitSchema]
     is_deleted: bool
+    week_flag: WeekFlagSchema | None = None
     created_at: datetime
 
 
