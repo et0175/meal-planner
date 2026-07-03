@@ -123,7 +123,7 @@ interface DayColumnProps {
   onLogDay: (date: string) => void
   dragData: DragData | null
   onDragStart: (data: DragData) => void
-  onDrop: (targetDate: string, targetSlot: MealSlot) => void
+  onDrop: (targetDate: string, targetSlot: MealSlot, dropEvent?: any) => void
 }
 
 function DayColumn({
@@ -303,7 +303,7 @@ function DayColumn({
               onDrop={(e) => {
                 e.preventDefault()
                 setDragOver(null)
-                onDrop(dateStr, slot)
+                onDrop(dateStr, slot, e)
               }}
               className={cn(
                 'px-2 pt-1.5 pb-1 border-b border-gray-50 min-h-14',
@@ -514,7 +514,25 @@ export function CalendarView({
     visibleDates = [dates[dayIndex]]
   }
 
-  async function handleDrop(targetDate: string, targetSlot: MealSlot) {
+  async function handleDrop(targetDate: string, targetSlot: MealSlot, dropEvent?: any) {
+    // Handle product drops from WeekProductsPanel
+    if (dropEvent && !dragData) {
+      const dataStr = dropEvent.dataTransfer?.getData('application/json')
+      if (dataStr) {
+        try {
+          const dropData = JSON.parse(dataStr)
+          if (dropData.type === 'product' && dropData.product) {
+            const product = dropData.product
+            dispatchAdd({ type: 'OPEN', date: targetDate, slot: targetSlot })
+            dispatchAdd({ type: 'SELECT', product: { id: product.id, name: product.name } })
+            return
+          }
+        } catch {
+          // ignore invalid JSON
+        }
+      }
+    }
+    
     if (!dragData) return
     if (dragData.sourceDate === targetDate && dragData.sourceMealSlot === targetSlot) {
       setDragData(null)
