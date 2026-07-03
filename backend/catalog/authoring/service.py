@@ -113,7 +113,15 @@ async def create_product(
     await _upsert_translation(db, product.id, locale, name)
 
     await db.commit()
-    await db.refresh(product)
+
+    # Reload with eager-loaded relationships for serialization
+    stmt = (
+        select(Product)
+        .options(selectinload(Product.nutrition), selectinload(Product.units))
+        .where(Product.id == product.id)
+    )
+    result = await db.execute(stmt)
+    product = result.scalar_one()
     return product
 
 
@@ -207,7 +215,15 @@ async def update_product(
             )
 
     await db.commit()
-    await db.refresh(product)
+
+    # Reload with eager-loaded relationships for serialization
+    stmt = (
+        select(Product)
+        .options(selectinload(Product.nutrition), selectinload(Product.units))
+        .where(Product.id == product.id)
+    )
+    result = await db.execute(stmt)
+    product = result.scalar_one()
     return product
 
 

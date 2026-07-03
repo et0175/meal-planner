@@ -77,8 +77,29 @@ class UpdateProductRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
 
+class NutritionSchema(BaseModel):
+    """Nutrition response schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    calories: float
+    protein_g: float
+    fat_g: float
+    carbs_g: float
+
+
+class ProductUnitSchema(BaseModel):
+    """Product unit response schema."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    unit_name: str
+    grams_per_unit: float
+
+
 class ProductResponse(BaseModel):
-    """Response schema for created/updated product."""
+    """Response schema for created/updated product (POST/PUT)."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -87,6 +108,9 @@ class ProductResponse(BaseModel):
     name: str
     category: str
     diet_tags: list[str]
+    nutrition: NutritionSchema
+    units: list[ProductUnitSchema]
+    is_deleted: bool
 
 
 class DeleteResponse(BaseModel):
