@@ -11,7 +11,8 @@
     "format:check": "prettier --check .",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "generate:api": "openapi-typescript http://localhost:8001/openapi.json -o src/lib/api/types/identity.ts && openapi-typescript http://localhost:8002/openapi.json -o src/lib/api/types/catalog.ts && openapi-typescript http://localhost:8003/openapi.json -o src/lib/api/types/planning.ts && openapi-typescript http://localhost:8004/openapi.json -o src/lib/api/types/shopping.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -35,6 +36,7 @@
     "eslint-config-prettier": "^9",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
+    "openapi-typescript": "^7.4.2",
     "prettier": "^3",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.11",
