@@ -215,20 +215,21 @@
 
 ---
 
-### TC-PLN-012: Calendar day column shows kcal nutrition strip
-**AC:** US-MP-019 — each day column in Calendar shows planned kcal and macros  
+### TC-PLN-012: Grid view day column shows calorie ring and kcal total
+**AC:** US-MP-007 / US-MP-019 — each day column in Grid view shows a colour-coded calorie ring and planned kcal  
 **Priority:** Medium
 
 **Preconditions:** User u-001 has calorie target 2000 kcal; seed data loaded (Mon has r-001 385 kcal + r-004 450 kcal = 835 kcal)
 
 **Steps:**
-1. Open Planner > Calendar tab > Week sub-view.
-2. Inspect the **Monday** column.
+1. Open Planner > **Grid view** tab.
+2. Inspect the **Monday** column header.
 
 **Expected result:**
-- Monday column shows a nutrition strip: **835 kcal**, protein (P), fat (F), carbs (C) totals
-- Strip visible when the column has at least one assignment
-- Empty columns do not show the strip
+- Monday column header shows a compact colour-coded calorie ring and **835 kcal**
+- Ring/kcal total visible when the column has at least one assignment
+- Empty columns do not show the ring
+- Note: Grid view's header shows the ring + kcal total only, not separate protein/fat/carbs figures — the full textual macro breakdown is shown in **2 Days** instead (see TC-CAL-024)
 
 **Status:** ✅
 
@@ -255,19 +256,57 @@
 
 ---
 
-### TC-PLN-014: Switch between Week summary and Calendar tabs
-**AC:** US-MP-002 — two tabs are visible; selecting a tab shows its content and hides the other; both tabs reflect the same underlying week  
+### TC-PLN-014: Switch between the four planner tabs
+**AC:** US-MP-002 — four tabs are visible; selecting a tab shows its content and hides the others; all tabs reflect the same underlying week  
 **Priority:** High
 
 **Steps:**
 1. Open Planner; note the default active tab (Week summary).
-2. Click **Calendar** tab.
-3. Click **Week summary** tab.
+2. Click **Grid view** tab.
+3. Click **2 Days** tab.
+4. Click **Month** tab.
+5. Click **Week summary** tab.
 
 **Expected result:**
-- After step 1: Week summary content visible; Calendar hidden; "Week summary" tab highlighted
-- After step 2: Calendar content visible; Week summary hidden; same assignments visible in calendar cells (Mon Breakfast: Berry overnight oats)
-- After step 3: Week summary visible again; data consistent across tabs
+- Four tabs are shown as a single row of pills: Week summary, Grid view, 2 Days, Month — no separate "Calendar" wrapper tab
+- After step 1: Week summary content visible; other tabs' content hidden; "Week summary" tab highlighted
+- After step 2: Grid view content visible; same assignments visible in grid cells (Mon Breakfast: Berry overnight oats)
+- After step 3: 2 Days content visible, showing the date scroller and 2 day columns
+- After step 4: Month content visible, showing the 42-cell read-only grid
+- After step 5: Week summary visible again; data consistent across all tabs
+
+**Status:** ✅
+
+---
+
+### TC-PLN-017: Reorder tabs by dragging one pill onto another
+**AC:** US-MP-025 — dragging a tab pill onto another swaps their positions; default order preserved otherwise  
+**Priority:** Medium
+
+**Steps:**
+1. Open Planner; confirm the tab row reads **Week summary, Grid view, 2 Days, Month** (the default order).
+2. Drag the **Month** tab pill and drop it onto the **Grid view** tab pill.
+
+**Expected result:**
+- Tab row now reads **Week summary, Month, 2 Days, Grid view** — only Month and Grid view swapped positions; Week summary and 2 Days keep their relative order
+- The previously active tab's content is still shown after the swap, even though its position in the row changed
+- No assignments or plan data are affected by reordering
+
+**Status:** ✅
+
+---
+
+### TC-PLN-018: Tab order is session-only — resets on reload
+**AC:** US-MP-025 — reordering persists only for the current session, not across page reloads  
+**Priority:** Low
+
+**Steps:**
+1. Reorder the tabs as in TC-PLN-017 (Month swapped with Grid view).
+2. Reload the page (`F5` / browser refresh).
+
+**Expected result:**
+- After reload, the tab row returns to the default order: Week summary, Grid view, 2 Days, Month
+- The custom order from step 1 is not persisted (in-memory React state resets on reload; no localStorage/sessionStorage write for tab order)
 
 **Status:** ✅
 

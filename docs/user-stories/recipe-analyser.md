@@ -57,7 +57,9 @@ Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 
 ---
 
-## US-RA-005 Filter recipes by diet
+## 🚫 US-RA-005 Filter recipes by diet — Deferred to post-MVP1
+
+> **Decision (OQ-011):** Depends on the Dietary Analyser module (`dietary-analyser.md`), which is deferred to post-MVP1. Kept for historical/planning reference.
 
 **As a** user on a specific diet  
 **I want** to filter recipes by diet type  
@@ -65,8 +67,8 @@ Requirements: [04_recipe_analyser.md](../requirements/04_recipe_analyser.md)
 
 **Acceptance criteria**
 
-- [ ] Diet filter is available on the recipe browsing UI.
-- [ ] Results respect diet compatibility set in the dietary analyser (or equivalent source of truth).
+- [ ] ~~Diet filter is available on the recipe browsing UI.~~ 🚫 Deferred (OQ-011).
+- [ ] ~~Results respect diet compatibility set in the dietary analyser (or equivalent source of truth).~~ 🚫 Deferred (OQ-011).
 
 ---
 

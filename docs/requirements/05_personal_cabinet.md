@@ -12,7 +12,7 @@ A signed-in user's personal area, organised into two top-level tabs: **Profile**
 ### Tab structure
 
 - The Personal Cabinet presents two top-level tabs:
-  - **Profile** — personal information and diet preferences.
+  - **Profile** — personal information and nutrition targets (calorie target and macro split; see note under "Profile tab — Diet preferences" below — the diet *selector* itself is deferred).
   - **Meal tracking** — food intake log, calendar view, goal corridor summaries, and nutrition progress.
 
 ### Profile tab — User profile
@@ -29,10 +29,12 @@ The user can maintain:
 
 ### Profile tab — Diet preferences
 
-- The user selects a single active diet, sees a recommended calorie range, and sets or adjusts the protein, fat, and carbohydrate split.
+> 🚫 **Diet selection deferred to post-MVP1 (OQ-011):** selecting an active diet (from the Dietary Analyser's 12 patterns) is out of scope for MVP1, since the Dietary Analyser module itself is deferred (`03_dietary_analyser.md`, `TODO_later.md`). The calorie target and macro split below are **not** removed — they are core MVP1 functionality (used throughout Meal tracking and the Meal planner) and are retained as values the user sets directly, independent of any diet. Originally the requirement framed the calorie range as "recommended" by the selected diet; without a diet to recommend it, the user sets the calorie target and macro split directly instead.
+
+- ~~The user selects a single active diet, sees a recommended calorie range, and~~ The user sets a calorie target and adjusts the protein, fat, and carbohydrate split.
 - The calorie corridor is defined as `target − 150` to `target + 150` kcal around the user's stated calorie target.
 - Macro percentages must sum to 100%.
-- The currently active diet label is surfaced in the Meal planner header so the user can see their diet context while planning.
+- 🚫 ~~The currently active diet label is surfaced in the Meal planner header so the user can see their diet context while planning.~~ **Deferred (OQ-011)** — see `06_meal_planner.md` "Profile integration".
 
 ### Meal tracking tab
 
@@ -69,7 +71,7 @@ The Meal tracking tab offers three layout views toggled by a **Today / Week / Mo
 ## UI / Prototype spec
 
 - The Personal Cabinet displays two tabs at the top: **Profile** and **Meal tracking**. Clicking a tab switches the content area.
-- The Profile tab contains: personal details section (email/password, language, unit system, demographics) and diet preferences section (diet selector, calorie target, macro split, corridor display).
+- The Profile tab contains: personal details section (email/password, language, unit system, demographics) and a nutrition targets section (calorie target, macro split, corridor display). 🚫 The diet selector is deferred to post-MVP1 (OQ-011) and is not part of this section for MVP1.
 - The macro split input shows a warning when percentages do not sum to 100%.
 - The Meal tracking tab shows a **Today / Week / Month** toggle at the top. The default view is **Today**.
 - The daily and weekly nutrition summaries are displayed as a **pie chart** showing the proportion of calories consumed from protein, fat, and carbs relative to the target. The corridor goal status and % of target figures accompany the chart.

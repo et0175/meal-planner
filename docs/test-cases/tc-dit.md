@@ -1,4 +1,4 @@
-# Test Cases — TC-DIT: Dietary Analyser
+# Test Cases — TC-DIT: Dietary Analyser 🚫 Deferred to post-MVP1
 
 **App:** `http://localhost:3001`  
 **Status key:** ✅ Pass | ❌ Fail | 🚫 Not implemented | ❓ Not tested  
@@ -9,6 +9,8 @@
 **Requirement:** [`03_dietary_analyser.md`](../requirements/03_dietary_analyser.md)  
 **User stories:** [`dietary-analyser.md`](../user-stories/dietary-analyser.md)  
 **Test data:** All 12 diets from test-data.json
+
+> 🚫 **Deferred to post-MVP1 (OQ-011, 2026-08-19):** The entire Dietary Analyser module is out of scope for MVP1. All six cases below are marked 🚫 per the deferral procedure in `../requirements/README.md`, even though they currently pass against the prototype — the prototype is an intentionally ahead-of-spec preview (see `TODO_later.md`) and will be trimmed to MVP1 scope in a later pass. These cases are retained for historical/planning reference.
 
 ---
 
@@ -24,7 +26,7 @@
 - Exactly 12 cards: Mediterranean, Plant-based / Flexitarian, MIND, DASH, Paleo, WeightWatchers (WW), Intermittent fasting, Ketogenic (Keto), Volumetrics, Protein-focused, Healthy fats, Hydration guidance
 - No "Add diet" button (static list in MVP)
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
@@ -47,7 +49,7 @@
 - Name and description visible
 - Macro section shows "Points-based — no fixed percentage split" or equivalent note (not applicable)
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
@@ -64,7 +66,7 @@
 - Quinoa card now shows the MIND diet tag
 - Selecting MIND diet filter in Products returns Quinoa
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
@@ -81,7 +83,7 @@
 - Greek salad card shows MIND tag
 - MIND filter in Recipes returns Greek salad
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
@@ -99,7 +101,7 @@
 - Slices are proportional by caloric contribution (matching pie chart style on product/recipe cards)
 - WW card **does not show a pie chart**; instead shows a text note such as "Points-based — no fixed percentage split"
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
@@ -122,4 +124,4 @@
 - A back control or breadcrumb returns to the diet catalogue
 - Berry overnight oats and Chicken quinoa bowl (tagged `mediterranean`) appear in the Recipes section; system products tagged `mediterranean` appear in the Products section
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)

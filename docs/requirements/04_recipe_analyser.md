@@ -19,7 +19,7 @@
   Appetizers · Salads · Sandwiches · Breakfasts · Soups · Main courses · Snacks · Sauces · Desserts · Baked dishes · Drinks · Low-calorie · Low-budget · Kid-friendly dishes
 
 - Show only favorites or only the current user's recipes.
-- Filter recipes by diet type.
+- 🚫 ~~Filter recipes by diet type.~~ **Deferred to post-MVP1 (OQ-011):** depends on the Dietary Analyser module (`03_dietary_analyser.md`), which is itself deferred. See `TODO_later.md`.
 - Search for a specific recipe.
 
 ### Recipe card

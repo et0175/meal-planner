@@ -14,6 +14,7 @@ Requirements: Navigation structure is implied by all module requirements — no 
 
 - [ ] Sidebar is visible on all authenticated screens.
 - [ ] Sidebar contains exactly 8 items in order: Planner, All products, Products analyser, Recipes, Diets, Shopping list, Personal cabinet, Advanced search.
+  > 🚫 **Note (OQ-011, 2026-08-19):** the Dietary Analyser module is deferred to post-MVP1 (`03_dietary_analyser.md`). The "Diets" sidebar item is not part of MVP1 target scope going forward, but is left in this AC unchanged for now because the prototype (an intentionally ahead-of-spec preview, per `prototype/README.md`) still implements it and this update is docs-only. When the prototype is trimmed to MVP1 scope in a later pass, this AC should drop to 7 items and remove "Diets."
 - [ ] Shopping list appears as a top-level item (not nested inside Planner).
 - [ ] Products analyser appears as a top-level item (not nested inside All products).
 - [ ] Advanced search appears as a top-level item.

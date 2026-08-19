@@ -8,7 +8,9 @@
 
 **Requirement:** [`05_personal_cabinet.md`](../requirements/05_personal_cabinet.md)  
 **User stories:** [`personal-cabinet.md`](../user-stories/personal-cabinet.md)  
-**Test data:** Users u-001 (Mediterranean, 2000 kcal), u-002 (Keto, 1800 kcal), u-003 (empty profile)
+**Test data:** Users u-001 (2000 kcal, 30/35/35 macros — labelled "Mediterranean" in seed data), u-002 (1800 kcal, 25/70/5 macros — labelled "Ketogenic" in seed data), u-003 (empty profile)
+
+> 🚫 **Note (OQ-011, 2026-08-19):** The seed users above carry a diet label in the prototype's ahead-of-spec seed data, but diet selection itself is deferred to post-MVP1 (see TC-PRF-006/007 below and `personal-cabinet.md` US-PC-005). Only the calorie target and macro split are MVP1-scope.
 
 ---
 
@@ -23,7 +25,7 @@
 - Two tabs visible at the top: **Profile** and **Meal tracking**
 - **Profile** tab is selected by default and shows:
   - Personal section: email/password, language, unit system, gender, age, weight
-  - Diet preferences section: diet selector, calorie target, macro % inputs, calorie corridor
+  - Nutrition targets section: calorie target, macro % inputs, calorie corridor (🚫 diet selector deferred to post-MVP1, OQ-011 — not part of this AC for MVP1)
 - **Meal tracking** tab is accessible and shows the meal tracking log area
 
 **Status:** ✅
@@ -109,9 +111,11 @@
 
 ---
 
-### TC-PRF-006: Active diet shown in Planner header
+### TC-PRF-006: Active diet shown in Planner header 🚫 Deferred to post-MVP1
 **AC:** US-PC-005 / US-MP-015 — active diet label in planner header  
 **Priority:** High
+
+> 🚫 **Deferred (OQ-011, 2026-08-19):** Depends on active-diet selection, which is deferred along with the Dietary Analyser module (see `tc-dit.md`, `personal-cabinet.md` US-PC-005, `meal-planner.md` US-MP-015). Retained for historical reference.
 
 **Steps:**
 1. In **Personal cabinet > Profile**, set active diet to **Ketogenic**.
@@ -121,13 +125,15 @@
 - Planner header shows "Ketogenic" (or "Keto") diet label
 - Label is informational only — no foods are filtered or blocked
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
-### TC-PRF-007: No active diet — label hidden in Planner
+### TC-PRF-007: No active diet — label hidden in Planner 🚫 Deferred to post-MVP1
 **AC:** US-MP-015 — label not shown when no diet selected  
 **Priority:** Medium
+
+> 🚫 **Deferred (OQ-011, 2026-08-19):** Depends on active-diet selection, which is deferred along with the Dietary Analyser module. Retained for historical reference.
 
 **Steps:**
 1. In **Personal cabinet > Profile**, clear / deselect the active diet.
@@ -136,7 +142,7 @@
 **Expected result:**
 - No diet label shown in Planner header
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 

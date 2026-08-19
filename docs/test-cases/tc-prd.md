@@ -114,10 +114,12 @@
 
 ---
 
-### TC-PRD-006: Search filters by diet tag
+### TC-PRD-006: Search filters by diet tag 🚫 Deferred to post-MVP1
 **AC:** US-PA-003 — search covers relevant attributes  
 **Priority:** Medium
 **Dataset:** Prototype seed only — imported USDA products have empty diet tags, so this case yields no matches against the production catalog.
+
+> 🚫 **Deferred (OQ-011, 2026-08-19):** Diet tags depend on the Dietary Analyser module, which is deferred to post-MVP1 (see `tc-dit.md`, `03_dietary_analyser.md`). The AC's diet-tag search clause is struck (see `products-database.md` US-PA-003). Retained for historical reference; the plain name-search portion of US-PA-003 is covered by TC-PRD-005.
 
 **Steps:**
 1. Type `keto` in the search box.
@@ -126,7 +128,7 @@
 - Products tagged with "keto" shown: Greek yogurt, Cheddar cheese, Butter, Atlantic salmon, Tuna in water, Sardines, Baby spinach, Broccoli, Avocado, Chicken breast, **Ground turkey**, **Beef sirloin**, Almonds, Olive oil, Whole eggs (15 items — verify against test-data.json `dietTags` arrays)
 - Products with no keto tag (e.g. Banana, Brown rice, Red lentils) are hidden
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
@@ -182,10 +184,12 @@
 
 ---
 
-### TC-PRD-010: Diet filter restricts list
+### TC-PRD-010: Diet filter restricts list 🚫 Deferred to post-MVP1
 **AC:** US-PA-002 extension — diet tag filter  
 **Priority:** Medium
 **Dataset:** Prototype seed only — imported USDA products have empty diet tags (diet filter returns nothing against the production catalog until diet-tag enrichment lands).
+
+> 🚫 **Deferred (OQ-011, 2026-08-19):** The diet tag filter depends on the Dietary Analyser module, which is deferred to post-MVP1 (see `tc-dit.md`, `03_dietary_analyser.md`). See `products-database.md` US-PA-002. Retained for historical reference.
 
 **Steps:**
 1. Select **Keto** from the diet filter dropdown.
@@ -194,7 +198,7 @@
 - Only products tagged `keto` shown (see TC-PRD-006 for expected set)
 - Products not tagged keto (e.g. Rolled oats, Brown rice, Banana) hidden
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 

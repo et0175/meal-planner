@@ -68,7 +68,7 @@ Always use the names from `actors.yml`. Currently: **User**, **Nutritionist**, *
 
 ### Open question IDs
 
-`OQ-NNN` — sequential, never reused. The current highest ID is `OQ-010`. OQ-009 and OQ-010 are open (Advanced Search module). The next available ID is `OQ-011`.
+`OQ-NNN` — sequential, never reused. The current highest ID is `OQ-011`. OQ-009 and OQ-010 are open (Advanced Search module). OQ-011 is resolved (Dietary Analyser deferred to post-MVP1). The next available ID is `OQ-012`.
 
 ---
 

@@ -22,15 +22,15 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 ## US-MP-002 Switch between planner views
 
 **As a** user  
-**I want** to switch between Week summary and Calendar tabs  
+**I want** to switch between the planner's four views  
 **So that** I can edit, browse, or review my plan in the format that suits the task.
 
 **Acceptance criteria**
 
-- [ ] Two tabs are visible: **Week summary** and **Calendar**.
-- [ ] Selecting a tab shows its content and hides the other.
-- [ ] Both tabs reflect the same selected week and the same underlying assignments.
-- [ ] An assignment created or modified in the Calendar tab is immediately visible in the Week summary tab and vice versa — no page refresh required.
+- [ ] Four tabs are visible as a single row of pills: **Week summary**, **Grid view**, **2 Days**, and **Month**. There is no separate "Calendar" wrapper tab.
+- [ ] Selecting a tab shows its content and hides the others.
+- [ ] All four tabs reflect the same selected week and the same underlying assignments.
+- [ ] An assignment created or modified in Week summary, Grid view, or 2 Days is immediately visible in the other two — no page refresh required. Month reflects the same data but does not support editing.
 
 ---
 
@@ -91,38 +91,38 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 ---
 
-## US-MP-007 View and manage meals per day in Calendar sub-views
+## US-MP-007 View and manage meals per day in Grid view
 
 **As a** user  
-**I want** each day to show its planned meals divided by Breakfast, Lunch, Dinner, and Snacks in the Calendar  
+**I want** each day to show its planned meals divided by Breakfast, Lunch, Dinner, and Snacks  
 **So that** I can see and adjust what I am eating each day.
 
 **Acceptance criteria**
 
-- [ ] Calendar > Week sub-view shows seven day columns, each divided into four meal slots: Breakfast, Lunch, Dinner, Snacks.
-- [ ] Each meal slot lists the items assigned on that day, with kcal and servings.
-- [ ] Each day column shows an aggregated nutrition strip (kcal, protein, fat, carbs) when there is at least one item.
+- [ ] Grid view shows a day × meal-slot matrix: seven day columns (Mon–Sun), each meal slot (Breakfast, Lunch, Dinner, Snacks) as a row.
+- [ ] Each meal slot row lists the items assigned on that day, with kcal and servings.
+- [ ] Each day column header shows a compact colour-coded calorie ring (green within the target corridor, amber below, red above) and the day's total kcal, when there is at least one item planned that day.
 
 ---
 
-## US-MP-008 Add and remove meals from calendar day slot sections
+## US-MP-008 Add and remove meals from Grid view slot cells
 
 **As a** user  
-**I want** to add items directly to a specific meal slot in a calendar day column and remove items I no longer want  
+**I want** to add items directly to a specific day/meal-slot cell in Grid view and remove items I no longer want  
 **So that** I can fine-tune each day without going back to the summary grid.
 
 **Acceptance criteria**
 
-- [ ] Each meal slot in Calendar day columns has an "+ Add" button that opens an inline search input.
+- [ ] Each day/meal-slot cell in Grid view has an "+ Add" button that opens an inline search input.
 - [ ] Selecting an item creates an assignment for that day+meal and adds the item to the weekly summary if absent.
 - [ ] Each item has a remove button; clicking it deletes the assignment.
 
 ---
 
-## US-MP-009 Adjust servings in calendar day views
+## US-MP-009 Adjust servings in Grid view and 2 Days
 
 **As a** user  
-**I want** to increase or decrease the number of servings for an item in a calendar day view  
+**I want** to increase or decrease the number of servings for an item in Grid view or 2 Days  
 **So that** portion sizes match what I will actually eat.
 
 **Acceptance criteria**
@@ -134,10 +134,10 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 ---
 
-## US-MP-010 Drag items between meal slots and days in Calendar
+## US-MP-010 Drag items between meal slots and days in Grid view
 
 **As a** user  
-**I want** to drag a planned item from one meal slot or day to another in the Calendar  
+**I want** to drag a planned item from one meal slot or day to another in Grid view  
 **So that** I can rebalance my week quickly.
 
 **Acceptance criteria**
@@ -149,66 +149,70 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 ---
 
-## US-MP-011 View the week at a glance in Calendar view
+## US-MP-011 View the week at a glance in Grid view
 
 **As a** user  
-**I want** a compact calendar grid showing all planned items across the week  
+**I want** a compact grid showing all planned items across the week  
 **So that** I can quickly sense-check the week.
 
 **Acceptance criteria**
 
-- [ ] Calendar > Week sub-view shows seven columns (Mon–Sun).
+- [ ] Grid view shows seven day columns (Mon–Sun).
 - [ ] Each column shows items grouped by meal slot with serving count and kcal.
-- [ ] Today's date is visually highlighted.
+- [ ] Today's column is visually highlighted.
 - [ ] Content reflects the same assignments as the Week summary tab.
 
 ---
 
-## US-MP-012 Switch between week and month calendar sub-views
+## US-MP-012 Browse the full month in the Month tab
 
 **As a** user  
-**I want** to toggle the Calendar between a single-week view and a full-month view  
+**I want** a full-month grid available as its own tab  
 **So that** I can zoom out to see how my meals are distributed across the month.
 
 **Acceptance criteria**
 
-- [ ] A Day / 4 Days / Week / Month toggle appears within the Calendar tab.
-- [ ] Week sub-view shows the 7 days of the currently selected week.
-- [ ] Month sub-view shows a 6-week grid (42 cells, Mon–Sun columns) for the month containing the selected week.
-- [ ] Days outside the current month are visually de-emphasised in the month view.
-- [ ] Prev / Next month navigation buttons appear in month sub-view.
+- [ ] **Month** is one of the four top-level planner tabs (Week summary, Grid view, 2 Days, Month), not a toggle nested inside another tab.
+- [ ] Month shows a 6-week grid (42 cells, Mon–Sun columns) for the month containing the currently selected week.
+- [ ] Days outside the current calendar month are visually de-emphasised.
+- [ ] A **Prev / Next month** navigation pair appears in the Month tab's header, separate from the week navigation above the tab row.
+- [ ] Switching to another tab and back to Month preserves the previously selected month offset within the session.
+
+> See also US-MP-024 for Month's read-only behaviour (no add/remove/drag/logging).
 
 ---
 
-## US-MP-013 Add and remove meals in Calendar view
+## US-MP-013 Add and remove meals in 2 Days
 
 **As a** user  
-**I want** to add items to a day and remove them directly in the Calendar  
+**I want** to add items to a day and remove them directly in the 2 Days view  
 **So that** I can edit my plan without switching to the Week summary.
 
 **Acceptance criteria**
 
-- [ ] Each day cell / column has a "+ Add" button that opens an inline search + meal-slot picker.
+- [ ] Each of the two visible day columns has a "+ Add" button per meal slot that opens an inline search + meal-slot picker.
 - [ ] Confirming the add creates an assignment for that day and slot and registers the item in the Week summary.
 - [ ] Each item has an × button; clicking it removes that assignment.
 
 ---
 
-## US-MP-014 Drag items between days in Calendar view
+## US-MP-014 Drag items between the two visible days in 2 Days
 
 **As a** user  
-**I want** to drag planned items from one day to another in the Calendar  
+**I want** to drag planned items from one visible day column to the other in 2 Days  
 **So that** I can move meals to different days without re-entering them.
 
 **Acceptance criteria**
 
-- [ ] Items in calendar cells are draggable.
-- [ ] Dropping on a different day cell moves the assignment to that day while keeping the original meal slot.
-- [ ] The source and target cells update immediately.
+- [ ] Items in the 2 Days day columns are draggable.
+- [ ] Dropping on the other visible day column moves the assignment to that day while keeping the original meal slot.
+- [ ] The source and target columns update immediately.
 
 ---
 
-## US-MP-015 See active diet label in the planner header
+## 🚫 US-MP-015 See active diet label in the planner header — Deferred to post-MVP1
+
+> **Decision (OQ-011):** Depends on active-diet selection in Personal cabinet (`personal-cabinet.md` US-PC-005), which is deferred along with the Dietary Analyser module. Kept for historical/planning reference.
 
 **As a** user who has set a diet preference in their profile  
 **I want** to see my active diet displayed in the planner header  
@@ -216,9 +220,9 @@ Requirements: [06_meal_planner.md](../requirements/06_meal_planner.md)
 
 **Acceptance criteria**
 
-- [ ] When a diet is selected in Personal cabinet, its name appears as a label in the Meal planner header.
-- [ ] The label is informational only — the planner does not filter or enforce diet rules automatically.
-- [ ] If no diet is selected in the profile, no label is shown.
+- [ ] ~~When a diet is selected in Personal cabinet, its name appears as a label in the Meal planner header.~~ 🚫 Deferred (OQ-011).
+- [ ] ~~The label is informational only — the planner does not filter or enforce diet rules automatically.~~ 🚫 Deferred (OQ-011).
+- [ ] ~~If no diet is selected in the profile, no label is shown.~~ 🚫 Deferred (OQ-011).
 
 ---
 
@@ -241,36 +245,38 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Log from pl
 
 ---
 
-## US-MP-017 Day and 4-day sub-views in Calendar
+## US-MP-017 Navigate focused day pairs in 2 Days
 
-**As a** user who wants a focused view of one or a few days  
-**I want** to switch the Calendar to a single-day or 4-day layout  
+**As a** user who wants a focused view of a couple of days  
+**I want** to scroll through the week two days at a time  
 **So that** I can see and edit meals in more detail than the full-week grid allows.
 
-Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Tab 2 Calendar
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Tab 3, 2 Days
+
+> **Note:** The earlier "Day" and "4 Days" sub-views described in prior revisions of this story were never built and have been removed from the spec. 2 Days is the one surviving focused view, and its behaviour is unchanged from before it became a top-level tab.
 
 **Acceptance criteria**
 
-- [ ] A **Day / 4 Days / Week / Month** button group appears within the Calendar tab.
-- [ ] Day sub-view shows one day column divided into four meal slots: Breakfast, Lunch, Dinner, Snacks. Each slot shows items with serving count, kcal, and +/− controls.
-- [ ] 4 Days sub-view shows 4 consecutive day columns, each with the same per-slot layout as the Day sub-view.
-- [ ] Both Day and 4 Days sub-views support add, remove, and serving-count adjustment.
-- [ ] Drag-and-drop between the visible day columns is supported in 4 Days sub-view.
-- [ ] Selecting a day in Week or Month sub-view and switching to Day sub-view shows that selected day.
+- [ ] A date scroller lets the user pick which pair of consecutive days is shown.
+- [ ] The 2 visible day columns are each divided into four meal slots: Breakfast, Lunch, Dinner, Snacks.
+- [ ] Each column shows a per-day calorie ring and macro breakdown at the top, plus an item list with serving count, kcal, and +/− controls per item.
+- [ ] Add, remove, and serving-count adjustment are supported in both visible day columns.
+- [ ] Drag-and-drop between the two visible day columns is supported.
 
 ---
 
-## US-MP-018 Calendar plan summary and drag from summary
+## US-MP-018 Grid view / 2 Days plan summary and drag from summary
 
-**As a** user planning in the Calendar tab  
-**I want** to see a summary of all planned items above the calendar grid, organised by meal slot, and drag items from that summary to a day  
+**As a** user planning in Grid view or 2 Days  
+**I want** to see a summary of all planned items above the day grid, organised by meal slot, and drag items from that summary to a day  
 **So that** I can quickly assign planned items to specific days without switching tabs.
 
-Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Plan summary
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Plan summary (Grid view and 2 Days only)
 
 **Acceptance criteria**
 
-- [ ] A plan summary panel is shown at the top of the Calendar tab, **organised as a gallery grouped by meal slots** (Breakfast, Lunch, Dinner, Snacks columns). Each slot group contains item cards showing item name, total servings, and kcal.
+- [ ] A collapsible plan summary panel is shown at the top of **Grid view and 2 Days only** (above the day grid), **organised as a gallery grouped by meal slots** (Breakfast, Lunch, Dinner, Snacks columns). Each slot group contains item cards showing item name, total servings, and kcal.
+- [ ] The plan summary panel is **not shown in Month**, which is read-only.
 - [ ] The user can drag an item from the summary panel onto a day cell to create an assignment for that day in a chosen meal slot.
 - [ ] After dragging from the summary, the item remains in the summary (it is still part of the plan; only a new day assignment is created).
 - [ ] Dragging an item from one day cell to another moves the assignment: the item disappears from the source day and appears on the target day in the same meal slot.
@@ -281,19 +287,19 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Plan summar
 ## US-MP-019 Nutrition progress and target-reaching summary in planner
 
 **As a** user tracking my nutritional goals  
-**I want** to see the percentage of my target corridor consumed for each planned day, and weekly and monthly summaries, with a per-macro target-reaching display in Calendar  
+**I want** to see the percentage of my target corridor consumed for each planned day, and a weekly summary, with a per-macro target-reaching display in Grid view and 2 Days  
 **So that** I can plan ahead to stay on target across all macros.
 
 Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Nutrition progress
 
 **Acceptance criteria**
 
-- [ ] In Calendar sub-views, each day column shows the day's planned kcal as a percentage of the user's calorie target corridor.
-- [ ] In Calendar sub-views, each day column additionally shows a **target-reaching summary** (same format as the Personal cabinet Meal tracking display): kcal, protein, fat, and carbs planned vs. target corridor, each with a colour-coded indicator (green = within corridor, amber = approaching limit, red = above).
+- [ ] In Grid view and 2 Days, each day column shows the day's planned kcal as a percentage of the user's calorie target corridor.
+- [ ] In Grid view and 2 Days, each day column additionally shows a **target-reaching summary** (same format as the Personal cabinet Meal tracking display): kcal, protein, fat, and carbs planned vs. target corridor, each with a colour-coded indicator (green = within corridor, amber = approaching limit, red = above).
 - [ ] In Week summary, a summary strip shows average % of target for calories, protein, fat, and carbs across the planned week.
-- [ ] A monthly summary view shows the same averages aggregated across the selected month. The monthly summary is accessible by switching the Calendar to the Month sub-view; it aggregates % of target across all days that have at least one assignment.
+- [ ] **Month does not show a nutrition or target-reaching summary.** It is a read-only overview of which items are planned each day; the user switches to Grid view or 2 Days to see daily nutrition targets.
 - [ ] Percentage bars or labels use a visual indicator (e.g. green for within corridor, amber for approaching, red for above).
-- [ ] If no diet/calorie target is set in the profile, the percentage strip and target-reaching summary are not shown.
+- [ ] If no calorie target is set in the profile, the percentage strip and target-reaching summary are not shown. (Note: this refers to the calorie target/macro split from `personal-cabinet.md` US-PC-005, not diet selection, which is deferred — OQ-011.)
 
 ---
 
@@ -307,7 +313,7 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Search sort
 
 **Acceptance criteria**
 
-- [ ] In all item search inputs within the planner (Week summary, Calendar), suggestions are sorted: recently planned or recently logged items first, then items owned by the current user (isUserAdded), then all others alphabetically.
+- [ ] In all item search inputs within the planner (Week summary, Grid view, 2 Days), suggestions are sorted: recently planned or recently logged items first, then items owned by the current user (isUserAdded), then all others alphabetically.
 - [ ] "Recently used" is defined as items that appear in the current or previous week's assignments, or in recent tracking log entries.
 - [ ] Items not recently used are shown after the recently-used group, user-owned next, then alphabetically.
 - [ ] The sort order is applied in real time as the user types.
@@ -316,15 +322,15 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Search sort
 
 ## US-MP-021 Log an individual planned item to Meal tracking
 
-**As a** user reviewing my meals in the Calendar  
-**I want** to log a single item directly from the calendar without logging the entire day  
+**As a** user reviewing my meals in the planner  
+**I want** to log a single item directly from Grid view or 2 Days without logging the entire day  
 **So that** I can mark only what I actually ate, one item at a time.
 
 Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Log from plan
 
 **Acceptance criteria**
 
-- [ ] Each item in **Calendar** sub-views (Day, 4 Days, Week) shows a **"+ Log"** per-item action.
+- [ ] Each item in **Grid view and 2 Days** shows a **"+ Log"** per-item action. Month is read-only and has no per-item log action.
 - [ ] Triggering the per-item log action creates a single Meal tracking entry for that item, its current serving count, and its meal slot on that day.
 - [ ] If a tracking entry already exists for the same day and item, the action adds to it (does not duplicate).
 - [ ] The bulk "Log this day" and "Log this week" actions remain available and are unaffected.
@@ -351,9 +357,9 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — PDF export
 
 ## US-MP-023 Add item directly to plan summary panel
 
-**As a** user planning in the Calendar tab  
+**As a** user planning in Grid view or 2 Days  
 **I want** to add an item to a specific meal slot in the plan summary panel without switching views  
-**So that** I can build my plan quickly from within the Calendar tab itself.
+**So that** I can build my plan quickly from within the current tab itself.
 
 Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Plan summary — Add to summary
 
@@ -365,3 +371,39 @@ Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Plan summar
 - [ ] Selecting an item from the search results adds it as an assignment on the first visible day in that slot.
 - [ ] The plan summary updates immediately to show the newly added item.
 - [ ] The search input closes after an item is selected; clicking + again re-opens it.
+
+---
+
+## US-MP-024 Month view is read-only
+
+**As a** user browsing my plan across a full month  
+**I want** the Month tab to be a pure overview  
+**So that** I can scan what's planned without risking accidental edits while zoomed out.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Tab 4, Month
+
+**Acceptance criteria**
+
+- [ ] Each day cell in Month shows up to 2 item names for that day, plus a "+N more" overflow label when more than 2 items are planned. No kcal figures are shown per item.
+- [ ] Month has no add, remove, or drag-and-drop capability on any cell.
+- [ ] The plan summary panel is not shown in Month.
+- [ ] Month does not show a nutrition or target-reaching summary for any day.
+- [ ] No per-item "+ Log" action is shown in Month.
+- [ ] To edit a day, the user must switch to Grid view or 2 Days; Month provides no in-place editing path.
+
+---
+
+## US-MP-025 Reorder planner tabs by dragging
+
+**As a** user with a preferred order for the planner views  
+**I want** to drag a tab pill onto another to swap their positions  
+**So that** I can put the view I use most first, for the current session.
+
+Source: [06_meal_planner.md](../requirements/06_meal_planner.md) — Four views (tabs) — Reorder tabs
+
+**Acceptance criteria**
+
+- [ ] The default tab order is Week summary, Grid view, 2 Days, Month.
+- [ ] Dragging one tab pill onto another swaps the two tabs' positions in the row; other tabs keep their relative order.
+- [ ] The currently active tab remains active (its content stays shown) after a reorder, even if its position in the row changed.
+- [ ] The reordered tab sequence persists only for the current session — reloading the page resets the tab order to the default.

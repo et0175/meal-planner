@@ -78,9 +78,11 @@
 
 ---
 
-### TC-RCP-005: Diet filter — "Plant-based"
+### TC-RCP-005: Diet filter — "Plant-based" 🚫 Deferred to post-MVP1
 **AC:** US-RA-005 — diet filter shows only compatible recipes  
 **Priority:** Medium
+
+> 🚫 **Deferred (OQ-011, 2026-08-19):** Depends on the Dietary Analyser module, which is deferred to post-MVP1 (see `tc-dit.md`, `recipe-analyser.md` US-RA-005). Retained for historical reference.
 
 **Steps:**
 1. Select **Plant-based** from the diet filter.
@@ -89,7 +91,7 @@
 - Recipes tagged `plant-based` shown: Berry overnight oats, Lentil tomato soup, Chickpea curry, Chia pudding (verify against test-data.json)
 - Recipes without the tag (e.g. Spinach omelette, Greek salad) hidden
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 

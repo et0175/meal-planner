@@ -1,6 +1,11 @@
 # Business Requirements: Dietary Analyser
 
-> **Decision (OQ-002):** The diet list is static in MVP1. The 12 patterns below are hardcoded; adding or changing a diet requires a code change and release.
+> ## 🚫 Deferred to post-MVP1
+> **Decision (OQ-011, 2026-08-19):** The entire Dietary Analyser module — browsing the 12 diet patterns, macro guidance, diet cards, and product/recipe diet tagging — is out of scope for MVP1. This supersedes the earlier, narrower deferral of diet *editing* only (see `TODO_later.md`). The requirement text below is kept for historical/planning reference only; nothing in this file should be built for MVP1.
+>
+> Everywhere else in the docs that referenced an "active diet," a diet filter, or diet tagging has been marked deferred with a pointer back to this decision. See `open-questions.md` OQ-011 (and the now-moot OQ-002, which asked who manages the diet list — moot because the list itself is no longer in scope).
+
+> **Decision (OQ-002 — historical, superseded by OQ-011):** The diet list is static in MVP1. The 12 patterns below are hardcoded; adding or changing a diet requires a code change and release.
 
 ---
 

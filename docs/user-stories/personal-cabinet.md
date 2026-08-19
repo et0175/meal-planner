@@ -61,15 +61,17 @@ Requirements: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md)
 
 ---
 
-## US-PC-005 Configure diet preferences and calorie corridor
+## US-PC-005 Configure calorie target, macro split, and corridor
 
 **As a** user  
-**I want** to select diet preferences, see a recommended calorie range, and set protein, fat, and carbohydrate proportions  
+**I want** to set a calorie target and protein, fat, and carbohydrate proportions  
 **So that** planning and tracking align with my goals.
+
+> 🚫 **Diet selection deferred (OQ-011):** the original story title/goal was "Configure diet preferences and calorie corridor," with an AC for selecting a diet from the Dietary Analyser. The Dietary Analyser module is deferred to post-MVP1 (`dietary-analyser.md`), so the diet-selection AC below is struck. Calorie target, macro split, and corridor remain in MVP1 scope as values the user sets directly.
 
 **Acceptance criteria**
 
-- [ ] User can select one diet at a time from the diets offered by the dietary analyser (single-select).
+- [ ] ~~User can select one diet at a time from the diets offered by the dietary analyser (single-select).~~ 🚫 Deferred to post-MVP1 (OQ-011).
 - [ ] System displays a calorie corridor as `target − 150` to `target + 150` kcal (e.g. a 2000 kcal target yields 1850–2150 kcal).
 - [ ] User can set macro proportions (protein %, fat %, carbs %); the UI shows a visible warning when the three values do not sum to exactly 100%.
 
@@ -156,7 +158,7 @@ Source: [05_personal_cabinet.md](../requirements/05_personal_cabinet.md) — Tab
 **Acceptance criteria**
 
 - [ ] The Personal cabinet view shows two top-level tabs: **Profile** and **Meal tracking**.
-- [ ] The Profile tab contains: personal details (email/password, language, unit system, demographics) and diet preferences (diet selector, calorie target, macro split, corridor).
+- [ ] The Profile tab contains: personal details (email/password, language, unit system, demographics) and nutrition targets (calorie target, macro split, corridor). 🚫 Diet selector deferred to post-MVP1 (OQ-011).
 - [ ] The Meal tracking tab contains: log entries, Today/Week/Month layout toggle, corridor summary, and nutrition progress.
 - [ ] Switching tabs does not reset the state within either tab (e.g. week navigation in Meal tracking is preserved when toggling to Profile and back).
 - [ ] The sidebar navigation item is labelled **"Personal cabinet"**.

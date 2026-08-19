@@ -8,7 +8,7 @@ A dedicated module that allows users to search and filter across **both products
 
 ### Entry point
 
-- Advanced Search is a standalone navigation item (shown in the sidebar alongside Products, Recipes, Dietary Analyser, etc.).
+- Advanced Search is a standalone navigation item (shown in the sidebar alongside Products, Recipes, etc.). 🚫 Note: the Dietary Analyser is deferred to post-MVP1 (OQ-011) and is not an MVP1 sidebar item — see `03_dietary_analyser.md`.
 - It opens an empty state with the filter panel visible and no results shown until the user applies at least one filter or types a search query.
 
 ### Search input
@@ -21,10 +21,12 @@ A dedicated module that allows users to search and filter across **both products
 
 All filters are optional and combine with AND logic: each active filter narrows the result set further.
 
-#### Diet
+#### Diet 🚫 Deferred to post-MVP1
 
-- A single-select dropdown for the 12 diet patterns defined in `03_dietary_analyser.md`.
-- Selecting a diet shows only products and recipes tagged as compatible with that diet.
+> **Deferred (OQ-011):** the Diet filter depends on the Dietary Analyser module (`03_dietary_analyser.md`) and diet tagging of products/recipes, both of which are deferred to post-MVP1. The filter is not part of MVP1 Advanced Search. See `TODO_later.md`.
+
+- ~~A single-select dropdown for the 12 diet patterns defined in `03_dietary_analyser.md`.~~
+- ~~Selecting a diet shows only products and recipes tagged as compatible with that diet.~~
 
 #### Calorie range
 

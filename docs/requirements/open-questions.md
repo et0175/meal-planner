@@ -2,7 +2,7 @@
 
 OQ-001 – OQ-008 resolved as of 2026-06-17. Decisions are recorded here and written into the affected requirement and user story files.
 
-OQ-009 and OQ-010 are open (Advanced Search module, added 2026-06-17).
+OQ-009 and OQ-010 are open (Advanced Search module, added 2026-06-17). OQ-011 resolved 2026-08-19 (Dietary Analyser deferred to post-MVP1).
 
 ---
 
@@ -25,6 +25,8 @@ The requirement says users can add products. The analyser requirement says a new
 The dietary analyser lists 12 named diet patterns. The requirement does not say whether this list is static (hardcoded), admin-managed, or extensible by users or nutritionists. If it is static, adding a new diet requires a code deployment. If it is dynamic, a UI and permission model are needed.
 
 **Decision:** ✅ Static list in MVP1. The 12 diets are hardcoded. Adding or changing a diet requires a code change and release. Admin or Nutritionist management of the diet list is deferred to a post-MVP1 version.
+
+> **Note (2026-08-19):** Superseded by **OQ-011** — the entire Dietary Analyser module is now deferred to post-MVP1, so this question (who manages the diet list) is moot for MVP1. Left here unchanged as historical record.
 
 ---
 
@@ -123,3 +125,16 @@ The Advanced Search ingredient filter (recipe tab) currently specifies one ingre
 The Advanced Search calorie and macro range filters are currently defined as per-serving values (consistent with how products and recipes display nutrition throughout the app). However, per-100g is the standard basis for comparing energy density across different foods. A user wanting to find high-protein-density foods (e.g. > 20 g protein per 100 g) cannot do so with per-serving filters alone, since serving sizes vary widely.
 
 **Decision:** 🔴 Open — not yet decided.
+
+---
+
+## OQ-011 — Should the Dietary Analyser module be deferred to post-MVP1?
+
+**Affects:** `03_dietary_analyser.md` (entire module), `01_products-database.md`, `04_recipe_analyser.md`, `05_personal_cabinet.md`, `06_meal_planner.md`, `10_advanced_search.md`, `actors.yml`; all `US-DA-NNN` stories; diet-touching stories in `personal-cabinet.md`, `recipe-analyser.md`, `meal-planner.md`, `products-database.md`, `advanced-search.md`; all `TC-DIT-NNN` cases and diet-touching cases in `tc-prd.md`, `tc-rcp.md`, `tc-prf.md`, `tc-as.md`.
+
+**Context:**
+The product owner decided (2026-08-19) that diets are out of scope for MVP1 — not just diet *editing* (already deferred per `TODO_later.md` item 6 / OQ-002) but the entire module: browsing the 12 diet patterns, macro guidance, diet cards, and product/recipe diet tagging. Diets are cross-referenced from several other modules (active-diet selection in Personal cabinet, the planner header's active-diet badge, diet filters on Products/Recipes/Advanced Search, and diet-compatibility annotation as a planned Nutritionist responsibility), so the deferral has a wide blast radius.
+
+**Decision:** ✅ Deferred to post-MVP1. The entire Dietary Analyser module, and every feature elsewhere that depends on it, is out of scope for MVP1. Requirement text is retained in `03_dietary_analyser.md` for historical/planning reference, clearly marked out of scope. Dependent requirements, user stories, and test cases in other modules are marked deferred with a pointer back to this decision rather than deleted, so the historical shape of the feature is traceable when it is revisited post-MVP1.
+
+> **Note:** This makes **OQ-002** ("Who can add, edit, or remove diets from the diet list?") moot — OQ-002 assumed the diet list would exist and be either static or admin-managed in MVP1; since the whole module is deferred, that question no longer applies to MVP1. OQ-002 is left as-is for historical record and is not deleted or reworded.

@@ -210,11 +210,13 @@ Day card items after placement: ["Berry overnight oats","Berry overnight oats",.
 
 ---
 
-## 🟡 ISSUE-010 — Only 4 of 12+ required diets are shown
+## 🟡 ISSUE-010 — Only 4 of 12+ required diets are shown — 🚫 Superseded (OQ-011, 2026-08-19)
 
 **Severity:** Prototype gap  
 **Affected view:** Diets  
 **Requirements:** `docs/requirements/03_dietary_analyser.md`
+
+> **Superseded:** The Dietary Analyser module is deferred to post-MVP1 (OQ-011). This gap no longer needs fixing for MVP1 — left here for historical record.
 
 Implemented: Mediterranean, DASH, Keto, Protein-focused  
 Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers (WW), Intermittent fasting, Volumetrics, Healthy fats, Hydration guidance
@@ -229,11 +231,13 @@ Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers 
 
 ---
 
-## 🟡 ISSUE-012 — No diet-type filter on Products or Recipes
+## 🟡 ISSUE-012 — No diet-type filter on Products or Recipes — 🚫 Superseded (OQ-011, 2026-08-19)
 
 **Severity:** Prototype gap  
 **Requirements:** US-RA-005 (recipe filter by diet); `docs/requirements/01_products-database.md` (product filter by diet)  
 **Description:** Items carry a `diets` array and diet tags are visible on cards, but no filter allows restricting the list to a specific diet. (US-DA-003/004 cover marking compatibility, not filtering.)
+
+> **Superseded:** Diet filtering depends on the Dietary Analyser module, deferred to post-MVP1 (OQ-011). This gap no longer needs fixing for MVP1 — left here for historical record.
 
 ---
 
@@ -261,11 +265,13 @@ Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers 
 
 ---
 
-## 🟡 ISSUE-016 — No diet compatibility marking
+## 🟡 ISSUE-016 — No diet compatibility marking — 🚫 Superseded (OQ-011, 2026-08-19)
 
 **Severity:** Prototype gap  
 **Requirements:** US-DA-003, US-DA-004  
 **Description:** No UI to mark a product or recipe as compatible with a given diet.
+
+> **Superseded:** US-DA-003/004 belong to the Dietary Analyser module, deferred to post-MVP1 (OQ-011). This gap no longer needs fixing for MVP1 — left here for historical record.
 
 ---
 
@@ -315,4 +321,4 @@ Missing from requirements: Plant-based/flexitarian, MIND, Paleo, WeightWatchers 
 | 🟡 Prototype gap | 11 | 010–020 |
 | **Total** | **20** | |
 
-**Priority fixes before next user test session:** ISSUE-001 (search bleed), ISSUE-002 (timezone), ISSUE-006 (favorite toggle), ISSUE-010 (more diets), ISSUE-020 (favourite toggle in search).
+**Priority fixes before next user test session:** ISSUE-001 (search bleed), ISSUE-002 (timezone), ISSUE-006 (favorite toggle), ~~ISSUE-010 (more diets)~~ superseded — Dietary Analyser deferred to post-MVP1 (OQ-011), ISSUE-020 (favourite toggle in search).

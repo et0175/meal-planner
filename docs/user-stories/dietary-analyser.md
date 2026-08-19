@@ -2,9 +2,12 @@
 
 Requirements: [03_dietary_analyser.md](../requirements/03_dietary_analyser.md)
 
+> ## 🚫 Deferred to post-MVP1
+> **Decision (OQ-011, 2026-08-19):** The entire Dietary Analyser module is out of scope for MVP1. All five stories below (US-DA-001 – US-DA-005) are deferred along with it. Kept for historical/planning reference — do not build against these for MVP1. See `open-questions.md` OQ-011 and `requirements/TODO_later.md`.
+
 ---
 
-## US-DA-001 View supported diets
+## 🚫 US-DA-001 View supported diets
 
 **As a** user choosing how to eat  
 **I want** to see a list of supported nutrition systems or diet patterns  
@@ -18,7 +21,7 @@ Requirements: [03_dietary_analyser.md](../requirements/03_dietary_analyser.md)
 
 ---
 
-## US-DA-002 Read diet description, macros guidance, and pie chart
+## 🚫 US-DA-002 Read diet description, macros guidance, and pie chart
 
 **As a** user  
 **I want** each diet to include a short description, macro split guidance, and a visual pie chart of the macro proportions  
@@ -33,7 +36,7 @@ Requirements: [03_dietary_analyser.md](../requirements/03_dietary_analyser.md)
 
 ---
 
-## US-DA-003 Mark product compatibility with a diet
+## 🚫 US-DA-003 Mark product compatibility with a diet
 
 **As a** user or nutritionist  
 **I want** to mark a product as acceptable for a given diet  
@@ -46,7 +49,7 @@ Requirements: [03_dietary_analyser.md](../requirements/03_dietary_analyser.md)
 
 ---
 
-## US-DA-004 Mark recipe compatibility with a diet
+## 🚫 US-DA-004 Mark recipe compatibility with a diet
 
 **As a** user or nutritionist  
 **I want** to mark a recipe as acceptable for a given diet  
@@ -59,7 +62,7 @@ Requirements: [03_dietary_analyser.md](../requirements/03_dietary_analyser.md)
 
 ---
 
-## US-DA-005 Browse products and recipes for a specific diet
+## 🚫 US-DA-005 Browse products and recipes for a specific diet
 
 **As a** user  
 **I want** to click on a diet card and see all products and recipes that are compatible with that diet  

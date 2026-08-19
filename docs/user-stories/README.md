@@ -8,9 +8,9 @@ Stories are grouped by module. Each links to [business requirements](../requirem
 | Navigation | [navigation.md](navigation.md) — US-NAV-001 – US-NAV-005 |
 | Products database | [products-database.md](products-database.md) — US-PA-001 – US-PA-012 |
 | Products analyser | [products-analyser.md](products-analyser.md) — US-PAN-001 – US-PAN-009 |
-| Dietary analyser | [dietary-analyser.md](dietary-analyser.md) — US-DA-001 – US-DA-005 |
+| Dietary analyser | 🚫 **Deferred to post-MVP1** (OQ-011) — [dietary-analyser.md](dietary-analyser.md) — US-DA-001 – US-DA-005, kept for historical reference |
 | Recipe analyser | [recipe-analyser.md](recipe-analyser.md) — US-RA-001 – US-RA-015 |
 | Personal cabinet | [personal-cabinet.md](personal-cabinet.md) — US-PC-001 – US-PC-010 |
-| Meal planner | [meal-planner.md](meal-planner.md) — US-MP-001 – US-MP-023 |
+| Meal planner | [meal-planner.md](meal-planner.md) — US-MP-001 – US-MP-025 |
 | Shopping list | [shopping-list.md](shopping-list.md) — US-SL-001 – US-SL-007 |
 | Advanced search | [advanced-search.md](advanced-search.md) — US-AS-001 – US-AS-014 |

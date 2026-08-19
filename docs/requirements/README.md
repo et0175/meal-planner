@@ -13,7 +13,7 @@ This folder contains the business requirements for Meal Forge. Each file covers 
 |---|------|--------|-------|
 | 01 | [`01_products-database.md`](01_products-database.md) | Products database | Product catalog, units, week flags, user-added products |
 | 02 | [`02_products-analyser.md`](02_products-analyser.md) | Products analyser | Single-product nutrition breakdown, serving-based input, macro table |
-| 03 | [`03_dietary_analyser.md`](03_dietary_analyser.md) | Dietary analyser | 12 named diet patterns with macro guidance |
+| 03 | [`03_dietary_analyser.md`](03_dietary_analyser.md) | Dietary analyser | 🚫 **Deferred to post-MVP1** (OQ-011) — 12 named diet patterns with macro guidance; kept for historical/planning reference only |
 | 04 | [`04_recipe_analyser.md`](04_recipe_analyser.md) | Recipe analyser | Recipe creation, import, ingredient nutrition, per-serving analysis |
 | 05 | [`05_personal_cabinet.md`](05_personal_cabinet.md) | Personal cabinet | User profile, meal tracking, calorie corridor, history |
 | 06 | [`06_meal_planner.md`](06_meal_planner.md) | Meal planner | Weekly plan, calendar, nutrition targets, PDF export |
@@ -29,7 +29,7 @@ This folder contains the business requirements for Meal Forge. Each file covers 
 | File | Purpose |
 |------|---------|
 | [`actors.yml`](actors.yml) | Canonical actor definitions — **User** (ACT-001), **Nutritionist** (ACT-002), **System** (ACT-003). Use only these names in requirements and stories. |
-| [`open-questions.md`](open-questions.md) | Decision log. Current highest: **OQ-010**. OQ-001–OQ-008 resolved; OQ-009 and OQ-010 open (Advanced Search). |
+| [`open-questions.md`](open-questions.md) | Decision log. Current highest: **OQ-011**. OQ-001–OQ-008 resolved; OQ-009 and OQ-010 open (Advanced Search); OQ-011 resolved (Dietary Analyser deferred to post-MVP1, supersedes OQ-002). |
 | [`TODO_later.md`](TODO_later.md) | Features explicitly deferred to post-MVP1 (localisation, mobile app, restaurant mode, etc.). |
 | [`images/`](images/) | Diagrams and mockups referenced from requirement files. |
 
@@ -44,7 +44,7 @@ Quick reference for the most common cases:
 ### Adding a new requirement
 
 1. Edit the relevant `NN_<module>.md` file.
-2. If the change resolves an open question, record the decision in `open-questions.md` first (next ID: **OQ-011**) and add a `> **Decision (OQ-NNN):**` callout in the requirement.
+2. If the change resolves an open question, record the decision in `open-questions.md` first (next ID: **OQ-012**) and add a `> **Decision (OQ-NNN):**` callout in the requirement.
 3. Write or update user stories in `../user-stories/<module>.md` (new story ID: next `US-<MODULE>-NNN`).
 4. Write a test case in `../test-cases/tc-<module>.md` (new ID: next `TC-<MODULE>-NNN`); set `**Status:** 🚫` until implemented. Update the counts in `../test-cases/README.md`.
 5. If the prototype must change: update `prototype/frontend/app/page.tsx`, `types.ts`, and/or `data/seed.ts`; then flip the test case status to `✅`.
@@ -82,7 +82,7 @@ Always use names from `actors.yml` exactly: **User**, **Nutritionist**, **System
 
 ### Open question IDs
 
-`OQ-NNN` — sequential, never reused. Next available: **OQ-011**.
+`OQ-NNN` — sequential, never reused. Next available: **OQ-012**.
 
 ---
 

@@ -8,7 +8,7 @@ actors:
   - id: ACT-002
     name: Nutritionist
     type: human
-    description: A professional user who curates products and recipes and annotates dietary compatibility. In MVP1, shares the same system permissions as a regular User. Post-MVP1 differentiations planned — annotate diet compatibility on any user's products/recipes; create and edit meal plans on behalf of other users.
+    description: A professional user who curates products and recipes. In MVP1, shares the same system permissions as a regular User. Post-MVP1 differentiations planned — create and edit meal plans on behalf of other users; annotate diet compatibility on any user's products/recipes (🚫 deferred further — the Dietary Analyser module itself, which this depends on, is now deferred to post-MVP1; see OQ-011 in open-questions.md).
 
   - id: ACT-003
     name: System

@@ -21,8 +21,11 @@
   - On week rollover (each Monday), "Next week" flags are automatically promoted to "This week" and the product is added to the current week's planner summary (Lunch slot by default).
 - Support filtering by "This week" and "Next week" flags.
 - Users cannot delete a product that is used as an ingredient in any recipe. The deletion is blocked and the user is shown which recipes reference the product.
-- **Product names are localized.** Product names (and, in a later phase, category and diet-tag labels) are shown in the user's selected language. When a translation is missing for the requested language, the English name is shown as a fallback. Global products can be translated into every supported language; user-added products are stored in the language of their creator. See ADR-0012.
-- **The global product catalogue is pre-populated from an external source.** Global products (visible to all users) are bulk-imported from USDA FoodData Central (Foundation Foods + SR Legacy), so new users find a rich catalogue with accurate per-100 g nutrition on day one. Imports are idempotent — re-running updates existing rows rather than duplicating them. Imported names are English-only for MVP (USDA carries no diet-tag labels). See ADR-0013.
+- **Product names are localized.** Product names (and, in a later phase, category labels) are shown in the user's selected language. When a translation is missing for the requested language, the English name is shown as a fallback. Global products can be translated into every supported language; user-added products are stored in the language of their creator. See ADR-0012.
+  > 🚫 **Diet-tag labels deferred (OQ-011):** the parenthetical originally also listed "diet-tag labels" for later localization. Diet tags themselves are out of scope for MVP1 — see `03_dietary_analyser.md`. There is nothing to localize until the Dietary Analyser module (and product/recipe diet tagging) is built post-MVP1.
+- 🚫 **Diet tagging of products (deferred, OQ-011):** marking a product as compatible with a given diet, and filtering/searching products by diet tag, is out of scope for MVP1. It depends on the Dietary Analyser module (`03_dietary_analyser.md`), which is itself deferred. See `TODO_later.md`.
+- **The global product catalogue is pre-populated from an external source.** Global products (visible to all users) are bulk-imported from USDA FoodData Central (Foundation Foods + SR Legacy), so new users find a rich catalogue with accurate per-100 g nutrition on day one. Imports are idempotent — re-running updates existing rows rather than duplicating them. 
+- For the MVP we'll have English and Ukrainian names
 
 ---
 

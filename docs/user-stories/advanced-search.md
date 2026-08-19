@@ -34,7 +34,9 @@ Requirements: [10_advanced_search.md](../requirements/10_advanced_search.md)
 
 ---
 
-## US-AS-003 Filter by diet compatibility
+## 🚫 US-AS-003 Filter by diet compatibility — Deferred to post-MVP1
+
+> **Decision (OQ-011):** Depends on the Dietary Analyser module (`dietary-analyser.md`) and diet tagging of products/recipes, both deferred to post-MVP1. Kept for historical/planning reference.
 
 **As a** user on a specific diet  
 **I want** to filter search results to only items tagged as compatible with my diet  
@@ -42,9 +44,9 @@ Requirements: [10_advanced_search.md](../requirements/10_advanced_search.md)
 
 **Acceptance criteria**
 
-- [ ] A single-select diet dropdown is available in the filter panel, with the same 12 diet options defined in `03_dietary_analyser.md`.
-- [ ] Selecting a diet restricts both the Products and Recipes tabs to items carrying that diet tag.
-- [ ] Selecting "Any diet" (the default) removes the diet constraint.
+- [ ] ~~A single-select diet dropdown is available in the filter panel, with the same 12 diet options defined in `03_dietary_analyser.md`.~~ 🚫 Deferred (OQ-011).
+- [ ] ~~Selecting a diet restricts both the Products and Recipes tabs to items carrying that diet tag.~~ 🚫 Deferred (OQ-011).
+- [ ] ~~Selecting "Any diet" (the default) removes the diet constraint.~~ 🚫 Deferred (OQ-011).
 
 ---
 

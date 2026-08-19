@@ -12,9 +12,11 @@ A module for planning meals across a selected calendar week.
 - By default, the current calendar week is selected.
 - The user can navigate to previous or next weeks, and jump back to the current week.
 
-### Two views (tabs)
+### Four views (tabs)
 
-The planner offers two tab-switchable views that share the same selected week.
+The planner offers four tab-switchable views that share the same selected week: **Week summary**, **Grid view**, **2 Days**, and **Month**. The tabs are shown as a single row of pills; there is no separate "Calendar" wrapper tab — Grid view, 2 Days, and Month are top-level tabs in their own right.
+
+- **Reorder tabs:** the user can drag a tab pill onto another to swap their positions in the row. The default order is Week summary, Grid view, 2 Days, Month. The order chosen by the user persists only for the current session (not saved across page reloads).
 
 ---
 
@@ -34,57 +36,52 @@ Displays the week's meal plan as a spreadsheet grid, grouped by meal slot.
 
 ---
 
-#### Tab 2 — Calendar
+#### Tab 2 — Grid view
 
-The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** button group. All sub-views share the same selected week and underlying assignments.
+Shows a day × meal-slot matrix: one column per day (Mon–Sun), one row per meal slot (**Breakfast**, **Lunch**, **Dinner**, **Snacks**).
 
-##### Plan summary (all sub-views)
+- Each day column header shows the day name/date plus a compact **calorie ring** (colour-coded against the user's target corridor: green within corridor, amber below, red above) and the day's total kcal.
+- Each slot cell lists the items assigned to that day/slot, with serving count, kcal contribution, and +/− serving controls, plus a per-item **"+ Log"** action.
+- Supports add, remove, drag between cells, and drag from the plan summary panel.
+- Today's column is highlighted.
+- On narrow viewports the grid scrolls horizontally instead of compressing columns (minimum ~150px per day column).
 
-- A collapsible **plan summary panel** is shown at the top of the Calendar tab (above the sub-view grid), similar in structure to the plan summary in the Shopping list.
+---
+
+#### Tab 3 — 2 Days
+
+- Shows 2 consecutive day columns, selected via a date scroller.
+- Each column is divided into four meal slots (**Breakfast**, **Lunch**, **Dinner**, **Snacks**), with a per-day calorie ring and macro breakdown at the top of the column, an item list with serving count and kcal, and +/− serving controls.
+- Supports add, remove, drag between the two visible day columns, drag from the plan summary panel, and per-item "+ Log".
+
+---
+
+#### Tab 4 — Month
+
+- A 6-week × 7-column grid (Mon–Sun columns, 42 cells total) for the month containing the selected week.
+- A **Prev / Next month** navigation pair appears in the calendar header (separate from the week navigation).
+- Days outside the current calendar month are visually de-emphasised.
+- **Read-only:** cells show up to 2 item names per day (plus a "+N more" overflow) with no kcal figures. There is no add, remove, or drag-and-drop capability, and no plan summary panel in this tab — the user switches to Grid view or 2 Days to edit a day.
+
+##### Plan summary (Grid view and 2 Days only)
+
+- A collapsible **plan summary panel** is shown at the top of the Grid view and 2 Days tabs (above the day grid), similar in structure to the plan summary in the Shopping list. It is not shown in Month, which is read-only.
 - The panel lists all items planned within the visible date range, organised as a **gallery grouped by meal slots** (Breakfast, Lunch, Dinner, Snacks). Each slot group shows item cards with item name, total servings, and kcal contribution.
 - **Drag from summary:** the user can drag an item from the summary panel onto any day cell to create an assignment for that day. The item remains in the summary after the drag (it is still planned; only a new day assignment is added).
 - **Add to summary:** each meal slot column in the plan summary panel has an **add (+)** button. Clicking it opens an inline search input; typing filters all items by name; selecting an item adds it as an assignment on the first visible day in that slot.
 - **Drag between days:** items are draggable between day cells; dropping an item from one day cell onto another moves the assignment (the item disappears from the source day and appears on the target day in the same meal slot).
 
-##### Day sub-view
-
-- Shows a single day column divided into four meal slots: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
-- Each meal slot lists the items assigned for that day, with serving count, kcal contribution, and +/− serving controls.
-- Supports add, remove, and serving adjustment.
-
-##### 4 Days sub-view
-
-- Shows 4 consecutive day columns starting from the currently selected day.
-- Each column is divided into four meal slots with the same per-slot layout as the Day sub-view.
-- Supports add, remove, drag between the four visible day columns, and drag from the summary.
-
-##### Week sub-view
-
-- Shows 7 day columns (Mon–Sun) for the selected week.
-- Each column is divided into four meal slots: **Breakfast**, **Lunch**, **Dinner**, **Snacks**.
-- Items are listed per slot with serving count, kcal, and +/− controls.
-- Today's date is highlighted.
-- Supports add, remove, drag between day cells, and per-item "+ Log" action.
-
-##### Month sub-view
-
-- A 6-week × 7-column grid (Mon–Sun columns, 42 cells total) for the month containing the selected week.
-- A **Prev / Next month** navigation pair appears in the calendar header (separate from the week navigation).
-- Days outside the current calendar month are visually de-emphasised.
-- Each cell has the same add, remove, and drag-and-drop capabilities as the week sub-view.
-- Cells are compact (no kcal strip) to fit the larger grid.
-
 ---
 
 ### Data consistency
 
-- Assignments made in any view are immediately reflected in all other views. An assignment created or modified in the Calendar tab is immediately visible in the Week summary tab and vice versa — no refresh required.
-- The weekly summary and calendar views share the same underlying assignment data keyed by (item, day, meal slot).
-- Adding an item in the calendar automatically registers it in the weekly summary in the selected meal slot.
+- Assignments created or modified in Week summary, Grid view, or 2 Days are immediately reflected in the other two — no refresh required. Month shows the same data but does not support editing.
+- Week summary, Grid view, and 2 Days share the same underlying assignment data keyed by (item, day, meal slot). Month reads the same data but is display-only.
+- Adding an item in Grid view or 2 Days automatically registers it in the weekly summary in the selected meal slot.
 
 ### Search sorting
 
-- In all item search inputs within the planner (Week summary, Calendar), results are sorted: **recently used items** (recently planned or recently logged in tracking) first, then **items owned by the current user**, then all others alphabetically.
+- In all item search inputs within the planner (Week summary, Grid view, 2 Days), results are sorted: **recently used items** (recently planned or recently logged in tracking) first, then **items owned by the current user**, then all others alphabetically.
 
 ### Log from plan
 
@@ -93,20 +90,22 @@ The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** 
 - The planner provides **"Log this day"** and **"Log this week"** bulk actions (available in all planner tabs):
   - **Log this day** — creates Meal tracking entries in the Personal cabinet for all assignments on the currently selected day. The item, serving count, and meal slot are pre-filled.
   - **Log this week** — creates Meal tracking entries for all assignments across the selected week (Mon–Sun).
-- In addition to the bulk actions, each individual item in the **Calendar** (Day, 4 Days, and Week sub-views) shows a **"+ Log"** per-item action. Triggering it creates a single Meal tracking entry for that item, serving count, and meal slot on the selected day — without logging other items.
+- In addition to the bulk actions, each individual item in **Grid view** and **2 Days** shows a **"+ Log"** per-item action. Triggering it creates a single Meal tracking entry for that item, serving count, and meal slot on the selected day — without logging other items. Month is read-only and has no per-item log action.
 - Created entries are editable in the Meal Tracking tab of the Personal cabinet.
 
 ### Nutrition progress
 
-- The planner (Week summary and Calendar sub-views) shows, for each day, the **percentage of the calorie corridor consumed** relative to the user's target corridor (as set in Personal cabinet).
+- The planner (Week summary, Grid view, and 2 Days) shows, for each day, the **percentage of the calorie corridor consumed** relative to the user's target corridor (as set in Personal cabinet).
 - A week summary strip shows the average % of target for calories, protein, fat, and carbs across the planned week.
-- A monthly summary shows the same averages aggregated by month. The monthly summary is accessible by switching the Calendar to the Month sub-view; it aggregates average % of target across all days in the selected month that have at least one assignment.
-- **Calendar sub-views** additionally display a **target-reaching summary** per day column matching the Personal cabinet Meal tracking display: kcal, protein, fat, and carbs planned vs. target corridor, with colour-coded indicators (green for within corridor, amber for approaching, red for above).
+- Month does not show a nutrition summary — it is a read-only overview of which items are planned each day. The user switches to Grid view or 2 Days to see daily nutrition targets.
+- **Grid view and 2 Days** additionally display a **target-reaching summary** per day column matching the Personal cabinet Meal tracking display: kcal, protein, fat, and carbs planned vs. target corridor, with colour-coded indicators (green for within corridor, amber for approaching, red for above).
 
 ### Profile integration
 
-- The planner header displays the user's currently active diet (as set in Personal cabinet) so they can see their dietary context while planning.
-- The planner does not enforce diet rules automatically; the active diet label is informational only.
+> 🚫 **Deferred to post-MVP1 (OQ-011):** this entire "Profile integration" section depends on active-diet selection in Personal cabinet, which is deferred along with the rest of the Dietary Analyser module (`03_dietary_analyser.md`). See `05_personal_cabinet.md` "Profile tab — Diet preferences" and `TODO_later.md`.
+
+- ~~The planner header displays the user's currently active diet (as set in Personal cabinet) so they can see their dietary context while planning.~~
+- ~~The planner does not enforce diet rules automatically; the active diet label is informational only.~~
 
 ---
 
@@ -127,10 +126,9 @@ The calendar offers four sub-views toggled by a **Day / 4 Days / Week / Month** 
 - In grams mode the secondary label shows the equivalent servings count, and vice versa.
 - "Add item" button at the bottom of each meal slot section.
 
-### Calendar
+### Tabs
 
-- Sub-view toggled by a **"Day / 4 Days / Week / Month"** button group.
-- Plan summary panel is collapsible and appears above the sub-view grid. Items are presented in a **gallery layout** with one column per meal slot (Breakfast, Lunch, Dinner, Snacks); each column shows item cards.
-- Day, 4 Days, and Week sub-views each show per-day columns divided into meal slots, matching the layout formerly provided by the Day cards tab.
-- Week sub-view: today's date is highlighted with a **teal circle**.
-- Month sub-view: cells are compact (no kcal strip) to fit the larger grid.
+- All four views (Week summary, Grid view, 2 Days, Month) sit in a single row of pills; tabs can be reordered by dragging one pill onto another to swap positions.
+- Plan summary panel is collapsible and appears above the day grid in Grid view and 2 Days only. Items are presented in a **gallery layout** with one column per meal slot (Breakfast, Lunch, Dinner, Snacks); each column shows item cards.
+- Grid view and 2 Days: today's column/date is highlighted (teal border/ring); each day header shows a compact colour-coded calorie ring.
+- Month sub-view: read-only, cells are compact (no kcal strip) to fit the larger grid.

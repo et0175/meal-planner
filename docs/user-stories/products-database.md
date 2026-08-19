@@ -27,7 +27,7 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 
 - [ ] Category filter controls are visible **in list view only** (not in category cards view).
 - [ ] Applying a filter updates the list to only products in that category (or “all” when cleared).
-- [ ] Diet tag filter is available in list view; selecting a diet tag (e.g. “keto”) narrows the list to products carrying that tag.
+- [ ] ~~Diet tag filter is available in list view; selecting a diet tag (e.g. “keto”) narrows the list to products carrying that tag.~~ 🚫 Deferred to post-MVP1 (OQ-011) — depends on product diet tagging, which requires the Dietary Analyser module (see `dietary-analyser.md`), itself deferred.
 - [ ] “This week” and “Next week” filter toggles are available in list view.
 
 ---
@@ -41,7 +41,7 @@ Requirements: [01_products-database.md](../requirements/01_products-database.md)
 **Acceptance criteria**
 
 - [ ] A search input is available in list view (not in category cards view).
-- [ ] Search matches **product name** (case-insensitive) and **diet tags** (e.g. typing "keto" returns all products tagged keto).
+- [ ] Search matches **product name** (case-insensitive). ~~and **diet tags** (e.g. typing "keto" returns all products tagged keto).~~ 🚫 Diet-tag search deferred to post-MVP1 (OQ-011) — depends on product diet tagging, which requires the Dietary Analyser module, itself deferred.
 - [ ] Results update as the user types; an empty state is shown when no products match.
 - [ ] Clearing the search restores the full unfiltered list.
 

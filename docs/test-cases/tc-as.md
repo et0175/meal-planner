@@ -51,9 +51,11 @@
 
 ---
 
-### TC-AS-003: Diet filter restricts both tabs to compatible items
+### TC-AS-003: Diet filter restricts both tabs to compatible items 🚫 Deferred to post-MVP1
 **AC:** US-AS-003 — selecting a diet shows only tagged products and recipes  
 **Priority:** High
+
+> 🚫 **Deferred (OQ-011, 2026-08-19):** The Diet filter depends on the Dietary Analyser module, which is deferred to post-MVP1 (see `tc-dit.md`, `10_advanced_search.md` "Diet" filter subsection, `advanced-search.md` US-AS-003). Retained for historical reference.
 
 **Test data:** Select diet "Ketogenic"; expect only keto-tagged items
 
@@ -67,7 +69,7 @@
 - Items without the keto tag are hidden
 - Switching diet to "Any diet" restores the full result set (if no other filter active, the empty state returns)
 
-**Status:** ✅
+**Status:** 🚫 (deferred, OQ-011 — was ✅ against the ahead-of-spec prototype before the deferral decision)
 
 ---
 
@@ -275,15 +277,17 @@
 **AC:** US-AS-012 — active filters shown as chips; × on each chip removes only that filter  
 **Priority:** Medium
 
+> **Note (OQ-011, 2026-08-19):** Originally used the Diet filter as one of the two active filters. Diet is deferred to post-MVP1 (`10_advanced_search.md`), so this case is re-based on the Category filter to keep exercising chip removal — the mechanic under test (chip × removes only that filter) is unrelated to diet.
+
 **Steps:**
-1. Open Advanced Search. Set diet filter = Ketogenic AND kcal min = 100.
+1. Open Advanced Search. Set category filter = Dairy AND kcal min = 100.
 2. Observe the chip area above the results.
-3. Click × on the **Diet: Ketogenic** chip.
+3. Click × on the **Category: Dairy** chip.
 
 **Expected result:**
-- Diet filter is cleared; kcal min = 100 filter remains active
-- Recipes and products filtered only by kcal ≥ 100 (not by diet)
-- The Ketogenic chip disappears; the kcal chip remains
+- Category filter is cleared; kcal min = 100 filter remains active
+- Products filtered only by kcal ≥ 100 (not by category)
+- The Dairy chip disappears; the kcal chip remains
 
 **Status:** ✅
 
@@ -293,8 +297,10 @@
 **AC:** US-AS-012 — Clear all resets everything; empty state returns if no other interaction  
 **Priority:** Medium
 
+> **Note (OQ-011, 2026-08-19):** The original filter combination included Diet, which is deferred to post-MVP1. Re-based on calorie range and category, which are unaffected.
+
 **Steps:**
-1. Apply multiple filters (diet, calorie min, a category) and type a query.
+1. Apply multiple filters (calorie min, a category, a macro range) and type a query.
 2. Click **Clear all**.
 
 **Expected result:**
@@ -311,8 +317,10 @@
 **AC:** US-AS-012 — filters do not persist across navigation  
 **Priority:** Medium
 
+> **Note (OQ-011, 2026-08-19):** Originally used the Diet filter, which is deferred to post-MVP1. Re-based on the Category filter — the mechanic under test (filters clear on navigation) is unrelated to diet.
+
 **Steps:**
-1. Open Advanced Search; apply a diet filter and type a query; confirm results appear.
+1. Open Advanced Search; apply a category filter and type a query; confirm results appear.
 2. Click **Products** in the sidebar (navigate away).
 3. Click **Advanced search** in the sidebar (return).
 
@@ -383,11 +391,13 @@
 **AC:** US-AS-002 – US-AS-007 — all active filters narrow the result set (AND logic across filter types)  
 **Priority:** High
 
+> **Note (OQ-011, 2026-08-19):** Originally combined Diet with kcal and search text. Diet is deferred to post-MVP1 (`10_advanced_search.md`), so this case is re-based on the Category filter to keep exercising cross-filter AND logic.
+
 **Steps:**
-1. Open Advanced Search. Set diet = Mediterranean AND kcal From = 100 AND type `a` in search.
+1. Open Advanced Search. Set category = Dairy AND kcal From = 100 AND type `a` in search.
 
 **Expected result:**
-- Products tab shows only products where: name contains "a" AND diet tag includes Mediterranean AND kcal ≥ 100
+- Products tab shows only products where: name contains "a" AND category is Dairy AND kcal ≥ 100
 - Each additional filter further narrows the result (result count ≤ any individual filter's count)
 - Removing one filter expands the result set accordingly
 
