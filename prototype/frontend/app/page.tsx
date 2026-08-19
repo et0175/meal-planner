@@ -5,12 +5,12 @@ import {
   UtensilsCrossed, ShoppingBasket, Apple, Leaf, CalendarDays,
   User, Search, Heart, Plus, Minus, X, ChevronLeft,
   ChevronRight, LayoutGrid, List, Edit2, Trash2, Check,
-  AlertTriangle, RefreshCw, Table2, Download, Eye, EyeOff, LogOut, SlidersHorizontal,
+  AlertTriangle, RefreshCw, Table2, Download, SlidersHorizontal,
   Sunrise, Salad, Soup, Sandwich, ChefHat, Cake, Coffee, BookOpen,
   Milk, Fish, Wheat, Carrot, Drumstick, Bean, Nut, Droplet,
 } from 'lucide-react'
-import { SEED_PRODUCTS, SEED_RECIPES, SEED_DIETS, SEED_ASSIGNMENTS, SEED_USERS } from '@/data/seed'
-import type { View, Day, Slot, Item, Assignment, Diet, Profile, MealLogEntry, ShoppingLine, AuthUser, SeedUser } from '@/types'
+import { SEED_PRODUCTS, SEED_RECIPES, SEED_DIETS, SEED_ASSIGNMENTS } from '@/data/seed'
+import type { View, Day, Slot, Item, Assignment, Diet, Profile, MealLogEntry, ShoppingLine } from '@/types'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
@@ -161,233 +161,6 @@ function EmptyState({
   )
 }
 
-// ─── auth screen ─────────────────────────────────────────────────────────────
-
-const LOCK_THRESHOLD = 5
-
-function AuthScreen({
-  users,
-  onAddUser,
-  onAuth,
-}: {
-  users: SeedUser[]
-  onAddUser: (u: SeedUser) => void
-  onAuth: (user: AuthUser) => void
-}) {
-  const [mode, setMode] = useState<'signin' | 'register' | 'forgot'>('signin')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPass, setShowPass] = useState(false)
-  const [emailError, setEmailError] = useState('')
-  const [passError, setPassError] = useState('')
-  const [globalError, setGlobalError] = useState('')
-  const [successMsg, setSuccessMsg] = useState('')
-  const [failedAttempts, setFailedAttempts] = useState<Record<string, number>>({})
-
-  function clearErrors() {
-    setEmailError(''); setPassError(''); setGlobalError(''); setSuccessMsg('')
-  }
-
-  function switchMode(m: 'signin' | 'register' | 'forgot') {
-    setMode(m); setEmail(''); setPassword(''); setShowPass(false); clearErrors()
-  }
-
-  function handleSignIn() {
-    clearErrors()
-    let valid = true
-    if (!email.trim()) { setEmailError('Email is required'); valid = false }
-    if (!password) { setPassError('Password is required'); valid = false }
-    if (!valid) return
-
-    const key = email.toLowerCase()
-    const attempts = failedAttempts[key] ?? 0
-    if (attempts >= LOCK_THRESHOLD) {
-      setGlobalError('Too many failed attempts. Please wait 15 minutes before trying again.')
-      return
-    }
-
-    const user = users.find(u => u.email.toLowerCase() === key && u.password === password)
-    if (user) {
-      onAuth({ id: user.id, email: user.email, role: user.role })
-    } else {
-      const next = attempts + 1
-      setFailedAttempts(prev => ({ ...prev, [key]: next }))
-      if (next >= LOCK_THRESHOLD) {
-        setGlobalError('Too many failed attempts. Please wait 15 minutes before trying again.')
-      } else {
-        setGlobalError('Invalid email or password.')
-      }
-    }
-  }
-
-  function handleRegister() {
-    clearErrors()
-    let valid = true
-    if (!email.trim()) { setEmailError('Email is required'); valid = false }
-    if (!password) { setPassError('Password is required'); valid = false }
-    else if (password.length < 8) { setPassError('Password must be at least 8 characters'); valid = false }
-    if (!valid) return
-
-    const existing = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase())
-    if (existing) {
-      setSuccessMsg('If this email is available, your account has been created. Try signing in.')
-      return
-    }
-
-    const newUser: SeedUser = { id: `u-${uid()}`, email: email.trim(), password, role: 'user' }
-    onAddUser(newUser)
-    onAuth({ id: newUser.id, email: newUser.email, role: newUser.role })
-  }
-
-  function handleForgot() {
-    clearErrors()
-    if (!email.trim()) { setEmailError('Email is required'); return }
-    setSuccessMsg('If an account with this email exists, a reset link has been sent. Check your inbox.')
-  }
-
-  const title = mode === 'signin' ? 'Sign in' : mode === 'register' ? 'Create account' : 'Reset password'
-  const subtitle = mode === 'signin'
-    ? 'Welcome back to Meal Forge'
-    : mode === 'register'
-      ? 'Start planning your meals'
-      : 'Enter your email to receive a reset link'
-
-  const onEnter = (e: React.KeyboardEvent) => {
-    if (e.key !== 'Enter') return
-    if (mode === 'signin') handleSignIn()
-    else if (mode === 'register') handleRegister()
-    else handleForgot()
-  }
-
-  return (
-    <div className="min-h-dvh flex items-center justify-center p-4" style={{ background: '#F1F5F4' }}>
-      <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2.5 justify-center mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: '#1A6B6E' }}>
-            <UtensilsCrossed size={20} className="text-white" />
-          </div>
-          <span className="text-xl font-semibold text-gray-900 tracking-tight">Meal Forge</span>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl px-6 py-7">
-          <div className="mb-5">
-            <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-            <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>
-          </div>
-
-          {successMsg && (
-            <div role="status" className="rounded-xl p-3 bg-green-50 border border-green-200 text-sm text-green-700 mb-4">
-              {successMsg}
-            </div>
-          )}
-          {globalError && (
-            <div role="alert" className="rounded-xl p-3 bg-red-50 border border-red-200 text-sm text-red-700 mb-4">
-              {globalError}
-            </div>
-          )}
-
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="auth-email" className="text-xs font-medium text-gray-500 mb-1 block">Email *</label>
-              <input
-                id="auth-email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={e => { setEmail(e.target.value); setEmailError('') }}
-                onKeyDown={onEnter}
-                className={cn(inputCls, emailError && 'border-red-300 focus:border-red-400 focus:ring-red-100')}
-                placeholder="you@example.com"
-                aria-describedby={emailError ? 'auth-email-err' : undefined}
-                aria-invalid={!!emailError}
-                aria-required="true"
-              />
-              {emailError && <p id="auth-email-err" role="alert" className="text-xs text-red-600 mt-1">{emailError}</p>}
-            </div>
-
-            {mode !== 'forgot' && (
-              <div>
-                <label htmlFor="auth-pass" className="text-xs font-medium text-gray-500 mb-1 block">Password *</label>
-                <div className="relative">
-                  <input
-                    id="auth-pass"
-                    type={showPass ? 'text' : 'password'}
-                    autoComplete={mode === 'register' ? 'new-password' : 'current-password'}
-                    value={password}
-                    onChange={e => { setPassword(e.target.value); setPassError('') }}
-                    onKeyDown={onEnter}
-                    className={cn(inputCls, 'pr-10', passError && 'border-red-300 focus:border-red-400 focus:ring-red-100')}
-                    placeholder={mode === 'register' ? 'Minimum 8 characters' : ''}
-                    aria-describedby={passError ? 'auth-pass-err' : undefined}
-                    aria-invalid={!!passError}
-                    aria-required="true"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPass(p => !p)}
-                    aria-label={showPass ? 'Hide password' : 'Show password'}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    {showPass ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-                {passError && <p id="auth-pass-err" role="alert" className="text-xs text-red-600 mt-1">{passError}</p>}
-              </div>
-            )}
-          </div>
-
-          <button
-            onClick={mode === 'signin' ? handleSignIn : mode === 'register' ? handleRegister : handleForgot}
-            className="w-full mt-5 py-2.5 rounded-xl text-sm font-medium text-white cursor-pointer hover:opacity-90 active:opacity-80 transition-opacity"
-            style={{ background: '#1A6B6E' }}
-          >
-            {mode === 'signin' ? 'Sign in' : mode === 'register' ? 'Create account' : 'Send reset link'}
-          </button>
-
-          <div className="mt-4 space-y-2 text-center text-sm">
-            {mode === 'signin' && (
-              <>
-                <button
-                  onClick={() => switchMode('forgot')}
-                  className="text-teal-700 hover:text-teal-900 cursor-pointer block w-full"
-                >
-                  Forgot password?
-                </button>
-                <p className="text-gray-500">
-                  No account?{' '}
-                  <button onClick={() => switchMode('register')} className="text-teal-700 hover:text-teal-900 cursor-pointer font-medium">
-                    Register
-                  </button>
-                </p>
-              </>
-            )}
-            {mode === 'register' && (
-              <p className="text-gray-500">
-                Already have an account?{' '}
-                <button onClick={() => switchMode('signin')} className="text-teal-700 hover:text-teal-900 cursor-pointer font-medium">
-                  Sign in
-                </button>
-              </p>
-            )}
-            {mode === 'forgot' && (
-              <button
-                onClick={() => switchMode('signin')}
-                className="text-teal-700 hover:text-teal-900 cursor-pointer block w-full"
-              >
-                Back to sign in
-              </button>
-            )}
-          </div>
-        </div>
-
-        <p className="text-center text-xs text-gray-400 mt-4">
-          Demo: user@mealforge.com · password123
-        </p>
-      </div>
-    </div>
-  )
-}
-
 // ─── sidebar ──────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS: { id: View; label: string; icon: React.ReactNode }[] = [
@@ -402,9 +175,9 @@ const NAV_ITEMS: { id: View; label: string; icon: React.ReactNode }[] = [
 ]
 
 function Sidebar({
-  active, setActive, userEmail, onSignOut,
+  active, setActive,
 }: {
-  active: View; setActive: (v: View) => void; userEmail: string; onSignOut: () => void
+  active: View; setActive: (v: View) => void
 }) {
   return (
     <aside
@@ -442,20 +215,7 @@ function Sidebar({
         })}
       </nav>
 
-      <div className="px-4 pb-5 pt-3 border-t border-white/10 space-y-2">
-        <div className="flex items-center gap-2 min-w-0 px-1">
-          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-            <User size={12} className="text-white" />
-          </div>
-          <span className="text-white/70 text-xs truncate flex-1" title={userEmail}>{userEmail}</span>
-        </div>
-        <button
-          onClick={onSignOut}
-          className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 cursor-pointer text-xs transition-colors"
-        >
-          <LogOut size={13} />
-          Sign out
-        </button>
+      <div className="px-4 pb-5 pt-3 border-t border-white/10">
         <p className="text-white/30 text-xs px-1">MVP Prototype · v1.0</p>
       </div>
     </aside>
@@ -2288,38 +2048,176 @@ function DayCardsView({
   )
 }
 
+function CalorieMacroRing({
+  kcal, target, protein, fat, carbs, size = 64,
+}: {
+  kcal: number; target?: number; protein: number; fat: number; carbs: number; size?: number
+}) {
+  const corridor = target ? { low: target - 150, high: target + 150 } : null
+  const pct = target ? Math.min(100, Math.round(kcal / target * 100)) : 0
+  const ringColor = !corridor ? '#d1d5db'
+    : kcal > corridor.high ? '#ef4444'
+    : kcal >= corridor.low ? '#22c55e'
+    : '#f59e0b'
+  const ringGradient = target
+    ? `conic-gradient(${ringColor} 0% ${pct}%, #e5e7eb ${pct}% 100%)`
+    : '#e5e7eb'
+
+  const pKcal = protein * 4, fKcal = fat * 9, cKcal = carbs * 4
+  const macroTotal = pKcal + fKcal + cKcal
+  const pPct = macroTotal > 0 ? pKcal / macroTotal * 100 : 0
+  const fPct = macroTotal > 0 ? fKcal / macroTotal * 100 : 0
+  const macroGradient = macroTotal > 0
+    ? `conic-gradient(#3b82f6 0% ${pPct.toFixed(1)}%, #f97316 ${pPct.toFixed(1)}% ${(pPct + fPct).toFixed(1)}%, #22c55e ${(pPct + fPct).toFixed(1)}% 100%)`
+    : '#e5e7eb'
+
+  return (
+    <div className="relative flex-shrink-0" style={{ width: size, height: size }} title={target ? `${pct}% of ${target} kcal target` : undefined}>
+      <div className="absolute inset-0 rounded-full" style={{ background: ringGradient }} />
+      <div className="absolute rounded-full bg-white" style={{ inset: `${size * 0.06}px` }} />
+      <div className="absolute rounded-full" style={{ inset: `${size * 0.11}px`, background: macroGradient }} />
+      <div className="absolute rounded-full bg-white flex items-center justify-center" style={{ inset: `${size * 0.24}px` }}>
+        <span className="text-[9px] font-bold text-gray-700 leading-none">{target ? `${pct}%` : '—'}</span>
+      </div>
+    </div>
+  )
+}
+
+function DateScroller({
+  days, dates, selectedIdx, rangeSize, onSelect, today,
+}: {
+  days: Day[]; dates: Date[]; selectedIdx: number; rangeSize: number
+  onSelect: (idx: number) => void; today: Date
+}) {
+  const maxIdx = days.length - rangeSize
+  return (
+    <div className="flex gap-1.5 overflow-x-auto pb-0.5" role="tablist" aria-label="Select date range">
+      {days.map((day, i) => {
+        const isToday = dates[i].toDateString() === today.toDateString()
+        const isSelected = i >= selectedIdx && i < selectedIdx + rangeSize
+        return (
+          <button
+            key={day}
+            role="tab"
+            aria-selected={isSelected}
+            onClick={() => onSelect(Math.min(i, maxIdx))}
+            className={cn(
+              'flex-shrink-0 flex flex-col items-center justify-center w-14 py-1.5 rounded-xl border text-xs cursor-pointer transition-colors',
+              isSelected ? 'bg-teal-600 border-teal-600 text-white'
+                : isToday ? 'border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100'
+                : 'border-gray-200 text-gray-500 bg-white hover:bg-gray-50',
+            )}
+          >
+            <span className="font-medium">{day}</span>
+            <span className={cn('text-sm font-bold', isSelected ? 'text-white' : 'text-gray-800')}>{dates[i].getDate()}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function GridSlotCell({
+  day, date, slot, isToday, assignments, items, onRemove, onAdd, onMove,
+}: {
+  day: Day; date: Date; slot: Slot; isToday: boolean
+  assignments: Assignment[]; items: Item[]
+  onRemove: (id: string) => void
+  onAdd: (itemId: string) => void
+  onMove: (assignmentId: string) => void
+}) {
+  const [adding, setAdding] = useState(false)
+  const [search, setSearch] = useState('')
+  const [dragOver, setDragOver] = useState(false)
+  const matched = items.filter(i => i.name.toLowerCase().includes(search.toLowerCase())).slice(0, 5)
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    setDragOver(false)
+    const type = e.dataTransfer.getData('drag-type')
+    if (type === 'summary') {
+      const name = e.dataTransfer.getData('item-name')
+      if (name) { setSearch(name); setAdding(true) }
+    } else if (type === 'cell') {
+      const aid = e.dataTransfer.getData('assignment-id')
+      if (aid) onMove(aid)
+    }
+  }
+
+  return (
+    <div
+      className={cn('relative border-r border-gray-50 last:border-r-0 p-1.5 min-h-16 group transition-colors', isToday && 'bg-teal-50/40', dragOver && 'bg-teal-50 ring-1 ring-inset ring-teal-400')}
+      onDragOver={e => { e.preventDefault(); setDragOver(true) }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+    >
+      {assignments.map(a => {
+        const item = items.find(x => x.id === a.itemId)
+        if (!item) return null
+        return (
+          <div
+            key={a.id}
+            draggable
+            onDragStart={e => {
+              e.dataTransfer.setData('drag-type', 'cell')
+              e.dataTransfer.setData('assignment-id', a.id)
+              e.dataTransfer.effectAllowed = 'move'
+            }}
+            className="flex items-center gap-1 mb-1 bg-teal-50 border border-teal-100 rounded-lg px-1.5 py-1 cursor-grab active:cursor-grabbing group/chip"
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-gray-700 truncate leading-tight">{item.name}</p>
+              <p className="text-xs text-gray-400">{a.servings} srv · {Math.round(item.kcal * a.servings)} kcal</p>
+            </div>
+            <button onClick={() => onRemove(a.id)} aria-label="Remove" className="text-gray-300 hover:text-red-500 cursor-pointer opacity-0 group-hover/chip:opacity-100 flex-shrink-0"><X size={9} /></button>
+          </div>
+        )
+      })}
+      {adding ? (
+        <div className="relative">
+          <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
+            onBlur={() => { if (!search) setAdding(false) }}
+            placeholder="Search…"
+            className="w-full text-xs border border-teal-400 rounded-lg px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-teal-300" />
+          {search && matched.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-xl shadow-lg z-20 mt-0.5 max-h-32 overflow-y-auto min-w-32">
+              {matched.map(i => (
+                <button key={i.id} type="button"
+                  onMouseDown={() => { onAdd(i.id); setSearch(''); setAdding(false) }}
+                  className="w-full text-left px-2 py-1.5 text-xs hover:bg-gray-50 cursor-pointer">
+                  {i.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <button onClick={() => setAdding(true)} aria-label={`Add item to ${day} ${slot}`} className="text-xs text-gray-300 hover:text-teal-500 cursor-pointer opacity-0 group-hover:opacity-100 flex items-center gap-0.5">
+          <Plus size={9} /> Add
+        </button>
+      )}
+    </div>
+  )
+}
+
 function CalendarView({
-  items, assignments, days, dates, upsertAssignment, setAssignments, onLog, profile,
+  items, assignments, days, dates, upsertAssignment, setAssignments, onLog, profile, subView,
 }: {
   items: Item[]; assignments: Assignment[]; days: Day[]; dates: Date[]
   upsertAssignment: (itemId: string, day: Day, slot: Slot, servings: number) => void
   setAssignments: React.Dispatch<React.SetStateAction<Assignment[]>>
   onLog?: (item: Item, servings: number, slot: Slot, date: string) => void
   profile?: Profile
+  subView: '2days' | 'grid' | 'month'
 }) {
-  const [subView, setSubView] = useState<'day' | '4days' | 'week' | 'month'>('week')
   const [monthOffset, setMonthOffset] = useState(0)
   const [selectedDayIdx, setSelectedDayIdx] = useState(0)
   const [summaryAddSlot, setSummaryAddSlot] = useState<Slot | null>(null)
   const [summaryAddQuery, setSummaryAddQuery] = useState('')
   const today = new Date()
 
-  const ViewToggle = () => (
-    <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit ml-auto">
-      {(['day', '4days', 'week', 'month'] as const).map(v => (
-        <button key={v} onClick={() => setSubView(v)}
-          className={cn('px-3 py-1 rounded-lg text-xs font-medium cursor-pointer',
-            subView === v ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:bg-white')}>
-          {v === '4days' ? '4 Days' : v.charAt(0).toUpperCase() + v.slice(1)}
-        </button>
-      ))}
-    </div>
-  )
-
   // Plan summary for visible date range
-  const visibleDays = subView === 'day' ? [days[selectedDayIdx]]
-    : subView === '4days' ? days.slice(selectedDayIdx, selectedDayIdx + 4)
-    : subView === 'week' ? days
+  const visibleDays = subView === '2days' ? days.slice(selectedDayIdx, selectedDayIdx + 2)
     : days
 
   const calPlanSummary = useMemo(() => {
@@ -2429,21 +2327,18 @@ function CalendarView({
 
     return (
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button onClick={() => setMonthOffset(p => p - 1)} aria-label="Previous month" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
-              <ChevronLeft size={14} />
-            </button>
-            <h2 className="text-sm font-semibold text-gray-700 min-w-32 text-center">
-              {firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
-            </h2>
-            <button onClick={() => setMonthOffset(p => p + 1)} aria-label="Next month" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
-              <ChevronRight size={14} />
-            </button>
-          </div>
-          <ViewToggle />
+        <div className="flex items-center gap-2">
+          <button onClick={() => setMonthOffset(p => p - 1)} aria-label="Previous month" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
+            <ChevronLeft size={14} />
+          </button>
+          <h2 className="text-sm font-semibold text-gray-700 min-w-32 text-center">
+            {firstDay.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+          </h2>
+          <button onClick={() => setMonthOffset(p => p + 1)} aria-label="Next month" className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600">
+            <ChevronRight size={14} />
+          </button>
+          <span className="text-xs text-gray-400 ml-1">Read-only overview — switch to Grid or 2 Days to edit a day</span>
         </div>
-        <PlanSummaryBar />
         <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
           <div className="grid grid-cols-7 border-b border-gray-100 bg-gray-50">
             {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d => (
@@ -2477,66 +2372,15 @@ function CalendarView({
     )
   }
 
-  if (subView === 'day') {
-    const day = days[selectedDayIdx]
-    const date = dates[selectedDayIdx]
-    const dayAssignments = assignments.filter(a => a.day === day)
+  if (subView === '2days') {
+    const maxIdx = days.length - 2
+    const visIdx = [selectedDayIdx, Math.min(selectedDayIdx + 1, days.length - 1)]
     return (
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button onClick={() => setSelectedDayIdx(p => Math.max(0, p - 1))} disabled={selectedDayIdx === 0}
-              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
-              <ChevronLeft size={14} />
-            </button>
-            <h2 className="text-sm font-semibold text-gray-700 min-w-28 text-center">
-              {day} · {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-            </h2>
-            <button onClick={() => setSelectedDayIdx(p => Math.min(6, p + 1))} disabled={selectedDayIdx === 6}
-              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
-              <ChevronRight size={14} />
-            </button>
-          </div>
-          <ViewToggle />
-        </div>
         <PlanSummaryBar />
-        <div className="max-w-sm">
-          <CalendarWeekCell
-            day={day} date={date}
-            isToday={date.toDateString() === today.toDateString()}
-            assignments={dayAssignments} items={items}
-            onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
-            onAdd={(itemId, slot) => upsertAssignment(itemId, day, slot, 1)}
-            onUpsert={(itemId, slot, servings) => upsertAssignment(itemId, day, slot, servings)}
-            onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day } : a))}
-            onLog={onLog}
-            profile={profile}
-          />
-        </div>
-      </div>
-    )
-  }
-
-  if (subView === '4days') {
-    const visIdx = Array.from({ length: 4 }, (_, k) => Math.min(selectedDayIdx + k, 6))
-    return (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <button onClick={() => setSelectedDayIdx(p => Math.max(0, p - 1))} disabled={selectedDayIdx === 0}
-              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
-              <ChevronLeft size={14} />
-            </button>
-            <h2 className="text-sm font-semibold text-gray-700">4-day view</h2>
-            <button onClick={() => setSelectedDayIdx(p => Math.min(3, p + 1))} disabled={selectedDayIdx >= 3}
-              className="p-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 cursor-pointer text-gray-600 disabled:opacity-40">
-              <ChevronRight size={14} />
-            </button>
-          </div>
-          <ViewToggle />
-        </div>
-        <PlanSummaryBar />
-        <div className="grid grid-cols-4 gap-2">
+        <DateScroller days={days} dates={dates} selectedIdx={selectedDayIdx} rangeSize={2}
+          onSelect={i => setSelectedDayIdx(Math.min(i, maxIdx))} today={today} />
+        <div className="grid grid-cols-2 gap-3">
           {visIdx.map(idx => {
             const d = days[idx]
             const dt = dates[idx]
@@ -2550,6 +2394,7 @@ function CalendarView({
                 onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day: d } : a))}
                 onLog={onLog}
                 profile={profile}
+                wide
               />
             )
           })}
@@ -2560,32 +2405,69 @@ function CalendarView({
 
   return (
     <div className="space-y-3">
-      <div className="flex justify-end"><ViewToggle /></div>
       <PlanSummaryBar />
-      <div className="grid grid-cols-7 gap-2">
-        {days.map((day, i) => (
-          <CalendarWeekCell
-            key={day}
-            day={day}
-            date={dates[i]}
-            isToday={dates[i].toDateString() === today.toDateString()}
-            assignments={assignments.filter(a => a.day === day)}
-            items={items}
-            onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
-            onAdd={(itemId, slot) => upsertAssignment(itemId, day, slot, 1)}
-            onUpsert={(itemId, slot, servings) => upsertAssignment(itemId, day, slot, servings)}
-            onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day } : a))}
-            onLog={onLog}
-            profile={profile}
-          />
-        ))}
+      <div className="bg-white rounded-2xl border border-gray-200 overflow-x-auto">
+        <div className="min-w-[720px]">
+          <div className="grid grid-cols-[88px_repeat(7,1fr)] border-b border-gray-100 bg-gray-50">
+            <div className="py-2 px-2 text-xs font-semibold text-gray-400 self-center">Meal</div>
+            {days.map((day, i) => {
+              const isToday = dates[i].toDateString() === today.toDateString()
+              const dayA = assignments.filter(a => a.day === day)
+              const dayTotals = dayA.reduce((acc, a) => {
+                const it = items.find(x => x.id === a.itemId)
+                if (!it) return acc
+                acc.kcal += it.kcal * a.servings
+                acc.protein += it.protein * a.servings
+                acc.fat += it.fat * a.servings
+                acc.carbs += it.carbs * a.servings
+                return acc
+              }, { kcal: 0, protein: 0, fat: 0, carbs: 0 })
+              const dayCorridor = profile?.calorieTarget ? { low: profile.calorieTarget - 150, high: profile.calorieTarget + 150 } : null
+              const dayKcalCls = dayCorridor
+                ? (dayTotals.kcal < dayCorridor.low ? 'text-amber-600' : dayTotals.kcal > dayCorridor.high ? 'text-red-600' : 'text-green-600')
+                : 'text-gray-600'
+              return (
+                <div key={day} className="py-1.5 px-1 flex flex-col items-center gap-1">
+                  <span className={cn('text-xs font-semibold', isToday ? 'text-teal-700' : 'text-gray-500')}>
+                    {day} <span className="text-gray-400 font-normal">{dates[i].getDate()}</span>
+                  </span>
+                  {dayTotals.kcal > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <CalorieMacroRing kcal={dayTotals.kcal} target={profile?.calorieTarget} protein={dayTotals.protein} fat={dayTotals.fat} carbs={dayTotals.carbs} size={40} />
+                      <span className={cn('text-xs font-semibold', dayKcalCls)}>{Math.round(dayTotals.kcal)}</span>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          {SLOTS.map(slot => (
+            <div key={slot} className="grid grid-cols-[88px_repeat(7,1fr)] border-b border-gray-50 last:border-b-0">
+              <div className={cn('flex items-center px-2 py-1.5 text-xs font-semibold uppercase tracking-wide border-r border-gray-50', SLOT_COLOURS[slot].split(' ')[2])}>
+                {slot}
+              </div>
+              {days.map((day, i) => (
+                <GridSlotCell
+                  key={day}
+                  day={day} date={dates[i]} slot={slot}
+                  isToday={dates[i].toDateString() === today.toDateString()}
+                  assignments={assignments.filter(a => a.day === day && a.slot === slot)}
+                  items={items}
+                  onRemove={id => setAssignments(prev => prev.filter(x => x.id !== id))}
+                  onAdd={itemId => upsertAssignment(itemId, day, slot, 1)}
+                  onMove={aid => setAssignments(prev => prev.map(a => a.id === aid ? { ...a, day, slot } : a))}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
 }
 
 function CalendarWeekCell({
-  day, date, isToday, assignments, items, onRemove, onAdd, onUpsert, onMove, onLog, profile,
+  day, date, isToday, assignments, items, onRemove, onAdd, onUpsert, onMove, onLog, profile, wide,
 }: {
   day: Day; date: Date; isToday: boolean
   assignments: Assignment[]; items: Item[]
@@ -2595,6 +2477,7 @@ function CalendarWeekCell({
   onMove?: (assignmentId: string) => void
   onLog?: (item: Item, servings: number, slot: Slot, date: string) => void
   profile?: Profile
+  wide?: boolean
 }) {
   const [addingSlot, setAddingSlot] = useState<Slot | null>(null)
   const [search, setSearch] = useState('')
@@ -2638,22 +2521,29 @@ function CalendarWeekCell({
         <span className="text-xs text-gray-400 font-medium">{day}</span>
       </div>
       {/* Nutrition strip */}
-      {assignments.length > 0 && (
-        <div className="px-2 py-1 bg-gray-50/50 border-b border-gray-100 text-xs space-y-0.5">
-          <div className="flex flex-wrap gap-x-1.5 gap-y-0.5">
-            <span className={kcalCls}>{Math.round(totalKcal)} kcal{corridor ? ` (${Math.round(totalKcal / profile!.calorieTarget * 100)}%)` : ''}</span>
-            <span className="text-blue-500">{fmtMacro(totalProtein)}P</span>
-            <span className="text-orange-400">{fmtMacro(totalFat)}F</span>
-            <span className="text-green-500">{fmtMacro(totalCarbs)}C</span>
+      {assignments.length > 0 && (wide ? (
+        <div className="px-3 py-2.5 bg-gray-50/50 border-b border-gray-100 flex items-center gap-3">
+          <CalorieMacroRing kcal={totalKcal} target={profile?.calorieTarget} protein={totalProtein} fat={totalFat} carbs={totalCarbs} size={56} />
+          <div className="text-xs space-y-1 flex-1 min-w-0">
+            <p className={kcalCls}>{Math.round(totalKcal)} kcal{corridor ? ` of ${profile!.calorieTarget}` : ''}</p>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500 inline-block flex-shrink-0" /><span className="text-gray-600">{fmtMacro(totalProtein)}g protein</span></div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500 inline-block flex-shrink-0" /><span className="text-gray-600">{fmtMacro(totalFat)}g fat</span></div>
+            <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-green-500 inline-block flex-shrink-0" /><span className="text-gray-600">{fmtMacro(totalCarbs)}g carbs</span></div>
           </div>
-          {corridor && (
-            <div className="w-full bg-gray-200 rounded-full h-1">
-              <div className={cn('h-1 rounded-full', totalKcal > corridor.high ? 'bg-red-500' : totalKcal >= corridor.low ? 'bg-green-500' : 'bg-amber-400')}
-                style={{ width: `${Math.min(100, Math.round(totalKcal / profile!.calorieTarget * 100))}%` }} />
-            </div>
-          )}
         </div>
-      )}
+      ) : (
+        <div className="px-2 py-1.5 bg-gray-50/50 border-b border-gray-100 flex items-center gap-2">
+          <CalorieMacroRing kcal={totalKcal} target={profile?.calorieTarget} protein={totalProtein} fat={totalFat} carbs={totalCarbs} size={32} />
+          <div className="text-[11px] leading-tight min-w-0">
+            <p className={kcalCls}>{Math.round(totalKcal)} kcal</p>
+            <div className="flex gap-1.5">
+              <span className="text-blue-500">{fmtMacro(totalProtein)}P</span>
+              <span className="text-orange-400">{fmtMacro(totalFat)}F</span>
+              <span className="text-green-500">{fmtMacro(totalCarbs)}C</span>
+            </div>
+          </div>
+        </div>
+      ))}
       {/* Slots */}
       <div>
         {SLOTS.map(slot => {
@@ -2725,6 +2615,11 @@ function CalendarWeekCell({
 
 // ─── planner view ─────────────────────────────────────────────────────────────
 
+type PlannerTab = 'summary' | 'grid' | '2days' | 'month'
+const PLANNER_TAB_LABELS: Record<PlannerTab, string> = {
+  summary: 'Week summary', grid: 'Grid view', '2days': '2 Days', month: 'Month',
+}
+
 function PlannerView({
   items, assignments, setAssignments, weekOffset, setWeekOffset, setLogEntries, profile,
 }: {
@@ -2734,7 +2629,19 @@ function PlannerView({
   setLogEntries: React.Dispatch<React.SetStateAction<MealLogEntry[]>>
   profile: Profile
 }) {
-  const [tab, setTab] = useState<'summary' | 'calendar'>('summary')
+  const [tab, setTab] = useState<PlannerTab>('summary')
+  const [tabOrder, setTabOrder] = useState<PlannerTab[]>(['summary', 'grid', '2days', 'month'])
+  const [draggedTab, setDraggedTab] = useState<PlannerTab | null>(null)
+
+  function swapTabs(a: PlannerTab, b: PlannerTab) {
+    if (a === b) return
+    setTabOrder(prev => {
+      const next = [...prev]
+      const i = next.indexOf(a), j = next.indexOf(b)
+      ;[next[i], next[j]] = [next[j], next[i]]
+      return next
+    })
+  }
   const { label, dates } = getWeekDates(weekOffset)
   const { dates: currDates } = getWeekDates(0)
   const isCurrentWeek = dates[0].toDateString() === currDates[0].toDateString()
@@ -2837,13 +2744,23 @@ function PlannerView({
 
       {/* Tabs */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
-        {([['summary', 'Week summary'], ['calendar', 'Calendar']] as const).map(([id, l]) => (
+        {tabOrder.map(id => (
           <button
             key={id}
+            draggable
+            onDragStart={() => setDraggedTab(id)}
+            onDragOver={e => e.preventDefault()}
+            onDrop={e => { e.preventDefault(); if (draggedTab) swapTabs(draggedTab, id); setDraggedTab(null) }}
+            onDragEnd={() => setDraggedTab(null)}
             onClick={() => setTab(id)}
-            className={cn('px-4 py-1.5 rounded-lg text-sm font-medium cursor-pointer', tab === id ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700')}
+            title="Drag to reorder tabs"
+            className={cn(
+              'px-4 py-1.5 rounded-lg text-sm font-medium cursor-pointer select-none transition-opacity',
+              tab === id ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700',
+              draggedTab === id && 'opacity-40',
+            )}
           >
-            {l}
+            {PLANNER_TAB_LABELS[id]}
           </button>
         ))}
       </div>
@@ -2851,8 +2768,8 @@ function PlannerView({
       {tab === 'summary' && (
         <WeeklySummary items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} />
       )}
-      {tab === 'calendar' && (
-        <CalendarView items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} onLog={logItem} profile={profile} />
+      {tab !== 'summary' && (
+        <CalendarView subView={tab} items={items} assignments={assignments.filter(a => (a.weekOffset ?? 0) === weekOffset)} days={DAYS} dates={dates} upsertAssignment={upsertAssignment} setAssignments={setAssignments} onLog={logItem} profile={profile} />
       )}
     </div>
   )
@@ -3985,11 +3902,6 @@ const DEFAULT_PROFILE: Profile = {
 }
 
 export default function App() {
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
-    try { const s = sessionStorage.getItem('mf_user'); return s ? JSON.parse(s) : null } catch { return null }
-  })
-  const [registeredUsers, setRegisteredUsers] = useState<SeedUser[]>([...SEED_USERS])
-
   const [activeView, setActiveView] = useState<View>('planner')
   const [items, setItems] = useState<Item[]>([...SEED_PRODUCTS, ...SEED_RECIPES])
   const [assignments, setAssignments] = useState<Assignment[]>(SEED_ASSIGNMENTS)
@@ -4005,30 +3917,9 @@ export default function App() {
     if (shoppingListRef.current !== null) setShoppingStale(true)
   }, [assignments])
 
-  function handleAuth(user: AuthUser) {
-    try { sessionStorage.setItem('mf_user', JSON.stringify(user)) } catch {}
-    setCurrentUser(user)
-  }
-
-  function handleSignOut() {
-    try { sessionStorage.removeItem('mf_user') } catch {}
-    setCurrentUser(null)
-    setActiveView('planner')
-  }
-
-  if (!currentUser) {
-    return (
-      <AuthScreen
-        users={registeredUsers}
-        onAddUser={u => setRegisteredUsers(prev => [...prev, u])}
-        onAuth={handleAuth}
-      />
-    )
-  }
-
   return (
     <div className="flex h-full overflow-hidden" style={{ background: '#F1F5F4' }}>
-      <Sidebar active={activeView} setActive={setActiveView} userEmail={currentUser.email} onSignOut={handleSignOut} />
+      <Sidebar active={activeView} setActive={setActiveView} />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar view={activeView} profile={profile} assignments={assignments} items={items} />
         <main id="main-content" className="flex-1 overflow-y-auto p-6">

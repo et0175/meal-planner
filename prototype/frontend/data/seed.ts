@@ -1,4 +1,4 @@
-import type { Item, Assignment, Diet, SeedUser } from '@/types'
+import type { Item, Assignment, Diet } from '@/types'
 
 export const SEED_PRODUCTS: Item[] = [
   { id:'p-001', kind:'product', name:'Greek yogurt', category:'Dairy', unit:'g', servingAmount:150, servingLabel:'150 g', kcal:88, protein:15, fat:0.6, carbs:5.4, fiber:0, dietTags:['mediterranean','plant-based','keto','protein-focused'], favorite:false, isUserAdded:false, userId:null, weekFlags:{thisWeek:false,nextWeek:false} },
@@ -71,10 +71,4 @@ export const SEED_ASSIGNMENTS: Assignment[] = [
   { id:'a-007', itemId:'r-005', day:'Fri', slot:'Lunch', servings:1, weekOffset:0 },
   { id:'a-008', itemId:'r-009', day:'Sun', slot:'Dinner', servings:2, weekOffset:0 },
   { id:'a-009', itemId:'p-008', day:'Mon', slot:'Lunch', servings:1, weekOffset:0, autoAdded:true },
-]
-
-export const SEED_USERS: SeedUser[] = [
-  { id:'u-001', email:'user@mealforge.com',  password:'password123', role:'user' },
-  { id:'u-002', email:'keto@mealforge.com',  password:'password123', role:'user' },
-  { id:'u-003', email:'empty@mealforge.com', password:'password123', role:'user' },
 ]
