@@ -2,7 +2,7 @@
 
 OQ-001 – OQ-008 resolved as of 2026-06-17. Decisions are recorded here and written into the affected requirement and user story files.
 
-OQ-009 and OQ-010 are open (Advanced Search module, added 2026-06-17). OQ-011 resolved 2026-08-19 (Dietary Analyser deferred to post-MVP1).
+OQ-009 and OQ-010 are open (Advanced Search module, added 2026-06-17). OQ-011 resolved 2026-08-19 (Dietary Analyser deferred to post-MVP1). OQ-012 is open (added 2026-08-19, "Plan for..." picker).
 
 ---
 
@@ -138,3 +138,21 @@ The product owner decided (2026-08-19) that diets are out of scope for MVP1 — 
 **Decision:** ✅ Deferred to post-MVP1. The entire Dietary Analyser module, and every feature elsewhere that depends on it, is out of scope for MVP1. Requirement text is retained in `03_dietary_analyser.md` for historical/planning reference, clearly marked out of scope. Dependent requirements, user stories, and test cases in other modules are marked deferred with a pointer back to this decision rather than deleted, so the historical shape of the feature is traceable when it is revisited post-MVP1.
 
 > **Note:** This makes **OQ-002** ("Who can add, edit, or remove diets from the diet list?") moot — OQ-002 assumed the diet list would exist and be either static or admin-managed in MVP1; since the whole module is deferred, that question no longer applies to MVP1. OQ-002 is left as-is for historical record and is not deleted or reworded.
+
+---
+
+## OQ-012 — Should list views offer a "Plan for..." picker alongside (or instead of) the This week / Next week toggles?
+
+**Affects:** `01_products-database.md`, `02_products-analyser.md`, `04_recipe_analyser.md`, `06_meal_planner.md`, `10_advanced_search.md`; `US-PA-007`, `US-RA-008`, `US-MP-006`, `US-AS-011`, and the products-analyser TW/NW stories.
+
+**Context:**
+Today, marking an item "This week" (TW) or "Next week" (NW) from any list (All products, Recipes, Products analyser, Advanced Search) is a single click, but it always drops the item into the Weekly summary's **Lunch slot by default** (`06_meal_planner.md`, `US-MP-006`). If the user actually wants it on, say, Wednesday Dinner, they still have to go into the planner's Grid/Calendar view afterward and move it — a two-step flow (flag now, place later) for what the user experiences as one intent ("plan this for Wednesday dinner").
+
+A **"Plan for..." picker** — a small control in the list row (e.g. a calendar icon next to the TW/NW toggles) that opens a compact day + meal-slot (+ week) picker and creates the assignment directly in the chosen slot — would let a user express that intent in one action instead of two.
+
+**Trade-offs:**
+- **Keep TW/NW only (status quo):** cheapest, already implemented consistently across four list surfaces; optimizes for the common "just get it on this week's plan, I'll sort details later" case; but leaves the two-step friction for anyone who already knows exactly when they want to eat something.
+- **Replace TW/NW with "Plan for...":** most precise, but removes the one-click bulk-add path, and forces a picker interaction (day, slot, week) even for the common "just add it, doesn't matter where" case — likely a net UX regression for quick planning.
+- **Add "Plan for..." alongside TW/NW (additive):** preserves the fast default path and gives precision as an opt-in; highest implementation cost, since it's a new control (with its own day/slot/week UI) that has to be added to all four list surfaces that currently share the simple toggle pattern, and its interaction with existing TW/NW state (e.g. does picking a slot also set the TW/NW flag?) needs to be defined.
+
+**Decision:** 🔴 Open — not yet decided.
